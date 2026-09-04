@@ -6,6 +6,7 @@
     "stdin": "newline-separated paths when --stdin is supplied"
   },
   "compatibility": {
+    "ownership": "Rust owns discovery, scheduling, parsing, printing, and aggregation; JavaScript is retained only as a transform compatibility bridge",
     "transform_api": "JavaScript transform(fileInfo, api, options)",
     "statuses": ["ok", "nochange", "skip", "error"],
     "summary": "results counts and elapsed time",
