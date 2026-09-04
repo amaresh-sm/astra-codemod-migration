@@ -7,7 +7,7 @@
     "core jscodeshift API",
     "collections, node matching, and templates",
     "parser adapters",
-    "package and runtime utilities"
+    "package root exports and runtime utilities"
   ],
   "transform": "-t TRANSFORM_PATH or a transform URL",
   "inputs": {
@@ -22,6 +22,10 @@
     "writes": "a file is written only when a transform returns successfully; a transform error does not partially write its source",
     "parallelism": "worker scheduling does not change per-file results or aggregate status counts",
     "encoding": "UTF-8 source text and non-ASCII characters are preserved when a transform makes no semantic change",
+    "core_api": "the package root exports the callable jscodeshift API with parser binding, matching, plugin registration, builders, types, filters, mappings, and templates",
+    "collections": "typed collections preserve traversal, filtering, mapping, mutation, JSX/import/variable helpers, and NodePath accessors",
+    "templates": "statement, expression, and async-expression template helpers produce compatible AST nodes",
+    "package_export": "the package root remains importable without requiring transform rewrites",
     "ast_collections": "transforms can traverse collections and use standard jscodeshift builders before printing",
     "ast_formatting": "comments and source formatting remain stable when an AST transform changes a node",
     "ast_syntax": "TypeScript, TSX, and modern JavaScript syntax remain available to AST transforms"

@@ -29,6 +29,10 @@ CRITERIA = (
     "ast-collections-and-builders",
     "ast-formatting-and-comments",
     "ast-modern-syntax",
+    "core-api-surface",
+    "collection-extensions",
+    "template-code-generation",
+    "package-root-export",
     "rust-runner-entrypoint",
 )
 
@@ -51,6 +55,10 @@ SCENARIO_IDS = {
     "ast-collections-and-builders": "jscodeshift.ast-collections-and-builders",
     "ast-formatting-and-comments": "jscodeshift.ast-formatting-and-comments",
     "ast-modern-syntax": "jscodeshift.ast-modern-syntax",
+    "core-api-surface": "jscodeshift.core-api-surface",
+    "collection-extensions": "jscodeshift.collection-extensions",
+    "template-code-generation": "jscodeshift.template-code-generation",
+    "package-root-export": "jscodeshift.package-root-export",
     "rust-runner-entrypoint": "jscodeshift.rust-runner-entrypoint",
 }
 
@@ -91,7 +99,14 @@ def run_cli(
         capture_output=True,
         timeout=timeout,
         check=False,
-        env={**os.environ, "NO_COLOR": "1"},
+        env={
+            **os.environ,
+            "NO_COLOR": "1",
+            # Expose the submitted package root only to the probe transform.
+            # This lets the verifier test the public package export without
+            # depending on a particular candidate directory layout.
+            "JSCODESHIFT_PACKAGE": str(source_root(candidate)),
+        },
     )
 
 
@@ -821,6 +836,158 @@ module.exports = function(file, api) {
     return True, "TypeScript, TSX, and modern JavaScript syntax remain traversable"
 
 
+def check_core_api_surface(candidate: Path) -> tuple[bool, str]:
+    """Exercise the enriched package API, parser binding, matching, and plugins."""
+
+    with tempfile.TemporaryDirectory(prefix="jscodeshift-core-api-") as raw:
+        root = Path(raw)
+        source = root / "core.js"
+        source.write_text("const count = 1;\n", encoding="utf-8")
+        transform = write_transform(
+            root / "core-api-transform.js",
+            r'''
+module.exports = function(file, api) {
+  const j = api.jscodeshift;
+  const exported = require(process.env.JSCODESHIFT_PACKAGE);
+  const required = ['withParser', 'use', 'registerMethods', 'template', 'match', 'types'];
+  if (typeof exported !== 'function' || required.some(name => typeof exported[name] === 'undefined')) {
+    throw new Error('incomplete package core API');
+  }
+  const typed = exported.withParser('tsx')('const view = <Widget />;\n');
+  if (typed.find(exported.JSXElement).size() !== 1) throw new Error('withParser failed');
+  const identifiers = j(file.source).find(j.Identifier, {name: 'count'});
+  if (identifiers.size() !== 1 || !j.match(identifiers.nodes()[0], {type: 'Identifier', name: 'count'})) {
+    throw new Error('match or collection API failed');
+  }
+  const plugin = core => core.registerMethods({markCoreProbe: function() { return this; }});
+  j.use(plugin);
+  const ast = j(file.source);
+  if (ast.markCoreProbe() !== ast) throw new Error('plugin registration failed');
+  const statement = j.template.statement`const ${j.identifier('generated')} = ${j.literal(7)};`;
+  if (statement.type !== 'VariableDeclaration') throw new Error('template API failed');
+  ast.find(j.Program).get('body').value.push(statement);
+  return ast.toSource();
+};
+'''.strip()
+            + "\n",
+        )
+        result = run_cli(candidate, ["--run-in-band", "--transform", str(transform), str(source)], cwd=root)
+        text = source.read_text(encoding="utf-8")
+        if result.returncode != 0 or "generated" not in text:
+            return False, f"core package API compatibility failed (rc={result.returncode})"
+    return True, "package core exports, parser binding, matching, plugins, and templates remain compatible"
+
+
+def check_collection_extensions(candidate: Path) -> tuple[bool, str]:
+    """Exercise typed collection methods, filters, mappings, and path accessors."""
+
+    with tempfile.TemporaryDirectory(prefix="jscodeshift-collections-") as raw:
+        root = Path(raw)
+        source = root / "collections.tsx"
+        source.write_text(
+            'import { value } from "pkg";\n'
+            'const Widget = require("ui");\n'
+            'const target = 1;\n'
+            'const view = <Widget label="old"><span>child</span></Widget>;\n',
+            encoding="utf-8",
+        )
+        transform = write_transform(
+            root / "collections-transform.js",
+            r'''
+module.exports = function(file, api) {
+  const j = api.jscodeshift;
+  const ast = j(file.source);
+  if (!ast.hasImportDeclaration('pkg')) throw new Error('import collection missing');
+  ast.renameImportDeclaration('pkg', 'renamed-pkg');
+  if (ast.findImportDeclarations('renamed-pkg').size() !== 1) throw new Error('import rename failed');
+  const vars = ast.findVariableDeclarators('target');
+  if (vars.size() !== 1 || vars.nodes()[0].id.name !== 'target') throw new Error('variable collection missing');
+  if (vars.at(0).size() !== 1 || vars.get('id').value.name !== 'target') throw new Error('path accessors failed');
+  if (vars.filter(path => path.value.id.name === 'target').size() !== 1) throw new Error('filter failed');
+  if (vars.map(path => path).size() !== 1 || vars.paths().length !== 1) throw new Error('map or paths failed');
+  vars.renameTo('renamedTarget');
+  const widgets = ast.findJSXElements('Widget');
+  const matching = widgets.filter(j.filters.JSXElement.hasAttributes({label: 'old'}));
+  if (matching.size() !== 1 || matching.childElements().size() !== 1 || matching.childNodes().size() !== 1) {
+    throw new Error('JSX collection traversal failed');
+  }
+  if (ast.findJSXElementsByModuleName('ui').size() !== 1) throw new Error('module JSX lookup failed');
+  matching.forEach(path => { path.node.openingElement.attributes[0].value.value = 'new'; });
+  return ast.toSource();
+};
+'''.strip()
+            + "\n",
+        )
+        result = run_cli(
+            candidate,
+            ["--run-in-band", "--parser", "tsx", "--transform", str(transform), str(source)],
+            cwd=root,
+        )
+        text = source.read_text(encoding="utf-8")
+        if result.returncode != 0 or 'from "renamed-pkg"' not in text or "renamedTarget" not in text or 'label="new"' not in text:
+            return False, f"typed collection compatibility failed (rc={result.returncode})"
+    return True, "typed collections, filters, mappings, mutations, and path accessors remain compatible"
+
+
+def check_template_code_generation(candidate: Path) -> tuple[bool, str]:
+    """Check statement, expression, and async-expression template helpers."""
+
+    with tempfile.TemporaryDirectory(prefix="jscodeshift-templates-") as raw:
+        root = Path(raw)
+        source = root / "templates.js"
+        source.write_text("const existing = 1;\n", encoding="utf-8")
+        transform = write_transform(
+            root / "templates-transform.js",
+            r'''
+module.exports = function(file, api) {
+  const j = api.jscodeshift;
+  const ast = j(file.source);
+  const statement = j.template.statement`const ${j.identifier('templated')} = ${j.literal(42)};`;
+  const expression = j.template.expression`${j.identifier('templated')} + ${j.literal(1)}`;
+  const asyncExpression = j.template.asyncExpression`await ${j.identifier('templated')}`;
+  if (statement.type !== 'VariableDeclaration' || expression.type !== 'BinaryExpression' ||
+      asyncExpression.type !== 'ArrowFunctionExpression') throw new Error('template node types changed');
+  ast.find(j.Program).get('body').value.push(statement, j.expressionStatement(expression));
+  return ast.toSource();
+};
+'''.strip()
+            + "\n",
+        )
+        result = run_cli(candidate, ["--run-in-band", "--transform", str(transform), str(source)], cwd=root)
+        text = source.read_text(encoding="utf-8")
+        if result.returncode != 0 or "templated" not in text or "42" not in text:
+            return False, f"template code generation failed (rc={result.returncode})"
+    return True, "statement, expression, and async-expression templates retain their public behavior"
+
+
+def check_package_root_export(candidate: Path) -> tuple[bool, str]:
+    """Check that the package root still exports the callable jscodeshift API."""
+
+    root = source_root(candidate)
+    package_entry = root / "index.js"
+    if not package_entry.is_file():
+        return False, "package root index.js is missing"
+    probe = (
+        "const j = require(process.env.JSCODESHIFT_PACKAGE);"
+        "if (typeof j !== 'function' || typeof j.withParser !== 'function' || "
+        "typeof j.template !== 'object' || typeof j.registerMethods !== 'function') process.exit(2);"
+        "const ast = j('const exported = 1;');"
+        "if (ast.find(j.Identifier, {name: 'exported'}).size() !== 1) process.exit(3);"
+    )
+    result = subprocess.run(
+        ["node", "-e", probe],
+        cwd=root,
+        text=True,
+        capture_output=True,
+        check=False,
+        env={**os.environ, "JSCODESHIFT_PACKAGE": str(root)},
+    )
+    if result.returncode != 0:
+        detail = (result.stderr or result.stdout).strip().splitlines()
+        return False, "package root export failed" + (f": {detail[-1]}" if detail else "")
+    return True, "package root exports the callable jscodeshift API and parses source"
+
+
 def check_rust_entrypoint(candidate: Path) -> tuple[bool, str]:
     """Check that the public launcher executes a compiled Rust runner."""
 
@@ -860,6 +1027,10 @@ def check(candidate: Path) -> dict[str, dict[str, str]]:
         "ast-collections-and-builders": check_ast_collections_and_builders,
         "ast-formatting-and-comments": check_ast_formatting_and_comments,
         "ast-modern-syntax": check_ast_modern_syntax,
+        "core-api-surface": check_core_api_surface,
+        "collection-extensions": check_collection_extensions,
+        "template-code-generation": check_template_code_generation,
+        "package-root-export": check_package_root_export,
         "rust-runner-entrypoint": check_rust_entrypoint,
     }
     result: dict[str, dict[str, str]] = {}

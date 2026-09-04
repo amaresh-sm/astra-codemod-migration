@@ -12,6 +12,7 @@ CRITERIA = (
     "parallel-failure-recovery", "lifecycle-manifest", "custom-option-forwarding",
     "atomic-write-on-error", "parallel-result-determinism", "utf8-source-preservation",
     "ast-collections-and-builders", "ast-formatting-and-comments", "ast-modern-syntax",
+    "core-api-surface", "collection-extensions", "template-code-generation", "package-root-export",
     "rust-runner-entrypoint",
 )
 
