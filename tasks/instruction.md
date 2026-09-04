@@ -2,7 +2,9 @@
 
 Migrate the complete jscodeshift command-line runner from JavaScript to Rust. Keep the existing
 public CLI behavior and JavaScript/TypeScript transform compatibility. Use the supplied source,
-tests, and fixtures as the compatibility baseline and ensure they continue to pass.
+tests, and fixtures as the compatibility baseline and ensure they continue to pass. The public
+behavior requirements are defined in `contracts/migration.contract.json`; use that contract as
+the authoritative compatibility target.
 
 Include `app-setup/manifest.json` in the completed workspace. It is the harness lifecycle handoff
 for this CLI task: define non-empty argument arrays under `commands` for `build`, `reset`, and

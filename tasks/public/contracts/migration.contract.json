@@ -8,7 +8,14 @@
   "compatibility": {
     "transform_api": "JavaScript transform(fileInfo, api, options)",
     "statuses": ["ok", "nochange", "skip", "error"],
-    "summary": "results counts and elapsed time"
+    "summary": "results counts and elapsed time",
+    "custom_options": "unknown long options are forwarded to the transform as values; repeated options preserve all values",
+    "writes": "a file is written only when a transform returns successfully; a transform error does not partially write its source",
+    "parallelism": "worker scheduling does not change per-file results or aggregate status counts",
+    "encoding": "UTF-8 source text and non-ASCII characters are preserved when a transform makes no semantic change",
+    "ast_collections": "transforms can traverse collections and use standard jscodeshift builders before printing",
+    "ast_formatting": "comments and source formatting remain stable when an AST transform changes a node",
+    "ast_syntax": "TypeScript, TSX, and modern JavaScript syntax remain available to AST transforms"
   },
   "options": [
     "--cpus", "--dry", "--print", "--babel", "--extensions", "--ignore-pattern",

@@ -6,8 +6,13 @@ import json
 from pathlib import Path
 
 CRITERIA = (
-    "cli-transform-api", "file-selection-and-stdin", "dry-run-print-and-reporting",
-    "parallel-workers-and-results", "failure-and-exit-contract", "rust-runner-entrypoint",
+    "cli-transform-api", "parser-and-transform-variants", "file-selection-and-stdin",
+    "dry-run-print-and-reporting", "parallel-workers-and-results", "failure-and-exit-contract",
+    "cli-surface-and-identity", "silent-output-contract", "symlink-boundary",
+    "parallel-failure-recovery", "lifecycle-manifest", "custom-option-forwarding",
+    "atomic-write-on-error", "parallel-result-determinism", "utf8-source-preservation",
+    "ast-collections-and-builders", "ast-formatting-and-comments", "ast-modern-syntax",
+    "rust-runner-entrypoint",
 )
 
 

@@ -5,40 +5,117 @@ criteria:
     contract: public/contracts/migration.contract.json
     hidden_test: jscodeshift.cli-transform-api
     mutant: transform-api-drift
-    weight: 0.18
+    weight: 0.05
   - id: parser-and-transform-variants
     requirement: TSX, Flow, transform-declared parsers, asynchronous transforms, and URL-sourced transforms remain compatible.
     contract: public/contracts/migration.contract.json
     hidden_test: jscodeshift.parser-and-transform-variants
     mutant: parser-source-drift
-    weight: 0.16
+    weight: 0.04
   - id: file-selection-and-stdin
     requirement: Recursive paths, extension filters, ignore patterns, and newline-separated stdin paths select the intended files.
     contract: public/contracts/migration.contract.json
     hidden_test: jscodeshift.file-selection-and-stdin
     mutant: selection-filter-drift
-    weight: 0.15
+    weight: 0.07
   - id: dry-run-print-and-reporting
     requirement: Dry runs preserve files while print output, statistics, and transform reports remain observable.
     contract: public/contracts/migration.contract.json
     hidden_test: jscodeshift.dry-run-print-and-reporting
     mutant: dry-run-write-leak
-    weight: 0.13
+    weight: 0.05
   - id: parallel-workers-and-results
     requirement: The runner honors a CPU limit, processes every selected file, and reports aggregate worker results.
     contract: public/contracts/migration.contract.json
     hidden_test: jscodeshift.parallel-workers-and-results
     mutant: worker-count-drift
-    weight: 0.12
+    weight: 0.06
   - id: failure-and-exit-contract
     requirement: Transform failures are reported per file and --fail-on-error controls the process exit status.
     contract: public/contracts/migration.contract.json
     hidden_test: jscodeshift.failure-and-exit-contract
     mutant: fail-on-error-drift
-    weight: 0.12
+    weight: 0.05
+
+  - id: cli-surface-and-identity
+    requirement: Help and version output expose the supported CLI surface and identify the Rust runner.
+    contract: public/contracts/migration.contract.json
+    hidden_test: jscodeshift.cli-surface-and-identity
+    mutant: cli-surface-drift
+    weight: 0.06
+
+  - id: silent-output-contract
+    requirement: --silent suppresses all CLI output without suppressing file transformation.
+    contract: public/contracts/migration.contract.json
+    hidden_test: jscodeshift.silent-output-contract
+    mutant: silent-output-drift
+    weight: 0.06
+
+  - id: symlink-boundary
+    requirement: File traversal stays within the input root and processes safe links without escaping it.
+    contract: public/contracts/migration.contract.json
+    hidden_test: jscodeshift.symlink-boundary
+    mutant: symlink-boundary-drift
+    weight: 0.06
+
+  - id: parallel-failure-recovery
+    requirement: A worker failure is reported without preventing independent files from completing.
+    contract: public/contracts/migration.contract.json
+    hidden_test: jscodeshift.parallel-failure-recovery
+    mutant: worker-failure-isolation-drift
+    weight: 0.07
+
+  - id: lifecycle-manifest
+    requirement: The candidate declares valid build, reset, and start lifecycle commands.
+    contract: public/contracts/migration.contract.json
+    hidden_test: jscodeshift.lifecycle-manifest
+    mutant: lifecycle-manifest-drift
+    weight: 0.05
+  - id: custom-option-forwarding
+    requirement: Repeatable and equals-form custom options reach JavaScript transforms without losing values.
+    contract: public/contracts/migration.contract.json
+    hidden_test: jscodeshift.custom-option-forwarding
+    mutant: custom-option-forwarding-drift
+    weight: 0.05
+  - id: atomic-write-on-error
+    requirement: A transform error never partially overwrites the input file.
+    contract: public/contracts/migration.contract.json
+    hidden_test: jscodeshift.atomic-write-on-error
+    mutant: partial-write-on-error
+    weight: 0.05
+  - id: parallel-result-determinism
+    requirement: Repeated parallel runs preserve stable aggregate status reporting.
+    contract: public/contracts/migration.contract.json
+    hidden_test: jscodeshift.parallel-result-determinism
+    mutant: nondeterministic-worker-report
+    weight: 0.05
+  - id: utf8-source-preservation
+    requirement: No-op transforms preserve UTF-8 source content and non-ASCII characters.
+    contract: public/contracts/migration.contract.json
+    hidden_test: jscodeshift.utf8-source-preservation
+    mutant: encoding-preservation-drift
+    weight: 0.05
+  - id: ast-collections-and-builders
+    requirement: Transforms can traverse collections and use standard jscodeshift builders before printing.
+    contract: public/contracts/migration.contract.json
+    hidden_test: jscodeshift.ast-collections-and-builders
+    mutant: ast-builder-drift
+    weight: 0.05
+  - id: ast-formatting-and-comments
+    requirement: AST edits preserve leading comments and honor source formatting options.
+    contract: public/contracts/migration.contract.json
+    hidden_test: jscodeshift.ast-formatting-and-comments
+    mutant: ast-formatting-drift
+    weight: 0.05
+  - id: ast-modern-syntax
+    requirement: TypeScript, TSX, and modern JavaScript syntax remain traversable by AST transforms.
+    contract: public/contracts/migration.contract.json
+    hidden_test: jscodeshift.ast-modern-syntax
+    mutant: ast-syntax-drift
+    weight: 0.05
   - id: rust-runner-entrypoint
     requirement: The public jscodeshift launcher executes the compiled Rust runner.
     contract: public/contracts/migration.contract.json
     hidden_test: jscodeshift.rust-runner-entrypoint
     mutant: javascript-runner-fallback
-    weight: 0.14
+    weight: 0.03

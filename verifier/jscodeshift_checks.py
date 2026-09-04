@@ -17,6 +17,18 @@ CRITERIA = (
     "dry-run-print-and-reporting",
     "parallel-workers-and-results",
     "failure-and-exit-contract",
+    "cli-surface-and-identity",
+    "silent-output-contract",
+    "symlink-boundary",
+    "parallel-failure-recovery",
+    "lifecycle-manifest",
+    "custom-option-forwarding",
+    "atomic-write-on-error",
+    "parallel-result-determinism",
+    "utf8-source-preservation",
+    "ast-collections-and-builders",
+    "ast-formatting-and-comments",
+    "ast-modern-syntax",
     "rust-runner-entrypoint",
 )
 
@@ -27,6 +39,18 @@ SCENARIO_IDS = {
     "dry-run-print-and-reporting": "jscodeshift.dry-run-print-and-reporting",
     "parallel-workers-and-results": "jscodeshift.parallel-workers-and-results",
     "failure-and-exit-contract": "jscodeshift.failure-and-exit-contract",
+    "cli-surface-and-identity": "jscodeshift.cli-surface-and-identity",
+    "silent-output-contract": "jscodeshift.silent-output-contract",
+    "symlink-boundary": "jscodeshift.symlink-boundary",
+    "parallel-failure-recovery": "jscodeshift.parallel-failure-recovery",
+    "lifecycle-manifest": "jscodeshift.lifecycle-manifest",
+    "custom-option-forwarding": "jscodeshift.custom-option-forwarding",
+    "atomic-write-on-error": "jscodeshift.atomic-write-on-error",
+    "parallel-result-determinism": "jscodeshift.parallel-result-determinism",
+    "utf8-source-preservation": "jscodeshift.utf8-source-preservation",
+    "ast-collections-and-builders": "jscodeshift.ast-collections-and-builders",
+    "ast-formatting-and-comments": "jscodeshift.ast-formatting-and-comments",
+    "ast-modern-syntax": "jscodeshift.ast-modern-syntax",
     "rust-runner-entrypoint": "jscodeshift.rust-runner-entrypoint",
 }
 
@@ -509,6 +533,294 @@ module.exports = function(file) {
     return True, "transform errors and --fail-on-error behaved correctly"
 
 
+def check_cli_surface_and_identity(candidate: Path) -> tuple[bool, str]:
+    """Check help/version discoverability and the migrated runner identity."""
+
+    help_result = run_cli(candidate, ["--help"], cwd=source_root(candidate))
+    help_text = help_result.stdout + help_result.stderr
+    required = ("--transform", "--extensions", "--stdin", "--run-in-band", "--fail-on-error")
+    if help_result.returncode != 0 or any(option not in help_text for option in required):
+        return False, "help output does not expose the required CLI surface"
+    version = run_cli(candidate, ["--version"], cwd=source_root(candidate))
+    if version.returncode != 0 or "jscodeshift:" not in version.stdout:
+        return False, "--version did not return the jscodeshift version"
+    if "runner: rust" not in version.stdout:
+        return False, "--version did not identify the Rust runner"
+    return True, "help and version identify the migrated CLI"
+
+
+def check_silent_output_contract(candidate: Path) -> tuple[bool, str]:
+    """Check that --silent suppresses all CLI output while still writing changes."""
+
+    with tempfile.TemporaryDirectory(prefix="jscodeshift-silent-") as raw:
+        root = Path(raw)
+        source = root / "silent.js"
+        source.write_text("const silent = true;\n", encoding="utf-8")
+        transform = write_transform(root / "silent-transform.js", "module.exports = file => file.source + '\\n// silent-ok';\n")
+        result = run_cli(candidate, ["--run-in-band", "--silent", "--transform", str(transform), str(source)], cwd=root)
+        if result.returncode != 0 or result.stdout or result.stderr:
+            return False, "--silent did not suppress CLI output"
+        if "// silent-ok" not in source.read_text(encoding="utf-8"):
+            return False, "--silent did not write the transformed source"
+    return True, "--silent suppresses output without suppressing the transform"
+
+
+def check_symlink_boundary(candidate: Path) -> tuple[bool, str]:
+    """Check that symlink traversal cannot escape the input root."""
+
+    with tempfile.TemporaryDirectory(prefix="jscodeshift-links-") as raw, tempfile.TemporaryDirectory(prefix="jscodeshift-outside-") as outside_raw:
+        root = Path(raw) / "project"
+        outside = Path(outside_raw)
+        root.mkdir()
+        (root / "z.js").write_text("z\n", encoding="utf-8")
+        (root / "a.js").write_text("a\n", encoding="utf-8")
+        (root / "inside-link.js").symlink_to(root / "a.js")
+        (outside / "secret.js").write_text("secret\n", encoding="utf-8")
+        (root / "outside-link.js").symlink_to(outside / "secret.js")
+        transform = write_transform(Path(raw) / "touch.js", "module.exports = file => file.source + '\\n// link-ok';\n")
+        result = run_cli(candidate, ["--run-in-band", "--extensions", "js", "--transform", str(transform), "project"], cwd=Path(raw))
+        if result.returncode != 0:
+            return False, f"symlink selection failed (rc={result.returncode})"
+        if "// link-ok" not in (root / "a.js").read_text(encoding="utf-8"):
+            return False, "safe in-root symlink target was not processed"
+        if "// link-ok" in (outside / "secret.js").read_text(encoding="utf-8"):
+            return False, "out-of-root symlink escaped the input boundary"
+    return True, "symlink traversal stays within the input root"
+
+
+def check_parallel_failure_recovery(candidate: Path) -> tuple[bool, str]:
+    """Check that one worker failure does not prevent independent files completing."""
+
+    with tempfile.TemporaryDirectory(prefix="jscodeshift-worker-errors-") as raw:
+        root = Path(raw)
+        project = root / "project"
+        project.mkdir()
+        good = project / "good.js"
+        bad = project / "bad.js"
+        good.write_text("const good = true;\n", encoding="utf-8")
+        bad.write_text("const bad = true;\n", encoding="utf-8")
+        transform = write_transform(
+            root / "worker-error.js",
+            """
+module.exports = function(file) {
+  if (file.path.endsWith('bad.js')) throw new Error('worker-boom');
+  return file.source + '\\n// worker-good';
+};
+""".strip()
+            + "\n",
+        )
+        result = run_cli(candidate, ["--cpus", "2", "--transform", str(transform), "project"], cwd=root)
+        if result.returncode != 0:
+            return False, f"parallel failure recovery returned rc={result.returncode}"
+        if "// worker-good" not in good.read_text(encoding="utf-8"):
+            return False, "successful worker result was lost after a peer failure"
+        if "worker-boom" not in result.stdout:
+            return False, "worker failure was not reported"
+    return True, "parallel workers isolate failures and complete independent files"
+
+
+def check_lifecycle_manifest(candidate: Path) -> tuple[bool, str]:
+    """Check the candidate lifecycle handoff without imposing implementation details."""
+
+    import json
+
+    manifest = candidate / "app-setup" / "manifest.json"
+    if not manifest.is_file():
+        return False, "app-setup/manifest.json is missing"
+    try:
+        payload = json.loads(manifest.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        return False, f"manifest is not valid JSON: {exc}"
+    commands = payload.get("commands") if isinstance(payload, dict) else None
+    if not isinstance(commands, dict):
+        return False, "manifest has no commands object"
+    for name in ("build", "reset", "start"):
+        command = commands.get(name)
+        if not isinstance(command, list) or not command or any(not isinstance(item, str) or not item for item in command):
+            return False, f"manifest command {name!r} is not a non-empty argument array"
+        executable = candidate / command[-1] if len(command) >= 2 else None
+        if executable is None or not executable.is_file():
+            return False, f"manifest command {name!r} points to a missing script"
+    return True, "build, reset, and start lifecycle commands are declared"
+
+
+def check_custom_option_forwarding(candidate: Path) -> tuple[bool, str]:
+    """Check repeatable and equals-form custom options reaching JavaScript transforms."""
+
+    with tempfile.TemporaryDirectory(prefix="jscodeshift-options-") as raw:
+        root = Path(raw)
+        source = root / "options.js"
+        source.write_text("const options = true;\n", encoding="utf-8")
+        transform = write_transform(
+            root / "options-transform.js",
+            """
+module.exports = function(file, api, options) {
+  if (options.marker !== 'equals-ok' || !Array.isArray(options.tag) || options.tag.join(',') !== 'one,two') {
+    throw new Error('custom options were not forwarded');
+  }
+  return file.source + '\\n// options-ok';
+};
+""".strip()
+            + "\n",
+        )
+        result = run_cli(
+            candidate,
+            ["--run-in-band", "--transform", str(transform), "--marker=equals-ok", "--tag=one", "--tag", "two", str(source)],
+            cwd=root,
+        )
+        if result.returncode != 0 or "// options-ok" not in source.read_text(encoding="utf-8"):
+            return False, "custom option values were not preserved"
+    return True, "repeatable and equals-form custom options reach transforms"
+
+
+def check_atomic_write_on_error(candidate: Path) -> tuple[bool, str]:
+    """Check that a failed transform cannot partially overwrite its source."""
+
+    with tempfile.TemporaryDirectory(prefix="jscodeshift-atomic-") as raw:
+        root = Path(raw)
+        source = root / "atomic.js"
+        original = "const keep = true;\n"
+        source.write_text(original, encoding="utf-8")
+        transform = write_transform(
+            root / "throw-after-change.js",
+            """
+module.exports = function(file) {
+  const changed = file.source + '\\n// should-not-write';
+  if (changed) throw new Error('atomic-boom');
+  return changed;
+};
+""".strip()
+            + "\n",
+        )
+        result = run_cli(candidate, ["--run-in-band", "--transform", str(transform), str(source)], cwd=root)
+        if result.returncode != 0 or "atomic-boom" not in (result.stdout + result.stderr):
+            return False, "transform failure was not reported"
+        if source.read_text(encoding="utf-8") != original:
+            return False, "failed transform partially overwrote its source"
+    return True, "failed transforms leave source files unchanged"
+
+
+def check_parallel_result_determinism(candidate: Path) -> tuple[bool, str]:
+    """Check that parallel scheduling preserves stable aggregate result counts."""
+
+    with tempfile.TemporaryDirectory(prefix="jscodeshift-determinism-") as raw:
+        root = Path(raw)
+        project = root / "project"
+        project.mkdir()
+        for index in range(6):
+            (project / f"file-{index}.js").write_text(f"const n = {index};\n", encoding="utf-8")
+        transform = write_transform(root / "stable.js", "module.exports = file => file.source + '\\n// stable';\n")
+        outputs: list[str] = []
+        for _ in range(2):
+            for index in range(6):
+                (project / f"file-{index}.js").write_text(f"const n = {index};\n", encoding="utf-8")
+            result = run_cli(candidate, ["--cpus", "3", "--transform", str(transform), "project"], cwd=root)
+            if result.returncode != 0:
+                return False, f"parallel run failed (rc={result.returncode})"
+            if "Processing 6 files" not in result.stdout or "6 ok" not in result.stdout:
+                return False, "parallel aggregate counts were incomplete"
+            outputs.append("\n".join(line for line in result.stdout.splitlines() if line.startswith(("Processing", "Spawning", "Results:"))))
+        if outputs[0] != outputs[1]:
+            return False, "parallel aggregate reporting changed with scheduling"
+    return True, "parallel scheduling produces stable aggregate results"
+
+
+def check_utf8_source_preservation(candidate: Path) -> tuple[bool, str]:
+    """Check that a no-op transform preserves UTF-8 source bytes and line content."""
+
+    with tempfile.TemporaryDirectory(prefix="jscodeshift-utf8-") as raw:
+        root = Path(raw)
+        source = root / "unicode.js"
+        original = "const café = '東京 🚀';\n// naïve façade\n"
+        source.write_text(original, encoding="utf-8")
+        transform = write_transform(root / "noop.js", "module.exports = file => file.source;\n")
+        result = run_cli(candidate, ["--run-in-band", "--transform", str(transform), str(source)], cwd=root)
+        if result.returncode != 0 or source.read_text(encoding="utf-8") != original:
+            return False, "no-op transform changed UTF-8 source content"
+    return True, "UTF-8 source content is preserved for no-op transforms"
+
+
+def check_ast_collections_and_builders(candidate: Path) -> tuple[bool, str]:
+    """Check collection traversal, node replacement, and builder availability."""
+
+    with tempfile.TemporaryDirectory(prefix="jscodeshift-ast-builders-") as raw:
+        root = Path(raw)
+        source = root / "builders.js"
+        source.write_text("const oldName = 1;\n", encoding="utf-8")
+        transform = write_transform(
+            root / "builders-transform.js",
+            """
+module.exports = function(file, api) {
+  const j = api.jscodeshift;
+  const ast = j(file.source);
+  if (ast.find(j.Identifier, { name: 'oldName' }).size() !== 1) throw new Error('collection traversal failed');
+  ast.find(j.Identifier, { name: 'oldName' }).replaceWith(() => j.identifier('newName'));
+  return ast.toSource();
+};
+""".strip()
+            + "\n",
+        )
+        result = run_cli(candidate, ["--run-in-band", "--transform", str(transform), str(source)], cwd=root)
+        if result.returncode != 0 or "newName" not in source.read_text(encoding="utf-8") or "oldName" in source.read_text(encoding="utf-8"):
+            return False, "collection traversal or standard builders failed"
+    return True, "collections and standard AST builders remain available"
+
+
+def check_ast_formatting_and_comments(candidate: Path) -> tuple[bool, str]:
+    """Check that AST edits retain leading comments and stable source formatting."""
+
+    with tempfile.TemporaryDirectory(prefix="jscodeshift-ast-format-") as raw:
+        root = Path(raw)
+        source = root / "comments.js"
+        source.write_text("// preserve this comment\nconst value = \"old\";\n", encoding="utf-8")
+        transform = write_transform(
+            root / "format-transform.js",
+            """
+module.exports = function(file, api) {
+  const j = api.jscodeshift;
+  const ast = j(file.source);
+  ast.find(j.Literal, { value: 'old' }).forEach(path => { path.node.value = 'new'; });
+  return ast.toSource({ quote: 'double' });
+};
+""".strip()
+            + "\n",
+        )
+        result = run_cli(candidate, ["--run-in-band", "--transform", str(transform), str(source)], cwd=root)
+        text = source.read_text(encoding="utf-8")
+        if result.returncode != 0 or "// preserve this comment" not in text or '"new"' not in text:
+            return False, "AST printing did not preserve comments or requested formatting"
+    return True, "AST edits preserve comments and formatting options"
+
+
+def check_ast_modern_syntax(candidate: Path) -> tuple[bool, str]:
+    """Check AST traversal over TypeScript types, TSX, and modern JavaScript syntax."""
+
+    with tempfile.TemporaryDirectory(prefix="jscodeshift-ast-syntax-") as raw:
+        root = Path(raw)
+        source = root / "modern.tsx"
+        source.write_text(
+            "interface User { name: string }\nconst view = <Card user={user?.name ?? 'unknown'} />;\n",
+            encoding="utf-8",
+        )
+        transform = write_transform(
+            root / "modern-transform.js",
+            """
+module.exports = function(file, api) {
+  const j = api.jscodeshift;
+  const ast = j(file.source);
+  if (ast.find(j.TSInterfaceDeclaration).size() !== 1) throw new Error('TypeScript interface unavailable');
+  if (ast.find(j.JSXElement).size() !== 1) throw new Error('TSX element unavailable');
+  return file.source + '\\n// modern-syntax-ok';
+};
+""".strip()
+            + "\n",
+        )
+        result = run_cli(candidate, ["--run-in-band", "--parser", "tsx", "--transform", str(transform), str(source)], cwd=root)
+        if result.returncode != 0 or "// modern-syntax-ok" not in source.read_text(encoding="utf-8"):
+            return False, "TypeScript/TSX modern syntax was not available to the transform"
+    return True, "TypeScript, TSX, and modern JavaScript syntax remain traversable"
+
+
 def check_rust_entrypoint(candidate: Path) -> tuple[bool, str]:
     """Check that the public launcher executes a compiled Rust runner."""
 
@@ -536,6 +848,18 @@ def check(candidate: Path) -> dict[str, dict[str, str]]:
         "dry-run-print-and-reporting": check_dry_print_reporting,
         "parallel-workers-and-results": check_parallel_workers,
         "failure-and-exit-contract": check_failure_contract,
+        "cli-surface-and-identity": check_cli_surface_and_identity,
+        "silent-output-contract": check_silent_output_contract,
+        "symlink-boundary": check_symlink_boundary,
+        "parallel-failure-recovery": check_parallel_failure_recovery,
+        "lifecycle-manifest": check_lifecycle_manifest,
+        "custom-option-forwarding": check_custom_option_forwarding,
+        "atomic-write-on-error": check_atomic_write_on_error,
+        "parallel-result-determinism": check_parallel_result_determinism,
+        "utf8-source-preservation": check_utf8_source_preservation,
+        "ast-collections-and-builders": check_ast_collections_and_builders,
+        "ast-formatting-and-comments": check_ast_formatting_and_comments,
+        "ast-modern-syntax": check_ast_modern_syntax,
         "rust-runner-entrypoint": check_rust_entrypoint,
     }
     result: dict[str, dict[str, str]] = {}

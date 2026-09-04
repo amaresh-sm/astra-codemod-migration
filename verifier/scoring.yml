@@ -1,23 +1,59 @@
 scale: normalized_1
 criteria:
   - id: cli-transform-api
-    weight: 0.18
+    weight: 0.05
     blocked_policy: zero
   - id: parser-and-transform-variants
-    weight: 0.16
+    weight: 0.04
     blocked_policy: zero
   - id: file-selection-and-stdin
-    weight: 0.15
+    weight: 0.07
     blocked_policy: zero
   - id: dry-run-print-and-reporting
-    weight: 0.13
+    weight: 0.05
     blocked_policy: zero
   - id: parallel-workers-and-results
-    weight: 0.12
+    weight: 0.06
     blocked_policy: zero
   - id: failure-and-exit-contract
-    weight: 0.12
+    weight: 0.05
+    blocked_policy: zero
+  - id: cli-surface-and-identity
+    weight: 0.06
+    blocked_policy: zero
+  - id: silent-output-contract
+    weight: 0.06
+    blocked_policy: zero
+  - id: symlink-boundary
+    weight: 0.06
+    blocked_policy: zero
+  - id: parallel-failure-recovery
+    weight: 0.07
+    blocked_policy: zero
+  - id: lifecycle-manifest
+    weight: 0.05
+    blocked_policy: zero
+  - id: custom-option-forwarding
+    weight: 0.05
+    blocked_policy: zero
+  - id: atomic-write-on-error
+    weight: 0.05
+    blocked_policy: zero
+  - id: parallel-result-determinism
+    weight: 0.05
+    blocked_policy: zero
+  - id: utf8-source-preservation
+    weight: 0.05
+    blocked_policy: zero
+  - id: ast-collections-and-builders
+    weight: 0.05
+    blocked_policy: zero
+  - id: ast-formatting-and-comments
+    weight: 0.05
+    blocked_policy: zero
+  - id: ast-modern-syntax
+    weight: 0.05
     blocked_policy: zero
   - id: rust-runner-entrypoint
-    weight: 0.14
+    weight: 0.03
     blocked_policy: zero

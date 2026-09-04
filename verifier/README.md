@@ -1,10 +1,9 @@
 # Private verification
 
-This directory is reserved for the jscodeshift runner migration verifier. The final verifier will
-exercise the public CLI and JavaScript transform API as a black box, using the upstream tests and
+This directory contains the private jscodeshift runner migration verifier. It exercises the public
+CLI and JavaScript transform API as a black box, using the upstream behavior baseline and
 additional cases for worker scheduling, stdin, parser selection, dry runs, reporting, failures,
-and compatibility.
+source preservation, lifecycle setup, and Rust entrypoint compatibility.
 
-The previous planner-only verifier artifacts are retained in this worktree until the new
-runner-specific reference solution and private checks are authored. Do not score the new task with
-those legacy artifacts.
+Legacy planner proof artifacts remain in this worktree for historical calibration only. They are
+not used by the runner verifier.
