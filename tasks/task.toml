@@ -1,4 +1,4 @@
 id = "migrate-jscodeshift-runner-to-rust"
 profile = "migration"
-title = "Migrate the jscodeshift runner to Rust"
+title = "Migrate the jscodeshift library to Rust"
 version = 1

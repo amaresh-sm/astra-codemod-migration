@@ -1,7 +1,9 @@
-# Migrate the jscodeshift runner to Rust
+# Migrate the jscodeshift library to Rust
 
-Migrate the complete jscodeshift command-line runner from JavaScript to Rust while preserving all
-externally observable behavior. Keep existing JavaScript transforms working, including collection
+Migrate the complete first-party jscodeshift library from JavaScript to Rust while preserving all
+externally observable behavior. The migration includes the CLI, argument handling, file discovery,
+ignore rules, runner, workers, core API, collections, node matching, templates, parser adapters,
+and package utilities. Keep existing JavaScript transforms working, including collection
 traversal, builders, comments, formatting, and supported JavaScript, TypeScript, and TSX syntax.
 Use the supplied source and public compatibility materials as the migration baseline. Additional
 behavior is checked privately by the verifier. The public behavior requirements are defined in

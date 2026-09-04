@@ -1,5 +1,14 @@
 {
   "command": "jscodeshift [options] PATH...",
+  "migration_scope": [
+    "CLI and argument handling",
+    "file discovery and ignore rules",
+    "runner and worker orchestration",
+    "core jscodeshift API",
+    "collections, node matching, and templates",
+    "parser adapters",
+    "package and runtime utilities"
+  ],
   "transform": "-t TRANSFORM_PATH or a transform URL",
   "inputs": {
     "paths": "one or more files or directories",
