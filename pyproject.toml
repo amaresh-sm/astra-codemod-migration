@@ -1,0 +1,10 @@
+[project]
+name = "astra-rl-harness"
+version = "0.1.0"
+description = "Shared isolated harness for ASTRA task generation and evaluation"
+requires-python = ">=3.11"
+
+[project.scripts]
+astra-generate = "astra_harness.generate:main"
+astra-verify = "astra_harness.verify:main"
+astra-score = "astra_harness.score:main"

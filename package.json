@@ -1,0 +1,20 @@
+{
+  "name": "astra-rl-templates",
+  "private": true,
+  "scripts": {
+    "validate": "python3 scripts/validate_task.py",
+    "package": "python3 scripts/package_task.py",
+    "build:images": "python3 scripts/build_images.py",
+    "generate": "python3 -m astra_harness.generate",
+    "verify": "python3 -m astra_harness.verify",
+    "score": "python3 -m astra_harness.score",
+    "check:package": "python3 readiness_checks/check_package.py",
+    "check:acceptance": "python3 readiness_checks/check_acceptance.py",
+    "check:report-privacy": "python3 readiness_checks/check_report_privacy.py",
+    "check:scoring": "python3 readiness_checks/check_scoring.py",
+    "check:determinism": "python3 readiness_checks/check_determinism.py",
+    "check:proof-work": "python3 readiness_checks/check_proof_work.py",
+    "check:reference": "python3 readiness_checks/check_reference.py",
+    "check:mutants": "python3 readiness_checks/check_mutants.py"
+  }
+}

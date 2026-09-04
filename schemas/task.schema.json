@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["id", "profile", "title"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+    "profile": { "enum": ["brownfield", "greenfield", "migration", "frontend"] },
+    "title": { "type": "string", "minLength": 1 },
+    "version": { "type": "integer", "minimum": 1 }
+  }
+}

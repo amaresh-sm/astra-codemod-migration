@@ -1,0 +1,46 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`tsxParser parse extends the ts config with jsx support 1`] = `
+[
+  ""mock content";",
+  {
+    "allowImportExportEverywhere": true,
+    "allowReturnOutsideFunction": true,
+    "plugins": [
+      "jsx",
+      "asyncGenerators",
+      "decoratorAutoAccessors",
+      "bigInt",
+      "classPrivateMethods",
+      "classPrivateProperties",
+      "classProperties",
+      "decorators-legacy",
+      "doExpressions",
+      "dynamicImport",
+      "exportDefaultFrom",
+      "exportExtensions",
+      "exportNamespaceFrom",
+      "functionBind",
+      "functionSent",
+      "importAttributes",
+      "importMeta",
+      "nullishCoalescingOperator",
+      "numericSeparator",
+      "objectRestSpread",
+      "optionalCatchBinding",
+      "optionalChaining",
+      [
+        "pipelineOperator",
+        {
+          "proposal": "minimal",
+        },
+      ],
+      "throwExpressions",
+      "typescript",
+    ],
+    "sourceType": "module",
+    "startLine": 1,
+    "tokens": true,
+  },
+]
+`;

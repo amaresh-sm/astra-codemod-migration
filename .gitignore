@@ -1,0 +1,13 @@
+# Candidate generations and verifier reports are run artifacts, not task source.
+runs/
+candidates/
+
+# Private grader material must never be published from this public repository.
+verifier/
+dist/
+target/
+
+# Generated Python bytecode and test caches.
+__pycache__/
+*.py[cod]
+.pytest_cache/

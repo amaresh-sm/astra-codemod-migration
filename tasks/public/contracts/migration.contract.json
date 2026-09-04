@@ -1,0 +1,19 @@
+{
+  "command": "jscodeshift [options] PATH...",
+  "transform": "-t TRANSFORM_PATH or a transform URL",
+  "inputs": {
+    "paths": "one or more files or directories",
+    "stdin": "newline-separated paths when --stdin is supplied"
+  },
+  "compatibility": {
+    "transform_api": "JavaScript transform(fileInfo, api, options)",
+    "statuses": ["ok", "nochange", "skip", "error"],
+    "summary": "results counts and elapsed time"
+  },
+  "options": [
+    "--cpus", "--dry", "--print", "--babel", "--extensions", "--ignore-pattern",
+    "--ignore-config", "--gitignore", "--run-in-band", "--silent", "--parser",
+    "--parser-config", "--fail-on-error", "--version", "--stdin"
+  ],
+  "errors": "diagnostic on stderr and non-zero exit status when requested by the CLI contract"
+}
