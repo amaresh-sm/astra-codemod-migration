@@ -4,9 +4,9 @@ Migrate the complete jscodeshift command-line runner from JavaScript to Rust and
 parse/transform/print boundary into the Rust implementation for the supported JavaScript,
 TypeScript, and TSX syntax. Keep existing JavaScript transforms working through a compatibility
 bridge, including collection traversal, builders, comments, and formatting. Use the supplied
-source, tests, and fixtures as the compatibility baseline and ensure they continue to pass. The
-public behavior requirements are defined in `contracts/migration.contract.json`; use that
-contract as the authoritative compatibility target.
+source and public compatibility materials as the migration baseline. Additional behavior is
+checked privately by the verifier. The public behavior requirements are defined in
+`contracts/migration.contract.json`; use that contract as the authoritative compatibility target.
 
 The migration is complete only when Rust owns file discovery, worker scheduling, parsing/printing,
 and result aggregation; the bridge is limited to invoking the existing JavaScript transform API.
