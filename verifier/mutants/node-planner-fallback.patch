@@ -1,0 +1,9 @@
+diff --git a/src/planner.js b/src/planner.js
+--- a/src/planner.js
++++ b/src/planner.js
+@@ -13,4 +13,4 @@
+   const args = ['--root', path.resolve(root), '--extensions', extensions || ''];
+   for (const rule of ignores) args.push('--ignore', rule);
+-  const result = childProcess.spawnSync(plannerBinary(), args, { encoding: 'utf8' });
++  const result = childProcess.spawnSync('node', ['src/legacy-planner.js', ...args], { encoding: 'utf8' });
+   if (result.error) throw result.error;

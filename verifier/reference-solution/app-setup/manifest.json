@@ -1,0 +1,10 @@
+{
+  "contractVersion": "1.0",
+  "commands": {
+    "build": ["bash", "app-setup/build.sh"],
+    "reset": ["bash", "app-setup/reset.sh"],
+    "start": ["bash", "app-setup/start.sh"]
+  },
+  "artifacts": { "migration": "app-setup/migration.contract.json" },
+  "datastoresUsed": []
+}

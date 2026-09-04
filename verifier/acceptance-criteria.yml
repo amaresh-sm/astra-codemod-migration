@@ -1,0 +1,44 @@
+task_id: migrate-jscodeshift-runner-to-rust
+criteria:
+  - id: cli-transform-api
+    requirement: The migrated CLI loads JavaScript and TypeScript transforms and preserves the jscodeshift transform API.
+    contract: public/contracts/migration.contract.json
+    hidden_test: jscodeshift.cli-transform-api
+    mutant: transform-api-drift
+    weight: 0.18
+  - id: parser-and-transform-variants
+    requirement: TSX, Flow, transform-declared parsers, asynchronous transforms, and URL-sourced transforms remain compatible.
+    contract: public/contracts/migration.contract.json
+    hidden_test: jscodeshift.parser-and-transform-variants
+    mutant: parser-source-drift
+    weight: 0.16
+  - id: file-selection-and-stdin
+    requirement: Recursive paths, extension filters, ignore patterns, and newline-separated stdin paths select the intended files.
+    contract: public/contracts/migration.contract.json
+    hidden_test: jscodeshift.file-selection-and-stdin
+    mutant: selection-filter-drift
+    weight: 0.15
+  - id: dry-run-print-and-reporting
+    requirement: Dry runs preserve files while print output, statistics, and transform reports remain observable.
+    contract: public/contracts/migration.contract.json
+    hidden_test: jscodeshift.dry-run-print-and-reporting
+    mutant: dry-run-write-leak
+    weight: 0.13
+  - id: parallel-workers-and-results
+    requirement: The runner honors a CPU limit, processes every selected file, and reports aggregate worker results.
+    contract: public/contracts/migration.contract.json
+    hidden_test: jscodeshift.parallel-workers-and-results
+    mutant: worker-count-drift
+    weight: 0.12
+  - id: failure-and-exit-contract
+    requirement: Transform failures are reported per file and --fail-on-error controls the process exit status.
+    contract: public/contracts/migration.contract.json
+    hidden_test: jscodeshift.failure-and-exit-contract
+    mutant: fail-on-error-drift
+    weight: 0.12
+  - id: rust-runner-entrypoint
+    requirement: The public jscodeshift launcher executes the compiled Rust runner.
+    contract: public/contracts/migration.contract.json
+    hidden_test: jscodeshift.rust-runner-entrypoint
+    mutant: javascript-runner-fallback
+    weight: 0.14

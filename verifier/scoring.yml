@@ -1,0 +1,23 @@
+scale: normalized_1
+criteria:
+  - id: cli-transform-api
+    weight: 0.18
+    blocked_policy: zero
+  - id: parser-and-transform-variants
+    weight: 0.16
+    blocked_policy: zero
+  - id: file-selection-and-stdin
+    weight: 0.15
+    blocked_policy: zero
+  - id: dry-run-print-and-reporting
+    weight: 0.13
+    blocked_policy: zero
+  - id: parallel-workers-and-results
+    weight: 0.12
+    blocked_policy: zero
+  - id: failure-and-exit-contract
+    weight: 0.12
+    blocked_policy: zero
+  - id: rust-runner-entrypoint
+    weight: 0.14
+    blocked_policy: zero

@@ -1,0 +1,12 @@
+diff --git a/bin/codemod-plan.js b/bin/codemod-plan.js
+--- a/bin/codemod-plan.js
++++ b/bin/codemod-plan.js
+@@ -9,6 +9,6 @@
+   const result = plan(options);
+   process.stdout.write(JSON.stringify(result) + '\n');
+ } catch (error) {
+-  process.stderr.write(`codemod-plan: ${error.message}\n`);
+-  process.exitCode = 1;
++  process.stdout.write(JSON.stringify({ files: [], count: 0 }) + '\n');
++  process.exitCode = 0;
+ }

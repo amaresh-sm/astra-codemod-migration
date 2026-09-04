@@ -1,0 +1,10 @@
+diff --git a/native/planner/src/main.rs b/native/planner/src/main.rs
+--- a/native/planner/src/main.rs
++++ b/native/planner/src/main.rs
+@@ -82,5 +82,5 @@
+     rules.append(&mut ignores);
+     let mut files = Vec::new();
+     visit(&root, &root, &extensions, &rules, &mut files);
+-    files.sort();
++    files.sort_by(|left, right| right.cmp(left));
+     let values = files.iter().map(|value| json_string(value)).collect::<Vec<_>>().join(",");

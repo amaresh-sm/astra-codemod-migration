@@ -1,0 +1,13 @@
+{
+  "command": "node bin/codemod-plan.js",
+  "arguments": {
+    "--root": "directory to scan (required)",
+    "--extensions": "comma-separated extensions without dots",
+    "--ignore": "repeatable path fragment or glob to skip"
+  },
+  "output": {
+    "files": "sorted root-relative POSIX paths",
+    "count": "number of selected files"
+  },
+  "errors": "diagnostic on stderr and non-zero exit status"
+}

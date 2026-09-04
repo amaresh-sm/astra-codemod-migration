@@ -1,0 +1,12 @@
+{
+  "name": "codemod-planner-brownfield",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "bin": { "codemod-plan": "bin/codemod-plan.js" },
+  "scripts": {
+    "test": "node --test test/planner.test.js",
+    "plan": "node bin/codemod-plan.js"
+  },
+  "engines": { "node": ">=18" }
+}

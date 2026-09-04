@@ -1,0 +1,10 @@
+diff --git a/bin/codemod-plan.js b/bin/codemod-plan.js
+--- a/bin/codemod-plan.js
++++ b/bin/codemod-plan.js
+@@ -7,5 +7,5 @@
+ try {
+   const options = parseArgs(process.argv.slice(2));
+   const result = plan(options);
+-  process.stdout.write(JSON.stringify(result) + '\n');
++  process.stdout.write(JSON.stringify({ files: result.files }) + '\n');
+ } catch (error) {

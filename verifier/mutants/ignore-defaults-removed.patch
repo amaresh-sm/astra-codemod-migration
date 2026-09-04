@@ -1,0 +1,10 @@
+diff --git a/native/planner/src/main.rs b/native/planner/src/main.rs
+--- a/native/planner/src/main.rs
++++ b/native/planner/src/main.rs
+@@ -78,5 +78,5 @@
+     let root = root.unwrap_or_else(|| fail("--root is required"));
+     let root = fs::canonicalize(&root).unwrap_or_else(|_| fail(&format!("root does not exist: {}", root.display())));
+     if !root.is_dir() { fail(&format!("root is not a directory: {}", root.display())); }
+-    let mut rules: Vec<String> = DEFAULT_IGNORES.iter().map(|item| (*item).to_string()).collect();
++    let mut rules: Vec<String> = Vec::new();
+     rules.append(&mut ignores);

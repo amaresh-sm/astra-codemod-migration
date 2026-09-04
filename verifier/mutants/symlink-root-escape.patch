@@ -1,0 +1,10 @@
+diff --git a/native/planner/src/main.rs b/native/planner/src/main.rs
+--- a/native/planner/src/main.rs
++++ b/native/planner/src/main.rs
+@@ -47,5 +47,5 @@
+         let matches_extension = extensions.is_empty() || extensions.iter().any(|ext| absolute.extension().and_then(|value| value.to_str()) == Some(ext));
+         if kind.file_type().is_symlink() {
+             let target = match fs::canonicalize(&absolute) { Ok(value) => value, Err(_) => continue };
+-            if target.starts_with(root) && target.is_file() && matches_extension { files.push(relative); }
++            if target.is_file() && matches_extension { files.push(relative); }
+         } else if kind.is_dir() {

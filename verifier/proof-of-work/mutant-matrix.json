@@ -1,0 +1,10 @@
+{
+  "mutants": {
+    "cli-output-drift": { "hidden_test": "cli.contract", "expected_criteria": ["cli-contract"], "related_criteria": ["deterministic-discovery", "ignore-rules", "symlink-boundary", "empty-and-error-cases"] },
+    "planner-unsorted": { "hidden_test": "planner.discovery", "expected_criteria": ["deterministic-discovery"], "related_criteria": ["cli-contract", "ignore-rules", "symlink-boundary"] },
+    "ignore-defaults-removed": { "hidden_test": "planner.ignore-rules", "expected_criteria": ["ignore-rules"], "related_criteria": ["cli-contract", "deterministic-discovery", "symlink-boundary"] },
+    "symlink-root-escape": { "hidden_test": "planner.symlink-boundary", "expected_criteria": ["symlink-boundary"], "related_criteria": ["cli-contract", "deterministic-discovery", "ignore-rules"] },
+    "node-planner-fallback": { "hidden_test": "migration.rust-bridge", "expected_criteria": ["rust-bridge"], "related_criteria": ["cli-contract", "deterministic-discovery", "ignore-rules", "symlink-boundary", "empty-and-error-cases"] },
+    "missing-root-success": { "hidden_test": "planner.error-cases", "expected_criteria": ["empty-and-error-cases"] }
+  }
+}
