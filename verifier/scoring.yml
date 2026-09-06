@@ -83,10 +83,10 @@ criteria:
     blocked_policy: zero
 
   - id: cross-feature-compatibility
-    weight: 0.0235294118
+    weight: 0.0311764706
     blocked_policy: zero
   - id: package-boundary-compatibility
-    weight: 0.0176470588
+    weight: 0.01
     blocked_policy: zero
   - id: ast-composition-corpus
     weight: 0.0176470588

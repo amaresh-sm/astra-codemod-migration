@@ -177,12 +177,12 @@ criteria:
     requirement: CLI options, parser selection, worker scheduling, templates, and ignore rules compose correctly in a single run.
     hidden_test: jscodeshift.cross-feature-compatibility
     mutant: cross-feature-composition-drift
-    weight: 0.0235294118
+    weight: 0.0311764706
   - id: package-boundary-compatibility
     requirement: The packed npm artifact retains its public metadata, package export, and CLI entrypoint.
     hidden_test: jscodeshift.package-boundary-compatibility
     mutant: package-boundary-drift
-    weight: 0.0176470588
+    weight: 0.01
   - id: ast-composition-corpus
     requirement: A multi-file TypeScript/TSX AST corpus preserves syntax, plugins, collections, templates, and formatting.
     hidden_test: jscodeshift.ast-composition-corpus

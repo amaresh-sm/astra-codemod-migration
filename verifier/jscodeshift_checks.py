@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import os
 import json
+import shlex
+import shutil
 import subprocess
 import tarfile
 import tempfile
@@ -1386,10 +1388,23 @@ Module._load = function(request, parent, isMain) {
             + "\n",
             encoding="utf-8",
         )
+        node_wrapper = root / "guarded-node"
+        node_binary = shutil.which("node") or "/usr/local/bin/node"
+        node_wrapper.write_text(
+            "#!/bin/sh\n"
+            f"exec {shlex.quote(node_binary)} --require {shlex.quote(str(guard))} \"$@\"\n",
+            encoding="utf-8",
+        )
+        node_wrapper.chmod(0o755)
         environment = {
             "NODE_OPTIONS": f"--require={guard}",
             "JSCODESHIFT_ENGINE_ROOT": runtime_source_root(candidate),
             "JSCODESHIFT_BLOCKED_MODULES": json.dumps(blocked),
+            # Rust implementations commonly launch a Node compatibility worker
+            # through this documented hook.  Wrapping that hook guarantees the
+            # module guard is loaded in every child process, not just in the
+            # JavaScript launcher process.
+            "JSCODESHIFT_NODE": str(node_wrapper),
         }
         source = root / "source.js"
         source.write_text(source_text, encoding="utf-8")
@@ -1424,6 +1439,10 @@ def retained_engine_delegation(candidate: Path) -> str | None:
     root = source_root(candidate)
     scan_roots = [root / "rust", root / "rust-runner", root / "native"]
     retained_markers = (
+        # A Rust worker that launches this bridge is still delegating AST and
+        # transform execution to the original JavaScript engine: the bridge
+        # imports src/getParser.js and src/core.js before invoking transforms.
+        "worker_bridge.js",
         "src/Worker.js",
         "src/Runner.js",
         "src/core.js",
