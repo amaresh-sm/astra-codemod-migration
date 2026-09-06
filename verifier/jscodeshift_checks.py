@@ -1426,6 +1426,66 @@ Module._load = function(request, parent, isMain) {
     return True, "runtime completed a real JavaScript transform without loading the retained modules under test"
 
 
+def run_with_engine_quarantine(
+    candidate: Path,
+    *,
+    source_text: str = "const original = 1;\n",
+    transform_text: str = "module.exports = (file, api) => api.jscodeshift(file.source).toSource();\n",
+    cli_prefix: list[str] | None = None,
+) -> tuple[bool, str]:
+    """Run the public CLI after hiding the original first-party JS engine.
+
+    The candidate is staged into a temporary workspace so the submitted files
+    are never modified. User-supplied transforms remain available outside the
+    staged package, while the legacy src and parser trees are hidden. A Rust
+    implementation must therefore provide parser, printer, core, collections,
+    and worker behavior itself rather than delegating to the old JavaScript
+    implementation.
+    """
+
+    with tempfile.TemporaryDirectory(prefix="jscodeshift-engine-quarantine-") as raw:
+        root = Path(raw)
+        staged = root / "candidate"
+        try:
+            # Hard links keep this probe fast and avoid rewriting a potentially
+            # large node_modules/target tree. The fallback handles filesystems
+            # that do not permit linking across temporary-directory mounts.
+            shutil.copytree(candidate, staged, symlinks=True, copy_function=os.link)
+        except OSError:
+            if staged.exists():
+                shutil.rmtree(staged)
+            shutil.copytree(candidate, staged, symlinks=True)
+
+        package = source_root(staged)
+        for relative in (
+            "src",
+            "parser",
+            "node_modules/recast",
+            "node_modules/ast-types",
+            "node_modules/@babel/parser",
+            "node_modules/flow-parser",
+        ):
+            path = package / relative
+            if not path.exists() and not path.is_symlink():
+                continue
+            path.rename(path.with_name(path.name + ".engine-quarantined"))
+
+        source = root / "source.js"
+        source.write_text(source_text, encoding="utf-8")
+        transform = write_transform(root / "transform.js", transform_text)
+        result = run_cli(
+            staged,
+            [*(cli_prefix or ["--run-in-band"]), "--transform", str(transform), str(source)],
+            cwd=root,
+        )
+        if result.returncode != 0:
+            output = result.stdout + result.stderr
+            detail = output.strip().splitlines()
+            suffix = f": {detail[-1]}" if detail else ""
+            return False, f"runtime could not execute with the retained JS engine quarantined{suffix}"
+    return True, "runtime completed with the original first-party JS engine quarantined"
+
+
 def retained_engine_delegation(candidate: Path) -> str | None:
     """Return a concrete retained-engine delegation found in migration code.
 
@@ -1468,9 +1528,8 @@ def check_rust_parser_printer_ownership(candidate: Path) -> tuple[bool, str]:
     delegated = retained_engine_delegation(candidate)
     if delegated is not None:
         return False, f"parser/printer ownership failed: {delegated}"
-    passed, detail = run_with_module_guard(
+    passed, detail = run_with_engine_quarantine(
         candidate,
-        blocked=["src/getParser.js", "parser/", "node_modules/recast/", "node_modules/ast-types/", "node_modules/@babel/parser/", "node_modules/flow-parser/"],
         source_text="const view = <Panel title=\"before\">{value?.name}</Panel>;\n",
         transform_text=(
             "module.exports = (file, api) => {\n"
@@ -1490,9 +1549,8 @@ def check_rust_core_collections_ownership(candidate: Path) -> tuple[bool, str]:
     delegated = retained_engine_delegation(candidate)
     if delegated is not None:
         return False, f"core/collections ownership failed: {delegated}"
-    passed, detail = run_with_module_guard(
+    passed, detail = run_with_engine_quarantine(
         candidate,
-        blocked=["src/core.js", "src/Collection.js", "src/matchNode.js", "src/template.js", "src/collections/"],
         transform_text=(
             "module.exports = (file, api) => {\n"
             "  const j = api.jscodeshift; const root = j(file.source);\n"
@@ -1512,9 +1570,8 @@ def check_rust_worker_execution_ownership(candidate: Path) -> tuple[bool, str]:
     delegated = retained_engine_delegation(candidate)
     if delegated is not None:
         return False, f"worker execution ownership failed: {delegated}"
-    passed, detail = run_with_module_guard(
+    passed, detail = run_with_engine_quarantine(
         candidate,
-        blocked=["src/Runner.js", "src/Worker.js"],
         cli_prefix=["--cpus", "2"],
     )
     return passed, detail if passed else f"worker execution ownership failed: {detail}"
