@@ -1,3 +1,5 @@
+FROM python:3.12-slim-bookworm AS python-runtime
+
 FROM node:22-bookworm-slim
 
 ARG CODEX_VERSION=0.144.6
@@ -11,8 +13,19 @@ ENV PATH="/opt/cargo/bin:${PATH}"
 # slim Node image includes Node's bundled roots but not the system CA bundle,
 # which causes TLS failures against the provider endpoint.
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends ca-certificates curl build-essential \
+    && apt-get install -y --no-install-recommends ca-certificates curl build-essential python3 python3-pip \
     && rm -rf /var/lib/apt/lists/*
+
+# Keep Node 22 from the base image while adding the Python 3.12 runtime
+# required by the OpenHands SDK. The two runtimes are intentionally colocated
+# because the agent needs Node to build/test the JavaScript repository.
+COPY --from=python-runtime /usr/local/bin/python3.12 /usr/local/bin/python3.12
+COPY --from=python-runtime /usr/local/bin/pip3.12 /usr/local/bin/pip3.12
+COPY --from=python-runtime /usr/local/lib/python3.12 /usr/local/lib/python3.12
+COPY --from=python-runtime /usr/local/lib/libpython3.12.so.1.0 /usr/local/lib/libpython3.12.so.1.0
+RUN ln -sf /usr/local/bin/python3.12 /usr/local/bin/python3 \
+    && ln -sf /usr/local/bin/pip3.12 /usr/local/bin/pip3 \
+    && ldconfig
 
 RUN mkdir -p /opt/rustup /opt/cargo \
     && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
@@ -32,9 +45,18 @@ RUN npm install --global --ignore-scripts --no-audit --no-fund "@openai/codex@${
 RUN npm install --global --no-audit --no-fund "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}" \
     && claude --version
 
+# OpenHands SDK is used through a small non-interactive adapter. Pin both
+# packages together so the benchmark image is reproducible and the built-in
+# terminal/file-editor tools match the SDK event model.
+ARG OPENHANDS_VERSION=1.44.1
+RUN python3.12 -m pip install --no-cache-dir \
+      "openhands-sdk==${OPENHANDS_VERSION}" \
+      "openhands-tools==${OPENHANDS_VERSION}"
+
 RUN useradd --create-home runner
 WORKDIR /work
 COPY environment/candidate-generation/entrypoint.sh /usr/local/bin/astra-generate
+COPY astra_harness/openhands_runner.py /opt/astra/openhands_runner.py
 RUN chmod 0555 /usr/local/bin/astra-generate \
     && mkdir -p /input /output /work/candidate \
     && chown -R runner:runner /input /output /work

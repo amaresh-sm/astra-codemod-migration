@@ -24,7 +24,7 @@ def utc_now() -> str:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Generate a candidate in an isolated container")
     parser.add_argument("--task", type=Path, required=True)
-    parser.add_argument("--provider", choices=("codex", "openai-compatible", "claude-code"), required=True)
+    parser.add_argument("--provider", choices=("codex", "openai-compatible", "claude-code", "openhands"), required=True)
     parser.add_argument("--model", required=True)
     parser.add_argument("--reasoning", choices=("low", "medium", "high", "xhigh", "max"), default="medium")
     parser.add_argument("--run-id", default=None)
@@ -59,7 +59,10 @@ def ensure_image(args: argparse.Namespace) -> None:
         stderr=subprocess.DEVNULL,
         check=False,
     )
-    required_cli = "claude" if args.provider == "claude-code" else "codex"
+    required_cli = {
+        "claude-code": "claude",
+        "openhands": "python3",
+    }.get(args.provider, "codex")
     if found.returncode == 0:
         installed = subprocess.run(
             ["docker", "run", "--rm", "--entrypoint", "sh", args.image, "-lc", f"command -v {required_cli}"],

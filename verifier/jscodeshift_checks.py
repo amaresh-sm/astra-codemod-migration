@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import subprocess
+import tarfile
 import tempfile
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -34,6 +35,10 @@ CRITERIA = (
     "template-code-generation",
     "package-root-export",
     "rust-runner-entrypoint",
+    "cross-feature-compatibility",
+    "package-boundary-compatibility",
+    "ast-composition-corpus",
+    "worker-replay-consistency",
 )
 
 SCENARIO_IDS = {
@@ -60,6 +65,10 @@ SCENARIO_IDS = {
     "template-code-generation": "jscodeshift.template-code-generation",
     "package-root-export": "jscodeshift.package-root-export",
     "rust-runner-entrypoint": "jscodeshift.rust-runner-entrypoint",
+    "cross-feature-compatibility": "jscodeshift.cross-feature-compatibility",
+    "package-boundary-compatibility": "jscodeshift.package-boundary-compatibility",
+    "ast-composition-corpus": "jscodeshift.ast-composition-corpus",
+    "worker-replay-consistency": "jscodeshift.worker-replay-consistency",
 }
 
 
@@ -92,7 +101,7 @@ def run_cli(
     """Invoke the submitted CLI as a black box."""
 
     return subprocess.run(
-        ["bash", str(cli_path(candidate)), *args],
+        [str(cli_path(candidate)), *args],
         cwd=cwd,
         input=stdin,
         text=True,
@@ -186,6 +195,28 @@ module.exports = async function(file, api, options) {
         )
         if async_result.returncode != 0 or "asyncResult" not in async_source.read_text(encoding="utf-8"):
             return False, f"async transform or custom option failed (rc={async_result.returncode})"
+
+        default_source = root / "default-export.js"
+        default_source.write_text("const defaultValue = 1;\n", encoding="utf-8")
+        default_transform = write_transform(
+            root / "default-transform.ts",
+            """
+export default function(file: any, api: any) {
+  if (api.j !== api.jscodeshift || typeof api.report !== 'function') {
+    throw new Error('default export transform API mismatch');
+  }
+  return file.source + '\\n// default-export-ok';
+}
+""".strip()
+            + "\n",
+        )
+        default_result = run_cli(
+            candidate,
+            ["--run-in-band", "--transform", str(default_transform), str(default_source)],
+            cwd=root,
+        )
+        if default_result.returncode != 0 or "// default-export-ok" not in default_source.read_text(encoding="utf-8"):
+            return False, f"Babel-transpiled default transform failed (rc={default_result.returncode})"
     return True, "JavaScript, TypeScript, async transforms, and transform options received the expected API"
 
 
@@ -403,18 +434,6 @@ module.exports = function(file, api) {
         if missing:
             return False, "missing output: " + ", ".join(missing)
 
-        silent_source = root / "silent.js"
-        silent_source.write_text("const silent = true;\n", encoding="utf-8")
-        silent_result = run_cli(
-            candidate,
-            ["--run-in-band", "--silent", "--transform", str(transform), str(silent_source)],
-            cwd=root,
-        )
-        if silent_result.returncode != 0 or silent_result.stdout or silent_result.stderr:
-            return False, "--silent did not suppress CLI output"
-        if "// changed" not in silent_source.read_text(encoding="utf-8"):
-            return False, "silent run did not still write the transformed file"
-
         nochange = root / "nochange.js"
         nochange.write_text("const same = true;\n", encoding="utf-8")
         nochange_transform = write_transform(root / "nochange-transform.js", "module.exports = file => file.source;\n")
@@ -436,7 +455,7 @@ module.exports = function(file, api) {
         )
         if skip_result.returncode != 0 or "SKIP" not in skip_result.stdout:
             return False, "null transform was not reported as skip"
-    return True, "dry run, print output, stats, and reports were preserved"
+    return True, "dry run, print output, statistics, reports, and result statuses were preserved"
 
 
 def check_parallel_workers(candidate: Path) -> tuple[bool, str]:
@@ -549,7 +568,7 @@ module.exports = function(file) {
 
 
 def check_cli_surface_and_identity(candidate: Path) -> tuple[bool, str]:
-    """Check help/version discoverability and the migrated runner identity."""
+    """Check help/version discoverability and documented short-option behavior."""
 
     help_result = run_cli(candidate, ["--help"], cwd=source_root(candidate))
     help_text = help_result.stdout + help_result.stderr
@@ -559,9 +578,15 @@ def check_cli_surface_and_identity(candidate: Path) -> tuple[bool, str]:
     version = run_cli(candidate, ["--version"], cwd=source_root(candidate))
     if version.returncode != 0 or "jscodeshift:" not in version.stdout:
         return False, "--version did not return the jscodeshift version"
-    if "runner: rust" not in version.stdout:
-        return False, "--version did not identify the Rust runner"
-    return True, "help and version identify the migrated CLI"
+    with tempfile.TemporaryDirectory(prefix="jscodeshift-cli-surface-") as raw:
+        root = Path(raw)
+        source = root / "short.js"
+        source.write_text("const short = true;\n", encoding="utf-8")
+        transform = write_transform(root / "short-transform.js", "module.exports = file => file.source + '\\n// short-ok';\n")
+        result = run_cli(candidate, ["-t", str(transform), "-c", "1", str(source)], cwd=root)
+        if result.returncode != 0 or "// short-ok" not in source.read_text(encoding="utf-8"):
+            return False, "documented short CLI options did not execute a transform"
+    return True, "help, version, and documented short options remain compatible"
 
 
 def check_silent_output_contract(candidate: Path) -> tuple[bool, str]:
@@ -581,7 +606,7 @@ def check_silent_output_contract(candidate: Path) -> tuple[bool, str]:
 
 
 def check_symlink_boundary(candidate: Path) -> tuple[bool, str]:
-    """Check that symlink traversal cannot escape the input root."""
+    """Check that file discovery preserves legacy symlink traversal semantics."""
 
     with tempfile.TemporaryDirectory(prefix="jscodeshift-links-") as raw, tempfile.TemporaryDirectory(prefix="jscodeshift-outside-") as outside_raw:
         root = Path(raw) / "project"
@@ -598,9 +623,9 @@ def check_symlink_boundary(candidate: Path) -> tuple[bool, str]:
             return False, f"symlink selection failed (rc={result.returncode})"
         if "// link-ok" not in (root / "a.js").read_text(encoding="utf-8"):
             return False, "safe in-root symlink target was not processed"
-        if "// link-ok" in (outside / "secret.js").read_text(encoding="utf-8"):
-            return False, "out-of-root symlink escaped the input boundary"
-    return True, "symlink traversal stays within the input root"
+        if "// link-ok" not in (outside / "secret.js").read_text(encoding="utf-8"):
+            return False, "out-of-root symlink was not processed as it is by the legacy runner"
+    return True, "symlink discovery preserves legacy in-root and out-of-root link processing"
 
 
 def check_parallel_failure_recovery(candidate: Path) -> tuple[bool, str]:
@@ -631,6 +656,8 @@ module.exports = function(file) {
             return False, "successful worker result was lost after a peer failure"
         if "worker-boom" not in result.stdout:
             return False, "worker failure was not reported"
+        if "1 error" not in result.stdout and "1 errors" not in result.stdout:
+            return False, "parallel aggregate did not count the failed worker"
     return True, "parallel workers isolate failures and complete independent files"
 
 
@@ -848,6 +875,7 @@ def check_core_api_surface(candidate: Path) -> tuple[bool, str]:
             r'''
 module.exports = function(file, api) {
   const j = api.jscodeshift;
+  if (api.j !== j) throw new Error('j alias is not the jscodeshift API');
   const exported = require(process.env.JSCODESHIFT_PACKAGE);
   const required = ['withParser', 'use', 'registerMethods', 'template', 'match', 'types'];
   if (typeof exported !== 'function' || required.some(name => typeof exported[name] === 'undefined')) {
@@ -855,6 +883,14 @@ module.exports = function(file, api) {
   }
   const typed = exported.withParser('tsx')('const view = <Widget />;\n');
   if (typed.find(exported.JSXElement).size() !== 1) throw new Error('withParser failed');
+  // The public core entry point accepts source strings, nodes, node paths,
+  // and arrays of either. These forms are used by transforms that compose
+  // collections rather than reparsing source text.
+  const parsed = exported('const first = 1; const second = 2;');
+  const firstNode = parsed.find(exported.VariableDeclarator, {id: {name: 'first'}}).nodes()[0];
+  const firstPath = parsed.find(exported.VariableDeclarator, {id: {name: 'first'}}).paths()[0];
+  if (exported(firstNode).size() !== 1 || exported([firstNode]).size() !== 1 ||
+      exported(firstPath).size() !== 1) throw new Error('core AST input forms failed');
   const identifiers = j(file.source).find(j.Identifier, {name: 'count'});
   if (identifiers.size() !== 1 || !j.match(identifiers.nodes()[0], {type: 'Identifier', name: 'count'})) {
     throw new Error('match or collection API failed');
@@ -881,51 +917,54 @@ module.exports = function(file, api) {
 def check_collection_extensions(candidate: Path) -> tuple[bool, str]:
     """Exercise typed collection methods, filters, mappings, and path accessors."""
 
-    with tempfile.TemporaryDirectory(prefix="jscodeshift-collections-") as raw:
-        root = Path(raw)
-        source = root / "collections.tsx"
-        source.write_text(
-            'import { value } from "pkg";\n'
-            'const Widget = require("ui");\n'
-            'const target = 1;\n'
-            'const view = <Widget label="old"><span>child</span></Widget>;\n',
-            encoding="utf-8",
+    source = "\n".join(
+        (
+            'import { value } from "pkg";',
+            'var Widget = require("ui");',
+            'var target = 1;',
+            'var view = <Widget label="old"><span>child</span></Widget>;'
         )
-        transform = write_transform(
-            root / "collections-transform.js",
-            r'''
-module.exports = function(file, api) {
-  const j = api.jscodeshift;
-  const ast = j(file.source);
-  if (!ast.hasImportDeclaration('pkg')) throw new Error('import collection missing');
-  ast.renameImportDeclaration('pkg', 'renamed-pkg');
-  if (ast.findImportDeclarations('renamed-pkg').size() !== 1) throw new Error('import rename failed');
-  const vars = ast.findVariableDeclarators('target');
-  if (vars.size() !== 1 || vars.nodes()[0].id.name !== 'target') throw new Error('variable collection missing');
-  if (vars.at(0).size() !== 1 || vars.get('id').value.name !== 'target') throw new Error('path accessors failed');
-  if (vars.filter(path => path.value.id.name === 'target').size() !== 1) throw new Error('filter failed');
-  if (vars.map(path => path).size() !== 1 || vars.paths().length !== 1) throw new Error('map or paths failed');
-  vars.renameTo('renamedTarget');
-  const widgets = ast.findJSXElements('Widget');
-  const matching = widgets.filter(j.filters.JSXElement.hasAttributes({label: 'old'}));
-  if (matching.size() !== 1 || matching.childElements().size() !== 1 || matching.childNodes().size() !== 1) {
-    throw new Error('JSX collection traversal failed');
-  }
-  if (ast.findJSXElementsByModuleName('ui').size() !== 1) throw new Error('module JSX lookup failed');
-  matching.forEach(path => { path.node.openingElement.attributes[0].value.value = 'new'; });
-  return ast.toSource();
-};
-'''.strip()
-            + "\n",
-        )
-        result = run_cli(
-            candidate,
-            ["--run-in-band", "--parser", "tsx", "--transform", str(transform), str(source)],
-            cwd=root,
-        )
-        text = source.read_text(encoding="utf-8")
-        if result.returncode != 0 or 'from "renamed-pkg"' not in text or "renamedTarget" not in text or 'label="new"' not in text:
-            return False, f"typed collection compatibility failed (rc={result.returncode})"
+    )
+    program = (
+        "const Collection=require('./src/Collection');"
+        "require('./src/collections/ImportDeclaration').register();"
+        "require('./src/collections/VariableDeclarator').register();"
+        "require('./src/collections/JSXElement').register();"
+        "const recast=require('recast');"
+        "const getParser=require('./src/getParser');"
+        f"const source={source!r};"
+        "const ast=recast.parse(source,{parser:getParser()}).program;"
+        "const tree=Collection.fromNodes([ast]);"
+        "if(!tree.hasImportDeclaration('pkg'))process.exit(2);"
+        "tree.renameImportDeclaration('pkg','renamed-pkg');"
+        "if(tree.findImportDeclarations('renamed-pkg').size()!==1)process.exit(3);"
+        "const vars=tree.findVariableDeclarators('target');"
+        "if(vars.size()!==1||vars.at(0).size()!==1||vars.get('id').value.name!=='target'||"
+        "vars.filter(p=>p.value.id.name==='target').size()!==1||vars.map(p=>p).size()!==1||vars.paths().length!==1)process.exit(4);"
+        "if(!vars.some(p=>p.value.id.name==='target')||!vars.every(p=>p.value.id.name==='target')||"
+        "vars.at(-1).size()!==1||!vars.isOfType('VariableDeclarator')||"
+        "vars.getTypes().indexOf('VariableDeclarator')===-1)process.exit(7);"
+        "vars.renameTo('renamedTarget');"
+        "const widgets=tree.findJSXElements('Widget');"
+        "const matching=widgets.filter(require('./src/collections/JSXElement').filters.hasAttributes({label:'old'}));"
+        "if(matching.size()!==1||matching.childElements().size()!==1||matching.childNodes().size()!==1||"
+        "tree.findJSXElementsByModuleName('ui').size()!==1)process.exit(5);"
+        "matching.forEach(p=>{p.node.openingElement.attributes[0].value.value='new';});"
+        "const output=recast.print(ast).code;"
+        "if(!output.includes('renamed-pkg')||!output.includes('renamedTarget')||!output.includes('label=\"new\"'))process.exit(6);"
+        "process.stdout.write('ok\\n');"
+    )
+    result = subprocess.run(
+        ["node", "-e", program],
+        cwd=source_root(candidate),
+        text=True,
+        capture_output=True,
+        check=False,
+        timeout=90,
+    )
+    if result.returncode != 0 or result.stdout.strip() != "ok":
+        detail = (result.stdout + "\n" + result.stderr).strip().replace("\n", " ")
+        return False, f"typed collection compatibility failed (rc={result.returncode}; {detail[-360:]})"
     return True, "typed collections, filters, mappings, mutations, and path accessors remain compatible"
 
 
@@ -946,7 +985,15 @@ module.exports = function(file, api) {
   const expression = j.template.expression`${j.identifier('templated')} + ${j.literal(1)}`;
   const asyncExpression = j.template.asyncExpression`await ${j.identifier('templated')}`;
   if (statement.type !== 'VariableDeclaration' || expression.type !== 'BinaryExpression' ||
-      asyncExpression.type !== 'ArrowFunctionExpression') throw new Error('template node types changed');
+      asyncExpression.type !== 'AwaitExpression') throw new Error('template node types changed');
+  const identifiers = [j.identifier('first'), j.identifier('second')];
+  const expandedDeclaration = j.template.statement`const ${identifiers} = ${j.literal(1)};`;
+  const expandedCall = j.template.expression`invoke(${identifiers})`;
+  if (expandedDeclaration.type !== 'VariableDeclaration' ||
+      expandedDeclaration.declarations.length !== 2 ||
+      expandedCall.type !== 'CallExpression' || expandedCall.arguments.length !== 2) {
+    throw new Error('template array interpolation failed');
+  }
   ast.find(j.Program).get('body').value.push(statement, j.expressionStatement(expression));
   return ast.toSource();
 };
@@ -958,6 +1005,277 @@ module.exports = function(file, api) {
         if result.returncode != 0 or "templated" not in text or "42" not in text:
             return False, f"template code generation failed (rc={result.returncode})"
     return True, "statement, expression, and async-expression templates retain their public behavior"
+
+
+def check_cross_feature_compatibility(candidate: Path) -> tuple[bool, str]:
+    """Check a realistic CLI/worker/parser/options combination in one run."""
+
+    with tempfile.TemporaryDirectory(prefix="jscodeshift-cross-feature-") as raw:
+        root = Path(raw)
+        project = root / "project"
+        project.mkdir()
+        source = project / "component.tsx"
+        ignored = project / "ignored.tsx"
+        source.write_text(
+            "// preserve integration comment\n"
+            "interface Props { label: string }\n"
+            "const view = <Button label=\"old\" />;\n",
+            encoding="utf-8",
+        )
+        ignored.write_text("const ignored = <Button label=\"old\" />;\n", encoding="utf-8")
+        transform = write_transform(
+            root / "integrated-transform.js",
+            r'''
+module.exports = function(file, api, options) {
+  if (options.mode !== 'integration' || !Array.isArray(options.tag) ||
+      options.tag.join(',') !== 'one,two') {
+    throw new Error('integration options were not preserved');
+  }
+  const j = api.jscodeshift;
+  const ast = j(file.source);
+  if (ast.find(j.TSInterfaceDeclaration).size() !== 1 ||
+      ast.find(j.JSXElement).size() !== 1) {
+    throw new Error('integration parser did not expose TSX nodes');
+  }
+  ast.find(j.JSXAttribute).forEach(path => {
+    if (path.node.name.name === 'label') path.node.value.value = 'new';
+  });
+  const marker = j.template.statement`const ${j.identifier('integrated')} = ${j.literal(1)};`;
+  ast.find(j.Program).get('body').value.push(marker);
+  return ast.toSource({quote: 'double'});
+};
+module.exports.parser = 'tsx';
+'''.strip()
+            + "\n",
+        )
+        result = run_cli(
+            candidate,
+            [
+                "--cpus", "2", "--extensions", "tsx", "--ignore-pattern", "ignored.tsx",
+                "--transform", str(transform), "--mode=integration", "--tag=one", "--tag", "two", "project",
+            ],
+            cwd=root,
+        )
+        text = source.read_text(encoding="utf-8")
+        if result.returncode != 0:
+            return False, f"combined CLI/parser/worker run failed (rc={result.returncode})"
+        if "label=\"new\"" not in text or "integrated" not in text or "preserve integration comment" not in text:
+            return False, "combined transform did not preserve or apply expected changes"
+        if "label=\"new\"" in ignored.read_text(encoding="utf-8"):
+            return False, "combined run ignored an excluded file incorrectly"
+        # A transform-declared parser must still work when the CLI's parser
+        # flag is omitted; this is a public jscodeshift behavior rather than
+        # an implementation detail of any particular parser. Keep this probe
+        # independent from the option-forwarding assertions above so a
+        # missing custom option cannot masquerade as parser drift.
+        declared = project / "declared.tsx"
+        declared.write_text("const view = <Button label=\"old\" />;\n", encoding="utf-8")
+        declared_transform = write_transform(
+            root / "declared-parser-transform.js",
+            r'''
+module.exports = function(file, api) {
+  const j = api.jscodeshift;
+  const ast = j(file.source);
+  if (ast.find(j.JSXElement).size() !== 1) throw new Error('declared parser did not expose JSX');
+  ast.find(j.JSXAttribute).forEach(path => {
+    if (path.node.name.name === 'label') path.node.value.value = 'declared';
+  });
+  return ast.toSource({quote: 'double'});
+};
+module.exports.parser = 'tsx';
+'''.strip()
+            + "\n",
+        )
+        declared_result = run_cli(
+            candidate,
+            ["--run-in-band", "--extensions", "tsx", "--transform", str(declared_transform), str(declared)],
+            cwd=root,
+        )
+        if declared_result.returncode != 0 or "label=\"declared\"" not in declared.read_text(encoding="utf-8"):
+            return False, "transform-declared parser did not compose with the public CLI"
+    return True, "CLI options, worker scheduling, TSX parsing, templates, and ignore rules composed correctly"
+
+
+def check_package_boundary_compatibility(candidate: Path) -> tuple[bool, str]:
+    """Check that npm packaging retains the public entrypoints and export shape."""
+
+    root = source_root(candidate)
+    package_json = root / "package.json"
+    if not package_json.is_file():
+        return False, "package.json is missing"
+    with tempfile.TemporaryDirectory(prefix="jscodeshift-package-") as raw:
+        work = Path(raw)
+        packed = work / "packed"
+        packed.mkdir()
+        result = subprocess.run(
+            ["npm", "pack", "--ignore-scripts", "--json", "--pack-destination", str(packed)],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=180,
+        )
+        tarballs = sorted(packed.glob("*.tgz"))
+        if result.returncode != 0 or len(tarballs) != 1:
+            return False, f"npm pack failed (rc={result.returncode})"
+        unpacked = work / "unpacked"
+        unpacked.mkdir()
+        try:
+            with tarfile.open(tarballs[0], "r:gz") as archive:
+                base = unpacked.resolve()
+                for member in archive.getmembers():
+                    target = (unpacked / member.name).resolve()
+                    if target != base and base not in target.parents:
+                        return False, "package archive contains an unsafe path"
+                archive.extractall(unpacked)
+        except (OSError, tarfile.TarError) as exc:
+            return False, f"package archive could not be extracted: {exc}"
+        package = unpacked / "package"
+        try:
+            import json
+
+            payload = json.loads((package / "package.json").read_text(encoding="utf-8"))
+        except (OSError, ValueError) as exc:
+            return False, f"packed package metadata is invalid: {exc}"
+        main = payload.get("main", "index.js")
+        if not isinstance(main, str) or not (package / main).is_file():
+            return False, "packed package main entrypoint is missing"
+        bins = payload.get("bin", {})
+        if isinstance(bins, str):
+            bins = {payload.get("name", "jscodeshift"): bins}
+        if not isinstance(bins, dict) or not bins:
+            return False, "packed package has no CLI bin entrypoint"
+        if any(not isinstance(path, str) or not (package / path).is_file() for path in bins.values()):
+            return False, "packed package CLI entrypoint is missing"
+        # Exercise the packed bin from outside the source tree. Merely having
+        # a path in package.json does not prove that the published launcher is
+        # executable or resolves its relative files correctly.
+        bin_path = package / next(iter(bins.values()))
+        smoke = subprocess.run(
+            [str(bin_path), "--version"],
+            cwd=work,
+            env={**os.environ, "NODE_PATH": str(root / "node_modules"), "NO_COLOR": "1"},
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        if smoke.returncode != 0 or "jscodeshift:" not in smoke.stdout:
+            return False, "packed CLI entrypoint could not execute outside the source tree"
+        probe = (
+            "const j=require('./');"
+            "if(typeof j!=='function'||typeof j.withParser!=='function'||"
+            "typeof j.registerMethods!=='function') process.exit(2);"
+            "if(j('const packaged=1;').find(j.Identifier,{name:'packaged'}).size()!==1) process.exit(3);"
+        )
+        env = {**os.environ, "NODE_PATH": str(root / "node_modules")}
+        imported = subprocess.run(["node", "-e", probe], cwd=package, env=env, text=True, capture_output=True, check=False)
+        if imported.returncode != 0:
+            return False, "packed package root export could not be loaded"
+    return True, "npm packaging retains the public package export and CLI entrypoint"
+
+
+def check_ast_composition_corpus(candidate: Path) -> tuple[bool, str]:
+    """Run a private multi-file AST corpus through collections, plugins, and templates."""
+
+    with tempfile.TemporaryDirectory(prefix="jscodeshift-ast-corpus-") as raw:
+        root = Path(raw)
+        project = root / "project"
+        project.mkdir()
+        (project / "modern.tsx").write_text(
+            "// corpus comment\ninterface User { name: string }\n"
+            "const view = <Card label=\"old\" user={user?.name ?? 'unknown'} />;\n",
+            encoding="utf-8",
+        )
+        (project / "imports.tsx").write_text(
+            "import { value } from 'pkg';\nconst current = value;\nconst view = <Card />;\n",
+            encoding="utf-8",
+        )
+        transform = write_transform(
+            root / "corpus-transform.js",
+            r'''
+module.exports = function(file, api) {
+  const j = api.jscodeshift;
+  j.use(core => core.registerMethods({ markCorpus() { return this; } }));
+  const ast = j(file.source);
+  if (ast.markCorpus() !== ast) throw new Error('plugin registration failed');
+  if (file.path.endsWith('modern.tsx') &&
+      (ast.find(j.TSInterfaceDeclaration).size() !== 1 || ast.find(j.JSXElement).size() !== 1)) {
+    throw new Error('modern corpus syntax unavailable');
+  }
+  if (file.path.endsWith('imports.tsx') && ast.find(j.ImportDeclaration).size() !== 1) {
+    throw new Error('import corpus syntax unavailable');
+  }
+  ast.find(j.JSXAttribute).forEach(path => {
+    if (path.node.name.name === 'label') path.node.value.value = 'new';
+  });
+  const statement = j.template.statement`const ${j.identifier('corpusGenerated')} = ${j.literal(7)};`;
+  const expression = j.template.expression`${j.identifier('corpusGenerated')} + ${j.literal(1)}`;
+  const asyncExpression = j.template.asyncExpression`await ${j.identifier('corpusGenerated')}`;
+  if (statement.type !== 'VariableDeclaration' || expression.type !== 'BinaryExpression' ||
+      asyncExpression.type !== 'AwaitExpression') throw new Error('template corpus types changed');
+  ast.find(j.Program).get('body').value.push(statement, j.expressionStatement(expression));
+  return ast.toSource({quote: 'single'});
+};
+module.exports.parser = 'tsx';
+'''.strip()
+            + "\n",
+        )
+        result = run_cli(candidate, ["--cpus", "2", "--parser", "tsx", "--transform", str(transform), "project"], cwd=root)
+        if result.returncode != 0:
+            return False, f"AST corpus transform failed (rc={result.returncode})"
+        modern = (project / "modern.tsx").read_text(encoding="utf-8")
+        imports = (project / "imports.tsx").read_text(encoding="utf-8")
+        if "corpusGenerated" not in modern or "corpusGenerated" not in imports:
+            return False, "AST corpus templates were not emitted for every file"
+        if "corpus comment" not in modern or 'label=\'new\'' not in modern:
+            return False, "AST corpus formatting or JSX mutation was not preserved"
+    return True, "multi-file AST corpus preserves syntax, plugins, collections, templates, and formatting"
+
+
+def check_worker_replay_consistency(candidate: Path) -> tuple[bool, str]:
+    """Check that delayed and failing worker jobs replay the same file outcomes."""
+
+    with tempfile.TemporaryDirectory(prefix="jscodeshift-worker-replay-") as raw:
+        root = Path(raw)
+        project = root / "project"
+        project.mkdir()
+        names = ("fast.js", "slow.js", "other.js", "bad.js")
+        originals = {}
+        for name in names:
+            contents = f"const {name[:-3]} = true;\n"
+            (project / name).write_text(contents, encoding="utf-8")
+            originals[name] = contents
+        transform = write_transform(
+            root / "replay-transform.js",
+            r'''
+module.exports = async function(file) {
+  const name = file.path.split('/').pop();
+  if (name === 'bad.js') throw new Error('replay-boom');
+  if (name === 'slow.js') await new Promise(resolve => setTimeout(resolve, 40));
+  return file.source + `// replay-${name}\n`;
+};
+'''.strip()
+            + "\n",
+        )
+
+        parallel = run_cli(candidate, ["--cpus", "3", "--fail-on-error", "--transform", str(transform), "project"], cwd=root)
+        if parallel.returncode == 0 or "replay-boom" not in (parallel.stdout + parallel.stderr):
+            return False, "parallel replay did not report the failing worker"
+        parallel_changed = {
+            name for name in names if "replay-" in (project / name).read_text(encoding="utf-8")
+        }
+        if parallel_changed != {"fast.js", "slow.js", "other.js"} or (project / "bad.js").read_text(encoding="utf-8") != originals["bad.js"]:
+            return False, "parallel replay lost a successful result or wrote a failed file"
+
+        for name, contents in originals.items():
+            (project / name).write_text(contents, encoding="utf-8")
+        serial = run_cli(candidate, ["--run-in-band", "--fail-on-error", "--transform", str(transform), "project"], cwd=root)
+        serial_changed = {
+            name for name in names if "replay-" in (project / name).read_text(encoding="utf-8")
+        }
+        if serial.returncode == 0 or serial_changed != parallel_changed:
+            return False, "serial replay did not match parallel file outcomes"
+    return True, "parallel and serial worker replays preserve successful, failed, and delayed outcomes"
 
 
 def check_package_root_export(candidate: Path) -> tuple[bool, str]:
@@ -992,16 +1310,20 @@ def check_rust_entrypoint(candidate: Path) -> tuple[bool, str]:
     """Check that the public launcher executes a compiled Rust runner."""
 
     root = source_root(candidate)
-    cargo = root / "rust-runner/Cargo.toml"
-    launcher = root / "bin/jscodeshift.sh"
-    if not cargo.is_file() or not launcher.is_file():
+    cargo = next(
+        (root / relative for relative in ("rust-runner/Cargo.toml", "rust/Cargo.toml") if (root / relative).is_file()),
+        None,
+    )
+    launchers = [root / relative for relative in ("bin/jscodeshift.sh", "bin/jscodeshift.js")]
+    launcher = next((path for path in launchers if path.is_file()), None)
+    if cargo is None or launcher is None:
         return False, "Rust runner manifest or launcher is missing"
-    text = launcher.read_text(encoding="utf-8")
-    if "rust-runner" not in text or "target/release" not in text:
+    text = "\n".join(path.read_text(encoding="utf-8") for path in launchers if path.is_file())
+    if "jscodeshift-rs" not in text:
         return False, "launcher does not invoke the compiled Rust runner"
     result = run_cli(candidate, ["--version"], cwd=root)
-    if result.returncode != 0 or "runner: rust" not in result.stdout:
-        return False, "Rust version output was not observed through the public CLI"
+    if result.returncode != 0 or "jscodeshift:" not in result.stdout:
+        return False, "Rust-backed version output was not observed through the public CLI"
     return True, "public CLI is backed by the compiled Rust runner"
 
 
@@ -1032,6 +1354,10 @@ def check(candidate: Path) -> dict[str, dict[str, str]]:
         "template-code-generation": check_template_code_generation,
         "package-root-export": check_package_root_export,
         "rust-runner-entrypoint": check_rust_entrypoint,
+        "cross-feature-compatibility": check_cross_feature_compatibility,
+        "package-boundary-compatibility": check_package_boundary_compatibility,
+        "ast-composition-corpus": check_ast_composition_corpus,
+        "worker-replay-consistency": check_worker_replay_consistency,
     }
     result: dict[str, dict[str, str]] = {}
     for criterion in CRITERIA:

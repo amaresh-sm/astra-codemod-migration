@@ -84,6 +84,23 @@ def parse_tokens(log_path: Path) -> dict[str, object]:
             event = json.loads(line)
         except json.JSONDecodeError:
             continue
+        if isinstance(event, dict) and event.get("type") == "astra_openhands_metrics":
+            input_value = event.get("input_tokens")
+            output_value = event.get("output_tokens")
+            if input_value is not None or output_value is not None:
+                cached = int(event.get("cache_read_input_tokens") or 0) + int(
+                    event.get("cache_creation_input_tokens") or 0
+                )
+                input_tokens = int(input_value or 0) + cached
+                output_tokens = int(output_value or 0)
+                return {
+                    "input": input_tokens,
+                    "output": output_tokens,
+                    "cached_input": cached,
+                    "total": input_tokens + output_tokens,
+                    "reasoning": event.get("reasoning_tokens"),
+                    "source": "provider-reported",
+                }
         usage = event.get("usage") if isinstance(event, dict) else None
         if not isinstance(usage, dict):
             continue
@@ -130,9 +147,11 @@ def parse_tool_calls(log_path: Path) -> dict[str, object]:
 
 
 def _event_tool_names(event: object) -> list[str]:
-    """Recognize Codex, Claude Code, and OpenAI-compatible structured events."""
+    """Recognize Codex, Claude Code, OpenAI-compatible, and OpenHands events."""
     if not isinstance(event, dict):
         return []
+    if event.get("type") == "openhands_event" and event.get("tool_name"):
+        return [str(event["tool_name"])]
     item = event.get("item")
     if isinstance(item, dict) and isinstance(item.get("type"), str):
         item_type = item["type"]

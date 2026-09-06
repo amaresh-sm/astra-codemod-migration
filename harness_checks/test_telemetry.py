@@ -56,6 +56,35 @@ class TelemetryTests(unittest.TestCase):
             self.assertEqual(telemetry["tool_calls"]["total"], 1)
             self.assertEqual(telemetry["tool_calls"]["by_type"]["read"], 1)
 
+    def test_recognizes_openhands_events_and_metrics(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            log = root / "generation.log"
+            log.write_text(
+                "\n".join(
+                    [
+                        json.dumps({"type": "openhands_event", "event_type": "ActionEvent", "tool_name": "terminal"}),
+                        json.dumps(
+                            {
+                                "type": "astra_openhands_metrics",
+                                "input_tokens": 20,
+                                "output_tokens": 7,
+                                "cache_read_input_tokens": 3,
+                                "reasoning_tokens": 5,
+                            }
+                        ),
+                    ]
+                ),
+                encoding="utf-8",
+            )
+
+            telemetry = collect(root, snapshot_workspace(root), log)
+
+            self.assertEqual(telemetry["tokens"]["total"], 30)
+            self.assertEqual(telemetry["tokens"]["reasoning"], 5)
+            self.assertEqual(telemetry["tool_calls"]["total"], 1)
+            self.assertEqual(telemetry["tool_calls"]["by_type"]["shell"], 1)
+
     def test_marks_plain_logs_as_unavailable(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
