@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import json
 import subprocess
 import tarfile
 import tempfile
@@ -35,6 +36,10 @@ CRITERIA = (
     "template-code-generation",
     "package-root-export",
     "rust-runner-entrypoint",
+    "rust-parser-printer-ownership",
+    "rust-core-collections-ownership",
+    "rust-worker-execution-ownership",
+    "rust-package-api-ownership",
     "cross-feature-compatibility",
     "package-boundary-compatibility",
     "ast-composition-corpus",
@@ -65,6 +70,10 @@ SCENARIO_IDS = {
     "template-code-generation": "jscodeshift.template-code-generation",
     "package-root-export": "jscodeshift.package-root-export",
     "rust-runner-entrypoint": "jscodeshift.rust-runner-entrypoint",
+    "rust-parser-printer-ownership": "jscodeshift.rust-parser-printer-ownership",
+    "rust-core-collections-ownership": "jscodeshift.rust-core-collections-ownership",
+    "rust-worker-execution-ownership": "jscodeshift.rust-worker-execution-ownership",
+    "rust-package-api-ownership": "jscodeshift.rust-package-api-ownership",
     "cross-feature-compatibility": "jscodeshift.cross-feature-compatibility",
     "package-boundary-compatibility": "jscodeshift.package-boundary-compatibility",
     "ast-composition-corpus": "jscodeshift.ast-composition-corpus",
@@ -77,6 +86,17 @@ def source_root(candidate: Path) -> Path:
 
     nested = candidate / "codebase"
     return nested if nested.is_dir() else candidate
+
+
+def runtime_source_root(candidate: Path) -> str:
+    """Return the submitted source root as seen by the verifier CLI process.
+
+    Private checks invoke the public CLI from the read-only candidate mount in
+    the verifier container.  The separate candidate-runtime container is only
+    used for lifecycle commands, so loader guards must target ``/input``.
+    """
+
+    return "/input/candidate/codebase" if (candidate / "codebase").is_dir() else "/input/candidate"
 
 
 def cli_path(candidate: Path) -> Path:
@@ -97,6 +117,7 @@ def run_cli(
     cwd: Path,
     stdin: str | None = None,
     timeout: float = 90.0,
+    extra_env: dict[str, str] | None = None,
 ) -> subprocess.CompletedProcess[str]:
     """Invoke the submitted CLI as a black box."""
 
@@ -115,6 +136,7 @@ def run_cli(
             # This lets the verifier test the public package export without
             # depending on a particular candidate directory layout.
             "JSCODESHIFT_PACKAGE": str(source_root(candidate)),
+            **(extra_env or {}),
         },
     )
 
@@ -1327,6 +1349,212 @@ def check_rust_entrypoint(candidate: Path) -> tuple[bool, str]:
     return True, "public CLI is backed by the compiled Rust runner"
 
 
+def run_with_module_guard(
+    candidate: Path,
+    *,
+    blocked: list[str],
+    source_text: str = "const original = 1;\n",
+    transform_text: str = "module.exports = (file, api) => api.jscodeshift(file.source).toSource();\n",
+    cli_prefix: list[str] | None = None,
+) -> tuple[bool, str]:
+    """Run a public CLI transform while rejecting selected retained JS modules."""
+
+    package = source_root(candidate).resolve()
+    with tempfile.TemporaryDirectory(prefix="jscodeshift-engine-guard-") as raw:
+        root = Path(raw)
+        guard = root / "deny-retained-engine.js"
+        guard.write_text(
+            r'''
+const Module = require('module');
+const path = require('path');
+const root = path.resolve(process.env.JSCODESHIFT_ENGINE_ROOT);
+const blocked = JSON.parse(process.env.JSCODESHIFT_BLOCKED_MODULES || '[]');
+const originalLoad = Module._load;
+function retainedEngine(resolved) {
+  if (typeof resolved !== 'string') return false;
+  const relative = path.relative(root, path.resolve(resolved));
+  return blocked.some(item => item.endsWith('/') ? relative.startsWith(item) : relative === item);
+}
+Module._load = function(request, parent, isMain) {
+  const resolved = Module._resolveFilename(request, parent, isMain);
+  if (retainedEngine(resolved)) {
+    throw new Error(`retained JavaScript jscodeshift engine was loaded: ${resolved}`);
+  }
+  return originalLoad.apply(this, arguments);
+};
+'''.strip()
+            + "\n",
+            encoding="utf-8",
+        )
+        environment = {
+            "NODE_OPTIONS": f"--require={guard}",
+            "JSCODESHIFT_ENGINE_ROOT": runtime_source_root(candidate),
+            "JSCODESHIFT_BLOCKED_MODULES": json.dumps(blocked),
+        }
+        source = root / "source.js"
+        source.write_text(source_text, encoding="utf-8")
+        transform = write_transform(
+            root / "transform.js",
+            transform_text,
+        )
+        result = run_cli(
+            candidate,
+            [*(cli_prefix or ["--run-in-band"]), "--transform", str(transform), str(source)],
+            cwd=root,
+            extra_env=environment,
+        )
+        output = result.stdout + result.stderr
+        if result.returncode != 0:
+            if "retained JavaScript jscodeshift engine was loaded" in output:
+                return False, "runtime executed one of the retained JavaScript modules under test"
+            return False, f"runtime ownership probe failed (rc={result.returncode})"
+    return True, "runtime completed a real JavaScript transform without loading the retained modules under test"
+
+
+def retained_engine_delegation(candidate: Path) -> str | None:
+    """Return a concrete retained-engine delegation found in migration code.
+
+    This is an architecture check, deliberately narrower than a source-file
+    ban: JavaScript transforms remain supported, but the migrated runner must
+    not invoke the original first-party runner, worker, parser, or core
+    implementation to execute them.  A loader guard is still used below for
+    runtime confirmation where process inheritance permits it.
+    """
+
+    root = source_root(candidate)
+    scan_roots = [root / "rust", root / "rust-runner", root / "native"]
+    retained_markers = (
+        "src/Worker.js",
+        "src/Runner.js",
+        "src/core.js",
+        "src/Collection.js",
+        "src/getParser.js",
+        "src/matchNode.js",
+        "src/template.js",
+    )
+    for scan_root in scan_roots:
+        if not scan_root.is_dir():
+            continue
+        for path in scan_root.rglob("*.rs"):
+            text = path.read_text(encoding="utf-8", errors="replace")
+            for marker in retained_markers:
+                if marker in text:
+                    return f"{path.relative_to(root)} delegates to retained {marker}"
+    return None
+
+
+def check_rust_parser_printer_ownership(candidate: Path) -> tuple[bool, str]:
+    """Verify parse/print work does not delegate to retained JS parser modules."""
+
+    delegated = retained_engine_delegation(candidate)
+    if delegated is not None:
+        return False, f"parser/printer ownership failed: {delegated}"
+    passed, detail = run_with_module_guard(
+        candidate,
+        blocked=["src/getParser.js", "parser/", "node_modules/recast/", "node_modules/ast-types/", "node_modules/@babel/parser/", "node_modules/flow-parser/"],
+        source_text="const view = <Panel title=\"before\">{value?.name}</Panel>;\n",
+        transform_text=(
+            "module.exports = (file, api) => {\n"
+            "  const j = api.jscodeshift; const root = j(file.source);\n"
+            "  root.find(j.JSXAttribute, { name: { name: 'title' } }).forEach(p => { p.node.value.value = 'after'; });\n"
+            "  return root.toSource({ quote: 'single' });\n"
+            "};\n"
+        ),
+        cli_prefix=["--run-in-band", "--parser", "tsx"],
+    )
+    return passed, detail if passed else f"parser/printer ownership failed: {detail}"
+
+
+def check_rust_core_collections_ownership(candidate: Path) -> tuple[bool, str]:
+    """Verify the core API, collections, matching, and templates are Rust-owned."""
+
+    delegated = retained_engine_delegation(candidate)
+    if delegated is not None:
+        return False, f"core/collections ownership failed: {delegated}"
+    passed, detail = run_with_module_guard(
+        candidate,
+        blocked=["src/core.js", "src/Collection.js", "src/matchNode.js", "src/template.js", "src/collections/"],
+        transform_text=(
+            "module.exports = (file, api) => {\n"
+            "  const j = api.jscodeshift; const root = j(file.source);\n"
+            "  if (root.find(j.Identifier, { name: 'original' }).size() !== 1) throw new Error('collection find failed');\n"
+            "  root.find(j.Identifier, { name: 'original' }).replaceWith(() => j.identifier('renamed'));\n"
+            "  root.find(j.Program).get('body').push(j.template.statement`const generated = renamed;`);\n"
+            "  return root.toSource();\n"
+            "};\n"
+        ),
+    )
+    return passed, detail if passed else f"core/collections ownership failed: {detail}"
+
+
+def check_rust_worker_execution_ownership(candidate: Path) -> tuple[bool, str]:
+    """Verify the public CLI does not delegate scheduling or transform work to old workers."""
+
+    delegated = retained_engine_delegation(candidate)
+    if delegated is not None:
+        return False, f"worker execution ownership failed: {delegated}"
+    passed, detail = run_with_module_guard(
+        candidate,
+        blocked=["src/Runner.js", "src/Worker.js"],
+        cli_prefix=["--cpus", "2"],
+    )
+    return passed, detail if passed else f"worker execution ownership failed: {detail}"
+
+
+def check_rust_package_api_ownership(candidate: Path) -> tuple[bool, str]:
+    """Verify package-root helpers are backed by the migrated implementation."""
+
+    package = source_root(candidate).resolve()
+    with tempfile.TemporaryDirectory(prefix="jscodeshift-package-guard-") as raw:
+        root = Path(raw)
+        guard = root / "deny-retained-package-engine.js"
+        blocked = ["src/core.js", "src/Collection.js", "src/getParser.js", "src/matchNode.js", "src/template.js", "src/collections/", "parser/"]
+        guard.write_text(
+            r'''
+const Module = require('module');
+const path = require('path');
+const root = path.resolve(process.env.JSCODESHIFT_ENGINE_ROOT);
+const blocked = JSON.parse(process.env.JSCODESHIFT_BLOCKED_MODULES || '[]');
+const originalLoad = Module._load;
+Module._load = function(request, parent, isMain) {
+  const resolved = Module._resolveFilename(request, parent, isMain);
+  if (typeof resolved === 'string') {
+    const relative = path.relative(root, path.resolve(resolved));
+    if (blocked.some(item => item.endsWith('/') ? relative.startsWith(item) : relative === item)) {
+      throw new Error(`retained JavaScript jscodeshift engine was loaded: ${resolved}`);
+    }
+  }
+  return originalLoad.apply(this, arguments);
+};
+'''.strip()
+            + "\n",
+            encoding="utf-8",
+        )
+        environment = {
+            **os.environ,
+            "NODE_OPTIONS": f"--require={guard}",
+            "JSCODESHIFT_ENGINE_ROOT": str(package),
+            "JSCODESHIFT_BLOCKED_MODULES": json.dumps(blocked),
+            "JSCODESHIFT_PACKAGE": str(package),
+        }
+
+        export_probe = "const j=require(process.env.JSCODESHIFT_PACKAGE); if(typeof j !== 'function') process.exit(2); j('const x=1;');"
+        exported = subprocess.run(
+            ["node", "-e", export_probe],
+            cwd=package,
+            text=True,
+            capture_output=True,
+            check=False,
+            env=environment,
+        )
+        export_output = exported.stdout + exported.stderr
+        if exported.returncode != 0 and "retained JavaScript jscodeshift engine was loaded" in export_output:
+            return False, "package-root export executes retained JavaScript parser, core, collection, or template code"
+        if exported.returncode != 0:
+            return False, "package-root export is not backed by the migrated runtime"
+    return True, "package-root helpers execute without loading retained first-party JavaScript engine modules"
+
+
 def check(candidate: Path) -> dict[str, dict[str, str]]:
     """Run all private criteria and retain concise diagnostic evidence."""
 
@@ -1354,6 +1582,10 @@ def check(candidate: Path) -> dict[str, dict[str, str]]:
         "template-code-generation": check_template_code_generation,
         "package-root-export": check_package_root_export,
         "rust-runner-entrypoint": check_rust_entrypoint,
+        "rust-parser-printer-ownership": check_rust_parser_printer_ownership,
+        "rust-core-collections-ownership": check_rust_core_collections_ownership,
+        "rust-worker-execution-ownership": check_rust_worker_execution_ownership,
+        "rust-package-api-ownership": check_rust_package_api_ownership,
         "cross-feature-compatibility": check_cross_feature_compatibility,
         "package-boundary-compatibility": check_package_boundary_compatibility,
         "ast-composition-corpus": check_ast_composition_corpus,

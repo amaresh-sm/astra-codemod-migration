@@ -13,7 +13,9 @@ CRITERIA = (
     "atomic-write-on-error", "parallel-result-determinism", "utf8-source-preservation",
     "ast-collections-and-builders", "ast-formatting-and-comments", "ast-modern-syntax",
     "core-api-surface", "collection-extensions", "template-code-generation", "package-root-export",
-    "rust-runner-entrypoint",
+    "rust-runner-entrypoint", "rust-parser-printer-ownership", "rust-core-collections-ownership",
+    "rust-worker-execution-ownership", "rust-package-api-ownership", "cross-feature-compatibility",
+    "package-boundary-compatibility", "ast-composition-corpus", "worker-replay-consistency",
 )
 
 

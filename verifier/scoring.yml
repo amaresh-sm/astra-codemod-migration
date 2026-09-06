@@ -1,84 +1,96 @@
 scale: normalized_1
 criteria:
   - id: cli-transform-api
-    weight: 0.03
+    weight: 0.0176470588
     blocked_policy: zero
   - id: parser-and-transform-variants
-    weight: 0.025
+    weight: 0.0147058824
     blocked_policy: zero
   - id: file-selection-and-stdin
-    weight: 0.045
+    weight: 0.0205882353
     blocked_policy: zero
   - id: dry-run-print-and-reporting
-    weight: 0.03
+    weight: 0.0176470588
     blocked_policy: zero
   - id: parallel-workers-and-results
-    weight: 0.035
+    weight: 0.0205882353
     blocked_policy: zero
   - id: failure-and-exit-contract
-    weight: 0.03
+    weight: 0.0176470588
     blocked_policy: zero
   - id: cli-surface-and-identity
-    weight: 0.035
+    weight: 0.0117647059
     blocked_policy: zero
   - id: silent-output-contract
-    weight: 0.03
+    weight: 0.0176470588
     blocked_policy: zero
   - id: symlink-boundary
-    weight: 0.035
+    weight: 0.0205882353
     blocked_policy: zero
   - id: parallel-failure-recovery
-    weight: 0.04
+    weight: 0.0176470588
     blocked_policy: zero
   - id: lifecycle-manifest
-    weight: 0.025
+    weight: 0.0147058824
     blocked_policy: zero
   - id: custom-option-forwarding
-    weight: 0.03
+    weight: 0.0176470588
     blocked_policy: zero
   - id: atomic-write-on-error
-    weight: 0.03
+    weight: 0.0176470588
     blocked_policy: zero
   - id: parallel-result-determinism
-    weight: 0.03
+    weight: 0.0176470588
     blocked_policy: zero
   - id: utf8-source-preservation
-    weight: 0.03
+    weight: 0.0176470588
     blocked_policy: zero
   - id: ast-collections-and-builders
-    weight: 0.03
+    weight: 0.0176470588
     blocked_policy: zero
   - id: ast-formatting-and-comments
-    weight: 0.03
+    weight: 0.0176470588
     blocked_policy: zero
   - id: ast-modern-syntax
-    weight: 0.03
+    weight: 0.0176470588
     blocked_policy: zero
   - id: core-api-surface
-    weight: 0.06
+    weight: 0.0235294118
     blocked_policy: zero
   - id: collection-extensions
-    weight: 0.07
+    weight: 0.0235294118
     blocked_policy: zero
   - id: template-code-generation
-    weight: 0.06
+    weight: 0.0235294118
     blocked_policy: zero
   - id: package-root-export
-    weight: 0.04
+    weight: 0.0235294118
     blocked_policy: zero
   - id: rust-runner-entrypoint
-    weight: 0.015
+    weight: 0.0088235294
+    blocked_policy: zero
+  - id: rust-parser-printer-ownership
+    weight: 0.15
+    blocked_policy: zero
+  - id: rust-core-collections-ownership
+    weight: 0.15
+    blocked_policy: zero
+  - id: rust-worker-execution-ownership
+    weight: 0.10
+    blocked_policy: zero
+  - id: rust-package-api-ownership
+    weight: 0.10
     blocked_policy: zero
 
   - id: cross-feature-compatibility
-    weight: 0.06
+    weight: 0.0235294118
     blocked_policy: zero
   - id: package-boundary-compatibility
-    weight: 0.04
+    weight: 0.0176470588
     blocked_policy: zero
   - id: ast-composition-corpus
-    weight: 0.045
+    weight: 0.0176470588
     blocked_policy: zero
   - id: worker-replay-consistency
-    weight: 0.04
+    weight: 0.0235294118
     blocked_policy: zero
