@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import json
+import hashlib
 import shlex
 import shutil
 import subprocess
@@ -38,10 +39,24 @@ CRITERIA = (
     "template-code-generation",
     "package-root-export",
     "rust-runner-entrypoint",
-    "rust-parser-printer-ownership",
+    "rust-parser-babel-ownership",
+    "rust-parser-typescript-ownership",
+    "rust-parser-tsx-ownership",
+    "rust-printer-comments-ownership",
     "rust-core-collections-ownership",
-    "rust-worker-execution-ownership",
-    "rust-package-api-ownership",
+    "rust-core-builders-ownership",
+    "rust-core-templates-ownership",
+    "rust-core-nodepath-ownership",
+    "rust-edge-ast-ownership",
+    "rust-edge-cli-ownership",
+    "rust-worker-multifile-ownership",
+    "rust-worker-parallel-ownership",
+    "rust-worker-failure-ownership",
+    "rust-worker-determinism-ownership",
+    "rust-package-root-ownership",
+    "rust-package-clean-pack-ownership",
+    "rust-package-guard-ownership",
+    "rust-legacy-engine-boundary",
     "cross-feature-compatibility",
     "package-boundary-compatibility",
     "ast-composition-corpus",
@@ -72,10 +87,24 @@ SCENARIO_IDS = {
     "template-code-generation": "jscodeshift.template-code-generation",
     "package-root-export": "jscodeshift.package-root-export",
     "rust-runner-entrypoint": "jscodeshift.rust-runner-entrypoint",
-    "rust-parser-printer-ownership": "jscodeshift.rust-parser-printer-ownership",
+    "rust-parser-babel-ownership": "jscodeshift.rust-parser-babel-ownership",
+    "rust-parser-typescript-ownership": "jscodeshift.rust-parser-typescript-ownership",
+    "rust-parser-tsx-ownership": "jscodeshift.rust-parser-tsx-ownership",
+    "rust-printer-comments-ownership": "jscodeshift.rust-printer-comments-ownership",
     "rust-core-collections-ownership": "jscodeshift.rust-core-collections-ownership",
-    "rust-worker-execution-ownership": "jscodeshift.rust-worker-execution-ownership",
-    "rust-package-api-ownership": "jscodeshift.rust-package-api-ownership",
+    "rust-core-builders-ownership": "jscodeshift.rust-core-builders-ownership",
+    "rust-core-templates-ownership": "jscodeshift.rust-core-templates-ownership",
+    "rust-core-nodepath-ownership": "jscodeshift.rust-core-nodepath-ownership",
+    "rust-edge-ast-ownership": "jscodeshift.rust-edge-ast-ownership",
+    "rust-edge-cli-ownership": "jscodeshift.rust-edge-cli-ownership",
+    "rust-worker-multifile-ownership": "jscodeshift.rust-worker-multifile-ownership",
+    "rust-worker-parallel-ownership": "jscodeshift.rust-worker-parallel-ownership",
+    "rust-worker-failure-ownership": "jscodeshift.rust-worker-failure-ownership",
+    "rust-worker-determinism-ownership": "jscodeshift.rust-worker-determinism-ownership",
+    "rust-package-root-ownership": "jscodeshift.rust-package-root-ownership",
+    "rust-package-clean-pack-ownership": "jscodeshift.rust-package-clean-pack-ownership",
+    "rust-package-guard-ownership": "jscodeshift.rust-package-guard-ownership",
+    "rust-legacy-engine-boundary": "jscodeshift.rust-legacy-engine-boundary",
     "cross-feature-compatibility": "jscodeshift.cross-feature-compatibility",
     "package-boundary-compatibility": "jscodeshift.package-boundary-compatibility",
     "ast-composition-corpus": "jscodeshift.ast-composition-corpus",
@@ -88,6 +117,119 @@ def source_root(candidate: Path) -> Path:
 
     nested = candidate / "codebase"
     return nested if nested.is_dir() else candidate
+
+
+ENGINE_SOURCE_SUFFIXES = frozenset({".cjs", ".js", ".mjs", ".ts", ".tsx"})
+ENGINE_EXCLUDED_PARTS = frozenset({".git", "node_modules", "target", ".cargo-home"})
+
+
+def public_source_root() -> Path | None:
+    """Locate the immutable public source snapshot mounted for verification."""
+
+    candidates = []
+    configured = os.environ.get("ASTRA_PUBLIC_ROOT")
+    if configured:
+        candidates.append(Path(configured))
+    candidates.extend((Path("/input/public/codebase"), Path("/input/public")))
+    for candidate in candidates:
+        if candidate.is_dir() and any((candidate / name).exists() for name in ("src", "parser", "index.js")):
+            return candidate
+    return None
+
+
+def file_digest(path: Path) -> str | None:
+    """Return a stable digest for one source file, or ``None`` if unreadable."""
+
+    try:
+        return hashlib.sha256(path.read_bytes()).hexdigest()
+    except OSError:
+        return None
+
+
+def legacy_engine_paths(candidate: Path) -> set[str]:
+    """Return retained-engine paths to quarantine in a staged candidate.
+
+    The public source snapshot supplies content fingerprints, so an upstream
+    JavaScript engine copied to a different filename is still quarantined.
+    Directory fallbacks preserve compatibility with local verifier tests where
+    the public mount is unavailable.  This function intentionally ignores Rust
+    source text, comments, and filenames when deciding ownership.
+    """
+
+    package = source_root(candidate)
+    paths: set[str] = set()
+    for relative in (
+        "src",
+        "parser",
+        "node_modules/recast",
+        "node_modules/ast-types",
+        "node_modules/@babel/parser",
+        "node_modules/flow-parser",
+    ):
+        path = package / relative
+        if path.exists() or path.is_symlink():
+            paths.add(relative)
+
+    public_root = public_source_root()
+    if public_root is None:
+        return paths
+
+    fingerprints: set[str] = set()
+    for path in public_root.rglob("*"):
+        if not path.is_file() or path.suffix.lower() not in ENGINE_SOURCE_SUFFIXES:
+            continue
+        if ENGINE_EXCLUDED_PARTS.intersection(path.relative_to(public_root).parts):
+            continue
+        digest = file_digest(path)
+        if digest:
+            fingerprints.add(digest)
+
+    if not fingerprints:
+        return paths
+    for path in package.rglob("*"):
+        if not path.is_file() or path.suffix.lower() not in ENGINE_SOURCE_SUFFIXES:
+            continue
+        relative = path.relative_to(package)
+        if ENGINE_EXCLUDED_PARTS.intersection(relative.parts):
+            continue
+        if file_digest(path) in fingerprints:
+            paths.add(relative.as_posix())
+    return paths
+
+
+def legacy_engine_module_patterns(candidate: Path) -> list[str]:
+    """Convert quarantined paths into module-loader relative patterns."""
+
+    package = source_root(candidate)
+    patterns: list[str] = []
+    for relative in legacy_engine_paths(candidate):
+        path = package / relative
+        patterns.append(relative + "/" if path.is_dir() else relative)
+    return sorted(patterns)
+
+
+def retained_legacy_engine_copies(candidate: Path) -> set[str]:
+    """Find exact copies of the public first-party JS engine retained in a candidate.
+
+    The migration contract permits a small compatibility bridge, but not a
+    second copy of the original implementation hidden under ``src``, ``dist``,
+    or a renamed parser/worker path. Content fingerprints make this independent
+    of the candidate's chosen filenames. If the public snapshot is unavailable,
+    return no static findings and let the runtime quarantine probes decide.
+    """
+
+    if public_source_root() is None:
+        return set()
+    package = source_root(candidate)
+    retained: set[str] = set()
+    for relative in legacy_engine_paths(candidate):
+        path = package / relative
+        if not path.is_file() or path.suffix.lower() not in ENGINE_SOURCE_SUFFIXES:
+            continue
+        if relative.startswith("sample/"):
+            continue
+        retained.add(relative)
+    return retained
 
 
 def runtime_source_root(candidate: Path) -> str:
@@ -1331,19 +1473,44 @@ def check_package_root_export(candidate: Path) -> tuple[bool, str]:
 
 
 def check_rust_entrypoint(candidate: Path) -> tuple[bool, str]:
-    """Check that the public launcher executes a compiled Rust runner."""
+    """Check that the public launcher executes a compiled Rust runner.
+
+    This intentionally checks the migration boundary, not a prescribed
+    directory layout or executable name.  A candidate may keep its Cargo
+    package at the source root, in ``rust/``, or in another small first-party
+    subdirectory and may name the executable ``jscodeshift`` rather than
+    ``jscodeshift-rs``.
+    """
 
     root = source_root(candidate)
-    cargo = next(
-        (root / relative for relative in ("rust-runner/Cargo.toml", "rust/Cargo.toml") if (root / relative).is_file()),
-        None,
-    )
+    ignored_parts = {"node_modules", "target", ".git", ".cargo-home"}
+    cargo_manifests = [
+        path
+        for path in root.rglob("Cargo.toml")
+        if not any(part in ignored_parts for part in path.relative_to(root).parts)
+        and len(path.relative_to(root).parts) <= 3
+    ]
     launchers = [root / relative for relative in ("bin/jscodeshift.sh", "bin/jscodeshift.js")]
     launcher = next((path for path in launchers if path.is_file()), None)
-    if cargo is None or launcher is None:
+    if not cargo_manifests or launcher is None:
         return False, "Rust runner manifest or launcher is missing"
+
+    has_rust_source = any(any(manifest.parent.rglob("*.rs")) for manifest in cargo_manifests)
+    if not has_rust_source:
+        return False, "Rust runner manifest has no Rust source files"
+
     text = "\n".join(path.read_text(encoding="utf-8") for path in launchers if path.is_file())
-    if "jscodeshift-rs" not in text:
+    native_launcher_signals = (
+        "JSCODESHIFT_BINARY",
+        "cargo run",
+        "target/release",
+        "target/debug",
+        "'target', 'release'",
+        "'target', 'debug'",
+        '"target", "release"',
+        '"target", "debug"',
+    )
+    if not any(signal in text for signal in native_launcher_signals):
         return False, "launcher does not invoke the compiled Rust runner"
     result = run_cli(candidate, ["--version"], cwd=root)
     if result.returncode != 0 or "jscodeshift:" not in result.stdout:
@@ -1457,14 +1624,12 @@ def run_with_engine_quarantine(
             shutil.copytree(candidate, staged, symlinks=True)
 
         package = source_root(staged)
-        for relative in (
-            "src",
-            "parser",
-            "node_modules/recast",
-            "node_modules/ast-types",
-            "node_modules/@babel/parser",
-            "node_modules/flow-parser",
-        ):
+        # Quarantine by immutable source fingerprints where available, with
+        # the legacy directory list as a fallback for isolated unit tests.
+        # This allows a migrated implementation to choose any Rust layout or
+        # filename while still preventing renamed copies of the old engine
+        # from being used.
+        for relative in sorted(legacy_engine_paths(candidate), key=lambda value: (value.count("/"), value), reverse=True):
             path = package / relative
             if not path.exists() and not path.is_symlink():
                 continue
@@ -1473,9 +1638,12 @@ def run_with_engine_quarantine(
         source = root / "source.js"
         source.write_text(source_text, encoding="utf-8")
         transform = write_transform(root / "transform.js", transform_text)
+        effective_prefix = list(cli_prefix or ["--run-in-band"])
+        if "--fail-on-error" not in effective_prefix:
+            effective_prefix.append("--fail-on-error")
         result = run_cli(
             staged,
-            [*(cli_prefix or ["--run-in-band"]), "--transform", str(transform), str(source)],
+            [*effective_prefix, "--transform", str(transform), str(source)],
             cwd=root,
         )
         if result.returncode != 0:
@@ -1486,48 +1654,137 @@ def run_with_engine_quarantine(
     return True, "runtime completed with the original first-party JS engine quarantined"
 
 
-def retained_engine_delegation(candidate: Path) -> str | None:
-    """Return a concrete retained-engine delegation found in migration code.
+def run_with_engine_quarantine_files(
+    candidate: Path,
+    *,
+    source_files: dict[str, str],
+    transform_text: str,
+    cli_prefix: list[str] | None = None,
+    target: str = "project",
+    stdin_paths: bool = False,
+) -> tuple[subprocess.CompletedProcess[str], dict[str, str]]:
+    """Run a multi-file probe after quarantining copied first-party JS code."""
 
-    This is an architecture check, deliberately narrower than a source-file
-    ban: JavaScript transforms remain supported, but the migrated runner must
-    not invoke the original first-party runner, worker, parser, or core
-    implementation to execute them.  A loader guard is still used below for
-    runtime confirmation where process inheritance permits it.
-    """
+    with tempfile.TemporaryDirectory(prefix="jscodeshift-engine-quarantine-files-") as raw:
+        root = Path(raw)
+        staged = root / "candidate"
+        try:
+            shutil.copytree(candidate, staged, symlinks=True, copy_function=os.link)
+        except OSError:
+            if staged.exists():
+                shutil.rmtree(staged)
+            shutil.copytree(candidate, staged, symlinks=True)
 
-    root = source_root(candidate)
-    scan_roots = [root / "rust", root / "rust-runner", root / "native"]
-    retained_markers = (
-        # A Rust worker that launches this bridge is still delegating AST and
-        # transform execution to the original JavaScript engine: the bridge
-        # imports src/getParser.js and src/core.js before invoking transforms.
-        "worker_bridge.js",
-        "src/Worker.js",
-        "src/Runner.js",
-        "src/core.js",
-        "src/Collection.js",
-        "src/getParser.js",
-        "src/matchNode.js",
-        "src/template.js",
+        package = source_root(staged)
+        for relative in sorted(legacy_engine_paths(candidate), key=lambda value: (value.count("/"), value), reverse=True):
+            path = package / relative
+            if path.exists() or path.is_symlink():
+                path.rename(path.with_name(path.name + ".engine-quarantined"))
+
+        for relative, content in source_files.items():
+            path = root / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(content, encoding="utf-8")
+        transform = write_transform(root / "transform.js", transform_text)
+        args = [*(cli_prefix or ["--run-in-band"]), "--transform", str(transform), str(root / target)]
+        stdin = None
+        if stdin_paths:
+            stdin = "\n".join(str(root / relative) for relative in source_files) + "\n"
+            args = [arg for arg in args if arg != str(root / target)]
+        result = run_cli(staged, args, cwd=root, stdin=stdin)
+        contents = {}
+        for relative in source_files:
+            path = root / relative
+            contents[relative] = path.read_text(encoding="utf-8") if path.exists() else ""
+        return result, contents
+
+
+def ownership_probe(
+    candidate: Path,
+    *,
+    label: str,
+    source_files: dict[str, str],
+    transform_text: str,
+    marker: str,
+    cli_prefix: list[str] | None = None,
+) -> tuple[bool, str]:
+    """Run one independent ownership probe and report only its own boundary."""
+
+    result, contents = run_with_engine_quarantine_files(
+        candidate,
+        source_files=source_files,
+        transform_text=transform_text,
+        cli_prefix=cli_prefix,
     )
-    for scan_root in scan_roots:
-        if not scan_root.is_dir():
-            continue
-        for path in scan_root.rglob("*.rs"):
-            text = path.read_text(encoding="utf-8", errors="replace")
-            for marker in retained_markers:
-                if marker in text:
-                    return f"{path.relative_to(root)} delegates to retained {marker}"
-    return None
+    if result.returncode != 0:
+        detail = (result.stdout + result.stderr).strip().splitlines()
+        suffix = f": {detail[-1]}" if detail else ""
+        return False, f"{label} ownership probe failed (rc={result.returncode}){suffix}"
+    if not contents or not all(marker in content for content in contents.values()):
+        return False, f"{label} ownership probe did not produce the expected native result"
+    return True, f"{label} completed with the retained JS engine quarantined"
+
+
+def check_rust_parser_babel_ownership(candidate: Path) -> tuple[bool, str]:
+    return ownership_probe(
+        candidate,
+        label="Babel parser/printer",
+        source_files={"project/babel.js": "const value = 1;\n"},
+        transform_text="module.exports = (file, api) => api.jscodeshift(file.source).toSource() + '\\n// babel-owned';\n",
+        marker="babel-owned",
+    )
+
+
+def check_rust_parser_typescript_ownership(candidate: Path) -> tuple[bool, str]:
+    return ownership_probe(
+        candidate,
+        label="TypeScript parser",
+        source_files={"project/types.ts": "type Value = string; const value: Value = 'ok';\n"},
+        transform_text=(
+            "module.exports = (file, api) => { const j = api.jscodeshift; const root = j(file.source); "
+            "if (root.find(j.TSTypeAliasDeclaration).size() !== 1) throw new Error('TS parser failed'); "
+            "return file.source + '\\n// typescript-owned'; };\n"
+        ),
+        marker="typescript-owned",
+        cli_prefix=["--run-in-band", "--parser", "ts"],
+    )
+
+
+def check_rust_parser_tsx_ownership(candidate: Path) -> tuple[bool, str]:
+    return ownership_probe(
+        candidate,
+        label="TSX parser",
+        source_files={"project/view.tsx": "const view = <Panel title=\"before\">{value?.name}</Panel>;\n"},
+        transform_text=(
+            "module.exports = (file, api) => { const j = api.jscodeshift; const root = j(file.source); "
+            "if (root.find(j.JSXElement).size() !== 1) throw new Error('TSX parser failed'); "
+            "return file.source + '\\n// tsx-owned'; };\n"
+        ),
+        marker="tsx-owned",
+        cli_prefix=["--run-in-band", "--parser", "tsx"],
+    )
+
+
+def check_rust_printer_comments_ownership(candidate: Path) -> tuple[bool, str]:
+    return ownership_probe(
+        candidate,
+        label="comment-preserving printer",
+        source_files={"project/comments.js": "// preserve this comment\nconst value = \"old\";\n"},
+        transform_text=(
+            "module.exports = (file, api) => { const j = api.jscodeshift; const root = j(file.source); "
+            "root.find(j.Literal, {value:'old'}).forEach(p => {p.node.value='new';}); "
+            "return root.toSource({quote:'single'}) + '\\n// printer-owned'; };\n"
+        ),
+        marker="printer-owned",
+    )
 
 
 def check_rust_parser_printer_ownership(candidate: Path) -> tuple[bool, str]:
     """Verify parse/print work does not delegate to retained JS parser modules."""
 
-    delegated = retained_engine_delegation(candidate)
-    if delegated is not None:
-        return False, f"parser/printer ownership failed: {delegated}"
+    retained = retained_legacy_engine_copies(candidate)
+    if retained:
+        return False, "parser/printer ownership failed: retained copies of the public JS engine: " + ", ".join(sorted(retained)[:8])
     passed, detail = run_with_engine_quarantine(
         candidate,
         source_text="const view = <Panel title=\"before\">{value?.name}</Panel>;\n",
@@ -1546,9 +1803,9 @@ def check_rust_parser_printer_ownership(candidate: Path) -> tuple[bool, str]:
 def check_rust_core_collections_ownership(candidate: Path) -> tuple[bool, str]:
     """Verify the core API, collections, matching, and templates are Rust-owned."""
 
-    delegated = retained_engine_delegation(candidate)
-    if delegated is not None:
-        return False, f"core/collections ownership failed: {delegated}"
+    retained = retained_legacy_engine_copies(candidate)
+    if retained:
+        return False, "core/collections ownership failed: retained copies of the public JS engine: " + ", ".join(sorted(retained)[:8])
     passed, detail = run_with_engine_quarantine(
         candidate,
         transform_text=(
@@ -1564,12 +1821,188 @@ def check_rust_core_collections_ownership(candidate: Path) -> tuple[bool, str]:
     return passed, detail if passed else f"core/collections ownership failed: {detail}"
 
 
+def check_rust_core_builders_ownership(candidate: Path) -> tuple[bool, str]:
+    return ownership_probe(
+        candidate,
+        label="core builders",
+        source_files={"project/builders.js": "const existing = 1;\n"},
+        transform_text=(
+            "module.exports = (file, api) => { const j = api.jscodeshift; const root = j(file.source); "
+            "root.find(j.Program).get('body').value.push(j.variableDeclaration('const',[j.variableDeclarator(j.identifier('builderOwned'),j.literal(1))])); "
+            "return root.toSource(); };\n"
+        ),
+        marker="builderOwned",
+    )
+
+
+def check_rust_core_templates_ownership(candidate: Path) -> tuple[bool, str]:
+    return ownership_probe(
+        candidate,
+        label="template generation",
+        source_files={"project/templates.js": "const existing = 1;\n"},
+        transform_text=(
+            "module.exports = (file, api) => { const j = api.jscodeshift; const root = j(file.source); "
+            "const quasi = ['const templateOwned = 42;']; quasi.raw = quasi; "
+            "root.find(j.Program).get('body').value.push(j.template.statement(quasi)); return root.toSource(); };\n"
+        ),
+        marker="templateOwned",
+    )
+
+
+def check_rust_core_nodepath_ownership(candidate: Path) -> tuple[bool, str]:
+    return ownership_probe(
+        candidate,
+        label="NodePath accessors",
+        source_files={"project/nodepath.js": "const pathOwned = 1;\n"},
+        transform_text=(
+            "module.exports = (file, api) => { const j = api.jscodeshift; const root = j(file.source); "
+            "const paths = root.find(j.VariableDeclarator).paths(); if (paths.length !== 1 || paths[0].get('id').value.name !== 'pathOwned') throw new Error('NodePath failed'); "
+            "return file.source + '\\n// nodepath-owned'; };\n"
+        ),
+        marker="nodepath-owned",
+    )
+
+
+def check_rust_edge_ast_ownership(candidate: Path) -> tuple[bool, str]:
+    """Exercise optional chaining, nullish coalescing, TS types, and TSX together."""
+
+    return ownership_probe(
+        candidate,
+        label="edge-case AST syntax",
+        source_files={
+            "project/edge.tsx": (
+                "type Item = { value: string };\n"
+                "const render = (item?: Item) => <Box data-value={item?.value ?? 'fallback'} />;\n"
+            )
+        },
+        transform_text=(
+            "module.exports = (file, api) => { const j = api.jscodeshift; const root = j(file.source); "
+            "if (root.find(j.JSXElement).size() !== 1 || root.find(j.TSTypeAliasDeclaration).size() !== 1) "
+            "throw new Error('edge AST syntax failed'); return file.source + '\\n// edge-ast-owned'; };\n"
+        ),
+        marker="edge-ast-owned",
+        cli_prefix=["--run-in-band", "--parser", "tsx"],
+    )
+
+
+def check_rust_edge_cli_ownership(candidate: Path) -> tuple[bool, str]:
+    """Exercise stdin file discovery and extension filtering independently."""
+
+    result, contents = run_with_engine_quarantine_files(
+        candidate,
+        source_files={
+            "project/edge.js": "const edge = 1;\n",
+            "project/ignored.txt": "not a transform input\n",
+        },
+        transform_text="module.exports = file => file.source + '\\n// edge-cli-owned';\n",
+        cli_prefix=["--run-in-band", "--stdin", "--extensions", "js"],
+        stdin_paths=True,
+    )
+    if result.returncode != 0:
+        detail = (result.stdout + result.stderr).strip().splitlines()
+        suffix = f": {detail[-1]}" if detail else ""
+        return False, f"edge-case CLI ownership probe failed (rc={result.returncode}){suffix}"
+    if "edge-cli-owned" not in contents["project/edge.js"] or "edge-cli-owned" in contents["project/ignored.txt"]:
+        return False, "edge-case CLI ownership probe did not preserve stdin and extension boundaries"
+    return True, "stdin and extension filtering completed with the retained JS engine quarantined"
+
+
+def _worker_files() -> dict[str, str]:
+    return {f"project/file-{index}.js": f"const workerValue{index} = {index};\n" for index in range(6)}
+
+
+def check_rust_worker_multifile_ownership(candidate: Path) -> tuple[bool, str]:
+    return ownership_probe(
+        candidate,
+        label="multi-file worker execution",
+        source_files=_worker_files(),
+        transform_text="module.exports = file => file.source + '\\n// multifile-owned';\n",
+        marker="multifile-owned",
+        cli_prefix=["--cpus", "1"],
+    )
+
+
+def check_rust_worker_parallel_ownership(candidate: Path) -> tuple[bool, str]:
+    return ownership_probe(
+        candidate,
+        label="parallel worker execution",
+        source_files=_worker_files(),
+        transform_text="module.exports = file => file.source + '\\n// parallel-owned';\n",
+        marker="parallel-owned",
+        cli_prefix=["--cpus", "2"],
+    )
+
+
+def check_rust_worker_failure_ownership(candidate: Path) -> tuple[bool, str]:
+    files = {"project/good-a.js": "const a = 1;\n", "project/bad.js": "const bad = 1;\n", "project/good-b.js": "const b = 1;\n"}
+    result, contents = run_with_engine_quarantine_files(
+        candidate,
+        source_files=files,
+        transform_text=(
+            "module.exports = file => { if (file.path.endsWith('bad.js')) throw new Error('intentional worker failure'); "
+            "return file.source + '\\n// recovery-owned'; };\n"
+        ),
+        cli_prefix=["--cpus", "2", "--fail-on-error"],
+    )
+    good = all("recovery-owned" in contents[name] for name in ("project/good-a.js", "project/good-b.js"))
+    if result.returncode == 0 or not good:
+        return False, f"worker failure recovery ownership failed (rc={result.returncode})"
+    return True, "parallel worker failure recovery preserved successful files with the JS engine quarantined"
+
+
+def check_rust_worker_determinism_ownership(candidate: Path) -> tuple[bool, str]:
+    files = _worker_files()
+    transform = "module.exports = file => file.source + '\\n// deterministic-owned';\n"
+    first_result, first = run_with_engine_quarantine_files(candidate, source_files=files, transform_text=transform, cli_prefix=["--cpus", "2"])
+    second_result, second = run_with_engine_quarantine_files(candidate, source_files=files, transform_text=transform, cli_prefix=["--cpus", "2"])
+    if first_result.returncode != 0 or second_result.returncode != 0 or first != second:
+        return False, "parallel worker replay changed outcomes under the ownership quarantine"
+    return True, "parallel worker replay was deterministic with the JS engine quarantined"
+
+
+def check_rust_package_root_ownership(candidate: Path) -> tuple[bool, str]:
+    package = source_root(candidate).resolve()
+    probe = (
+        "const j=require(process.env.JSCODESHIFT_PACKAGE);"
+        "if(typeof j!=='function'||typeof j.withParser!=='function'||typeof j.template!=='function') process.exit(2);"
+        "const root=j('const value=1;'); if(!root.find(j.Identifier).size()) process.exit(3);"
+        "if(typeof j.template.statement!=='function') process.exit(4);"
+    )
+    result = subprocess.run(
+        ["node", "-e", probe],
+        cwd=package,
+        text=True,
+        capture_output=True,
+        check=False,
+        env={**os.environ, "JSCODESHIFT_PACKAGE": str(package)},
+    )
+    if result.returncode != 0:
+        return False, "package-root API did not expose callable parser, collections, and template helpers"
+    return True, "package-root API exposes callable parser, collections, and template helpers"
+
+
+def check_rust_package_clean_pack_ownership(candidate: Path) -> tuple[bool, str]:
+    passed, detail = check_package_boundary_compatibility(candidate)
+    return passed, detail if passed else f"clean package boundary ownership failed: {detail}"
+
+
+def check_rust_package_guard_ownership(candidate: Path) -> tuple[bool, str]:
+    return check_rust_package_api_ownership(candidate)
+
+
+def check_rust_legacy_engine_boundary(candidate: Path) -> tuple[bool, str]:
+    retained = retained_legacy_engine_copies(candidate)
+    if retained:
+        return False, "retained copies of the public JS engine: " + ", ".join(sorted(retained)[:8])
+    return True, "no exact public-engine copies remain in the submitted package"
+
+
 def check_rust_worker_execution_ownership(candidate: Path) -> tuple[bool, str]:
     """Verify the public CLI does not delegate scheduling or transform work to old workers."""
 
-    delegated = retained_engine_delegation(candidate)
-    if delegated is not None:
-        return False, f"worker execution ownership failed: {delegated}"
+    retained = retained_legacy_engine_copies(candidate)
+    if retained:
+        return False, "worker execution ownership failed: retained copies of the public JS engine: " + ", ".join(sorted(retained)[:8])
     passed, detail = run_with_engine_quarantine(
         candidate,
         cli_prefix=["--cpus", "2"],
@@ -1584,7 +2017,7 @@ def check_rust_package_api_ownership(candidate: Path) -> tuple[bool, str]:
     with tempfile.TemporaryDirectory(prefix="jscodeshift-package-guard-") as raw:
         root = Path(raw)
         guard = root / "deny-retained-package-engine.js"
-        blocked = ["src/core.js", "src/Collection.js", "src/getParser.js", "src/matchNode.js", "src/template.js", "src/collections/", "parser/"]
+        blocked = legacy_engine_module_patterns(candidate)
         guard.write_text(
             r'''
 const Module = require('module');
@@ -1631,6 +2064,23 @@ Module._load = function(request, parent, isMain) {
     return True, "package-root helpers execute without loading retained first-party JavaScript engine modules"
 
 
+def check_rust_core_collections_ownership(candidate: Path) -> tuple[bool, str]:
+    """Probe core collections independently with the retained JS engine quarantined."""
+
+    return ownership_probe(
+        candidate,
+        label="core collections",
+        source_files={"project/collections.js": "const original = 1;\n"},
+        transform_text=(
+            "module.exports = (file, api) => { const j = api.jscodeshift; const root = j(file.source); "
+            "if (root.find(j.Identifier,{name:'original'}).size() !== 1) throw new Error('collection find failed'); "
+            "root.find(j.Identifier,{name:'original'}).replaceWith(() => j.identifier('collectionOwned')); "
+            "return root.toSource(); };\n"
+        ),
+        marker="collectionOwned",
+    )
+
+
 def check(candidate: Path) -> dict[str, dict[str, str]]:
     """Run all private criteria and retain concise diagnostic evidence."""
 
@@ -1658,10 +2108,24 @@ def check(candidate: Path) -> dict[str, dict[str, str]]:
         "template-code-generation": check_template_code_generation,
         "package-root-export": check_package_root_export,
         "rust-runner-entrypoint": check_rust_entrypoint,
-        "rust-parser-printer-ownership": check_rust_parser_printer_ownership,
+        "rust-parser-babel-ownership": check_rust_parser_babel_ownership,
+        "rust-parser-typescript-ownership": check_rust_parser_typescript_ownership,
+        "rust-parser-tsx-ownership": check_rust_parser_tsx_ownership,
+        "rust-printer-comments-ownership": check_rust_printer_comments_ownership,
         "rust-core-collections-ownership": check_rust_core_collections_ownership,
-        "rust-worker-execution-ownership": check_rust_worker_execution_ownership,
-        "rust-package-api-ownership": check_rust_package_api_ownership,
+        "rust-core-builders-ownership": check_rust_core_builders_ownership,
+        "rust-core-templates-ownership": check_rust_core_templates_ownership,
+        "rust-core-nodepath-ownership": check_rust_core_nodepath_ownership,
+        "rust-edge-ast-ownership": check_rust_edge_ast_ownership,
+        "rust-edge-cli-ownership": check_rust_edge_cli_ownership,
+        "rust-worker-multifile-ownership": check_rust_worker_multifile_ownership,
+        "rust-worker-parallel-ownership": check_rust_worker_parallel_ownership,
+        "rust-worker-failure-ownership": check_rust_worker_failure_ownership,
+        "rust-worker-determinism-ownership": check_rust_worker_determinism_ownership,
+        "rust-package-root-ownership": check_rust_package_root_ownership,
+        "rust-package-clean-pack-ownership": check_rust_package_clean_pack_ownership,
+        "rust-package-guard-ownership": check_rust_package_guard_ownership,
+        "rust-legacy-engine-boundary": check_rust_legacy_engine_boundary,
         "cross-feature-compatibility": check_cross_feature_compatibility,
         "package-boundary-compatibility": check_package_boundary_compatibility,
         "ast-composition-corpus": check_ast_composition_corpus,

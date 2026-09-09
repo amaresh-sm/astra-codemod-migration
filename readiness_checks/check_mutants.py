@@ -21,12 +21,29 @@ def _criterion_statuses(payload: dict[str, Any]) -> dict[str, str]:
     return {str(key): status_value(value) for key, value in values.items()}
 
 
+def _scoring_criteria(proof_dir: Path) -> set[str]:
+    """Read criterion IDs from the task's scoring ledger when available."""
+
+    scoring_path = proof_dir.parent / "scoring.yml"
+    if not scoring_path.is_file():
+        return set()
+    criteria: set[str] = set()
+    for raw in scoring_path.read_text(encoding="utf-8").splitlines():
+        stripped = raw.split("#", 1)[0].strip()
+        if stripped.startswith("- id:"):
+            value = stripped.partition(":")[2].strip().strip("'\"")
+            if value:
+                criteria.add(value)
+    return criteria
+
+
 def _run_mutant(
     proof_dir: Path,
     name: str,
     patch_source: Path,
     mapping: dict[str, Any],
     baseline: dict[str, str],
+    valid_criteria: set[str] | None = None,
 ) -> dict[str, Any]:
     """Evaluate one mutant against the reference criterion-status baseline."""
 
@@ -92,6 +109,12 @@ def _run_mutant(
         result["failures"].append("backend reward has no criterionStatus ledger")
         result["ok"] = False
         return result
+    unknown_mapping = sorted((expected | related) - (valid_criteria or set(baseline)))
+    if unknown_mapping:
+        result["failures"].append(
+            "mapping references criteria outside the current verifier ledger: "
+            + ", ".join(unknown_mapping)
+        )
     changed = {
         criterion
         for criterion, baseline_status in baseline.items()
@@ -177,6 +200,11 @@ def check_mutants(verifier_dir: Path, proof_dir: Path) -> dict[str, Any]:
         result["failures"].append("reference reward has no criterionStatus ledger")
         result["ok"] = False
         return result
+    scoring_criteria = _scoring_criteria(proof_dir)
+    if scoring_criteria and set(baseline) != scoring_criteria:
+        result["failures"].append(
+            "reference mutant baseline does not match the current scoring ledger"
+        )
 
     patch_names = {path.stem for path in mutants_dir.glob("*.patch")}
     mapped_names = {str(name) for name in matrix}
@@ -189,7 +217,14 @@ def check_mutants(verifier_dir: Path, proof_dir: Path) -> dict[str, Any]:
             result["mutants"].append({"mutant": name, "failures": ["mapping has no patch file"]})
             continue
         result["mutants"].append(
-            _run_mutant(proof_dir, name, mutants_dir / f"{name}.patch", mapping, baseline)
+            _run_mutant(
+                proof_dir,
+                name,
+                mutants_dir / f"{name}.patch",
+                mapping,
+                baseline,
+                scoring_criteria or set(baseline),
+            )
         )
     result["failures"].extend(
         f"{row['mutant']}: {failure}"

@@ -1,13 +1,15 @@
 {
-  "command": "node bin/codemod-plan.js",
-  "arguments": {
-    "--root": "directory to scan (required)",
-    "--extensions": "comma-separated extensions without dots",
-    "--ignore": "repeatable path fragment or glob to skip"
-  },
-  "output": {
-    "files": "sorted root-relative POSIX paths",
-    "count": "number of selected files"
-  },
-  "errors": "diagnostic on stderr and non-zero exit status"
+  "command": "bin/jscodeshift.sh",
+  "migration_scope": [
+    "Rust CLI and argument handling",
+    "Rust file discovery, ignore rules, and worker scheduling",
+    "JavaScript transform compatibility boundary",
+    "parser, collections, templates, and package-root behavior"
+  ],
+  "compatibility": {
+    "transform_api": "JavaScript transform(fileInfo, api, options)",
+    "statuses": ["ok", "nochange", "skip", "error"],
+    "writes": "successful transforms write files; failed transforms do not partially write",
+    "package_export": "the package root remains a callable jscodeshift API"
+  }
 }

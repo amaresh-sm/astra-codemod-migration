@@ -17,6 +17,87 @@ from openhands.tools.file_editor import FileEditorTool
 from openhands.tools.terminal import TerminalTool
 
 
+def _portable_gateway_messages(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Remove optional OpenAI fields rejected by the internal portable route.
+
+    The HackerRank gateway accepts the OpenAI chat-completions shape but rejects
+    ``name`` and ``refusal`` fields when they are present in conversation
+    history.  These fields are optional metadata; tool calls, tool IDs, roles,
+    and content remain unchanged.
+    """
+    return [
+        {
+            key: value
+            for key, value in message.items()
+            if key not in {"name", "refusal"}
+        }
+        for message in messages
+    ]
+
+
+def _without_gemini_prompt_cache_key(model: str, kwargs: dict[str, Any]) -> dict[str, Any]:
+    """Remove LiteLLM's prompt-cache field for Gemini gateway requests.
+
+    The gateway accepts the OpenAI chat-completions contract, but the Gemini
+    route rejects ``prompt_cache_key`` instead of ignoring it.  LiteLLM can
+    place the field at the transport level or inside a nested request-options
+    mapping, so scrub the exact key recursively only for Gemini models.
+    """
+    model_name = model.rsplit("/", 1)[-1].lower()
+    if not model_name.startswith("gemini-"):
+        return kwargs
+
+    def scrub(value: Any) -> Any:
+        if isinstance(value, dict):
+            return {
+                key: scrub(item)
+                for key, item in value.items()
+                if key != "prompt_cache_key"
+            }
+        if isinstance(value, list):
+            return [scrub(item) for item in value]
+        return value
+
+    return scrub(kwargs)
+
+
+def _install_portable_gateway_compatibility() -> None:
+    """Patch the SDK transport boundary for the configured portable gateway."""
+    if "gateway-central.ai.private.hackerrank.link" not in (
+        os.getenv("LLM_BASE_URL") or ""
+    ):
+        return
+
+    original_transport_call = LLM._transport_call
+    original_async_transport_call = LLM._atransport_call
+    if getattr(original_transport_call, "_astra_gateway_compatible", False):
+        return
+
+    def transport_call(self: LLM, *, messages: list[dict[str, Any]], **kwargs: Any):
+        kwargs = _without_gemini_prompt_cache_key(str(self.model), kwargs)
+        return original_transport_call(
+            self,
+            messages=_portable_gateway_messages(messages),
+            **kwargs,
+        )
+
+    transport_call._astra_gateway_compatible = True
+    LLM._transport_call = transport_call
+
+    async def async_transport_call(
+        self: LLM, *, messages: list[dict[str, Any]], **kwargs: Any
+    ):
+        kwargs = _without_gemini_prompt_cache_key(str(self.model), kwargs)
+        return await original_async_transport_call(
+            self,
+            messages=_portable_gateway_messages(messages),
+            **kwargs,
+        )
+
+    async_transport_call._astra_gateway_compatible = True
+    LLM._atransport_call = async_transport_call
+
+
 def _json_value(value: Any) -> Any:
     """Convert SDK/Pydantic values into JSON-safe primitives."""
     if value is None or isinstance(value, (str, int, float, bool)):
@@ -97,21 +178,30 @@ def main() -> int:
     except OSError as exc:
         print(f"cannot read instruction: {exc}", file=sys.stderr)
         return 2
-    api_key = os.getenv("LLM_API_KEY")
+    # The local HackerRank gateway env file uses ASTRA_GATEWAY_API_KEY. Keep
+    # the generic OpenHands names supported while accepting that convention
+    # without copying or logging the secret.
+    api_key = os.getenv("LLM_API_KEY") or os.getenv("ASTRA_GATEWAY_API_KEY")
     if not api_key:
         print("LLM_API_KEY is required", file=sys.stderr)
         return 2
     # OpenHands currently documents high/xhigh but not max. Keep the common
     # harness surface while mapping max to the strongest supported SDK value.
     sdk_reasoning = "high" if args.reasoning == "max" else args.reasoning
+    gateway_base_url = os.getenv("LLM_BASE_URL") or os.getenv("ASTRA_GATEWAY_BASE_URL")
+    if not gateway_base_url and os.getenv("ASTRA_GATEWAY_API_KEY"):
+        gateway_base_url = "https://gateway-central.ai.private.hackerrank.link/v1"
     llm = LLM(
         usage_id="agent",
         model=args.model,
         api_key=SecretStr(api_key),
-        base_url=os.getenv("LLM_BASE_URL") or None,
+        base_url=gateway_base_url or None,
         force_string_serializer=True,
         reasoning_effort=sdk_reasoning,
     )
+    if gateway_base_url and not os.getenv("LLM_BASE_URL"):
+        os.environ["LLM_BASE_URL"] = gateway_base_url
+    _install_portable_gateway_compatibility()
 
     def callback(event: Event) -> None:
         if isinstance(event, LLMConvertibleEvent) or getattr(event, "tool_name", None):

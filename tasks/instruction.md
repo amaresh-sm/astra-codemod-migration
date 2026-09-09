@@ -10,9 +10,7 @@ Use the supplied source and public compatibility materials as the migration base
 behavior is checked privately by the verifier. The public behavior requirements are defined in
 `contracts/migration.contract.json`; use that contract as the authoritative compatibility target.
 
-Internal implementation details may change, but the public CLI, transform API, outputs, errors,
-options, file-writing behavior, and compatibility semantics must remain unchanged. Do not require
-users to rewrite transforms.
+The public CLI, transform API, outputs, errors, options, file-writing behavior, and compatibility semantics must remain unchanged.
 
 Include `app-setup/manifest.json` in the completed workspace. It is the harness lifecycle handoff
 for this CLI task: define non-empty argument arrays under `commands` for `build`, `reset`, and

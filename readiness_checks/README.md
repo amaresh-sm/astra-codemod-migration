@@ -87,6 +87,10 @@ The mapping is kept in `mutant-matrix.json` rather than inferred from patch text
 test-to-mutant relationship reviewable and prevents a patch from silently changing what it is
 supposed to exercise.
 
+The mutant gate also checks that every expected or related criterion exists in the current
+`scoring.yml` ledger. Historical proof artifacts from another task or verifier generation therefore
+fail explicitly until their matrix and evidence are regenerated.
+
 The unit tests for these checks can be run with:
 
 ```bash

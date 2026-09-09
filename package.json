@@ -8,6 +8,8 @@
     "generate": "python3 -m astra_harness.generate",
     "verify": "python3 -m astra_harness.verify",
     "score": "python3 -m astra_harness.score",
+    "benchmark": "python3 -m astra_harness.benchmark",
+    "report:benchmark": "python3 scripts/generate_benchmark_html.py",
     "check:package": "python3 readiness_checks/check_package.py",
     "check:acceptance": "python3 readiness_checks/check_acceptance.py",
     "check:report-privacy": "python3 readiness_checks/check_report_privacy.py",

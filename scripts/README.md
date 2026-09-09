@@ -76,3 +76,25 @@ python3 -m astra_harness.score \
 The scorer reads private `verifier/scoring.yml`, validates that weights total `1.0`, and writes
 `reports/score.json`. The published score is normalized to `0.0–1.0`; missing criteria are blocked
 and never silently treated as passes.
+
+For one idempotent command that prepares the runtime/verifier images when missing or stale, runs
+the isolated verification, and calculates the score, use:
+
+```bash
+npm run benchmark -- \
+  --task tasks \
+  --candidate runs/<task-id>/<candidate-id>/candidate \
+  --run runs/<task-id>/<candidate-id>/verification
+```
+
+The command records a source digest on each Docker image. Unchanged images are reused; changed or
+missing images are rebuilt. A low candidate score is still a successful benchmark result, while
+infrastructure or verifier failures return a non-zero exit status.
+
+Generate the presentation report from the stored candidate telemetry and verifier artifacts with:
+
+```bash
+npm run report:benchmark
+```
+
+This writes `runs/migrate-jscodeshift-runner-to-rust/benchmark.html`.

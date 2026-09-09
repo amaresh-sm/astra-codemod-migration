@@ -1,12 +1,10 @@
 {
-  "name": "codemod-planner-brownfield",
-  "version": "1.0.0",
-  "private": true,
-  "type": "commonjs",
-  "bin": { "codemod-plan": "bin/codemod-plan.js" },
-  "scripts": {
-    "test": "node --test test/planner.test.js",
-    "plan": "node bin/codemod-plan.js"
-  },
+  "name": "jscodeshift-rust-reference",
+  "version": "17.4.0-rust.1",
+  "description": "Rust-owned jscodeshift-compatible runner",
+  "main": "index.js",
+  "bin": { "jscodeshift": "bin/jscodeshift.sh" },
+  "files": ["index.js", "rust-compat.js", "rust-compat-worker.js", "bin", "rust"],
+  "scripts": { "test": "cargo test --manifest-path rust/Cargo.toml" },
   "engines": { "node": ">=18" }
 }

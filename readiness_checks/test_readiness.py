@@ -104,6 +104,16 @@ class MutantCoverageTests(unittest.TestCase):
             # Temporary directories are intentionally left to the OS; no repository files are touched.
             pass
 
+    def test_rejects_mapping_for_criteria_outside_reference_ledger(self) -> None:
+        root = self._build_fixture()
+        matrix = root / "verifier/proof-of-work/mutant-matrix.json"
+        payload = json.loads(matrix.read_text())
+        payload["mutants"]["example"]["expected_criteria"] = ["stale-criterion"]
+        matrix.write_text(json.dumps(payload), encoding="utf-8")
+        result = check_mutants(root / "verifier", root / "verifier/proof-of-work")
+        self.assertFalse(result["ok"])
+        self.assertTrue(any("outside the current verifier ledger" in failure for failure in result["failures"]))
+
 
 if __name__ == "__main__":
     unittest.main()

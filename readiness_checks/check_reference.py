@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import math
+import tomllib
 from pathlib import Path
 from typing import Any
 
@@ -32,6 +33,30 @@ def check_reference(proof_dir: Path) -> dict[str, Any]:
     runs = sorted(path for path in runs_dir.iterdir() if path.is_dir())
     if not runs:
         result["failures"].append("no reference runs have been recorded")
+
+    # A copied proof directory can otherwise pass this gate while belonging to
+    # an entirely different task.  The current scoring ledger is the stable
+    # source of truth for the expected criterion set.
+    scoring_path = proof_dir.parent / "scoring.yml"
+    expected_criteria: set[str] = set()
+    if scoring_path.is_file():
+        for raw in scoring_path.read_text(encoding="utf-8").splitlines():
+            stripped = raw.split("#", 1)[0].strip()
+            if stripped.startswith("- id:"):
+                criterion = stripped.partition(":")[2].strip().strip("'\"")
+                if criterion:
+                    expected_criteria.add(criterion)
+
+    task_metadata_path = proof_dir.parent.parent / "tasks" / "task.toml"
+    expected_task_id: str | None = None
+    if task_metadata_path.is_file():
+        try:
+            value = tomllib.loads(task_metadata_path.read_text(encoding="utf-8")).get("id")
+            if isinstance(value, str) and value:
+                expected_task_id = value
+        except (OSError, tomllib.TOMLDecodeError):
+            pass
+
     for run_dir in runs:
         score_path = run_dir / "reports" / "score.json"
         run_result: dict[str, Any] = {"run": run_dir.name}
@@ -47,6 +72,11 @@ def check_reference(proof_dir: Path) -> dict[str, Any]:
         score = payload.get("score")
         hard_pass = payload.get("hard_pass")
         run_result.update({"score": score, "hard_pass": hard_pass})
+        task_id = payload.get("task_id")
+        if expected_task_id is not None and task_id != expected_task_id:
+            result["failures"].append(
+                f"{run_dir.name}: task_id is {task_id!r}, expected {expected_task_id!r}"
+            )
         if (
             isinstance(score, bool)
             or not isinstance(score, (int, float))
@@ -59,6 +89,17 @@ def check_reference(proof_dir: Path) -> dict[str, Any]:
         if not isinstance(criteria, dict) or not criteria:
             result["failures"].append(f"{run_dir.name}: score report has no criteria ledger")
         else:
+            if expected_criteria and set(criteria) != expected_criteria:
+                missing = sorted(expected_criteria - set(criteria))
+                extra = sorted(set(criteria) - expected_criteria)
+                detail: list[str] = []
+                if missing:
+                    detail.append(f"missing: {', '.join(missing)}")
+                if extra:
+                    detail.append(f"unexpected: {', '.join(extra)}")
+                result["failures"].append(
+                    f"{run_dir.name}: criteria do not match current scoring ledger ({'; '.join(detail)})"
+                )
             non_pass = sorted(
                 key for key, value in criteria.items() if status_value(value) not in PASS_STATUSES
             )
