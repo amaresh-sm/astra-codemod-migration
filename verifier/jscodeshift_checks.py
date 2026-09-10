@@ -122,6 +122,17 @@ def source_root(candidate: Path) -> Path:
 ENGINE_SOURCE_SUFFIXES = frozenset({".cjs", ".js", ".mjs", ".ts", ".tsx"})
 ENGINE_EXCLUDED_PARTS = frozenset({".git", "node_modules", "target", ".cargo-home"})
 
+# JavaScript is allowed only at the compatibility boundary.  The boundary
+# keeps customer-authored transforms working; parsing, printing, collections,
+# and scheduling must remain in the Rust implementation.  This is an explicit
+# policy rather than a filename heuristic for detecting the old engine.
+ALLOWED_JS_BRIDGE_PATHS = frozenset({
+    "index.js",
+    "bin/jscodeshift.js",
+    "rust-compat.js",
+    "rust-compat-worker.js",
+})
+
 
 def public_source_root() -> Path | None:
     """Locate the immutable public source snapshot mounted for verification."""
@@ -230,6 +241,148 @@ def retained_legacy_engine_copies(candidate: Path) -> set[str]:
             continue
         retained.add(relative)
     return retained
+
+
+def _remove_non_bridge_sources(package: Path) -> list[str]:
+    """Remove every submitted source file except the explicit JS bridge.
+
+    The staged copy is disposable, so unlinking is safe and avoids changing a
+    candidate's checkout.  User transforms are created outside ``package``
+    and remain available to the compatibility worker.
+    """
+
+    removed: list[str] = []
+    for path in sorted(package.rglob("*"), key=lambda value: len(value.parts), reverse=True):
+        if not (path.is_file() or path.is_symlink()) or path.suffix.lower() not in ENGINE_SOURCE_SUFFIXES:
+            continue
+        relative = path.relative_to(package).as_posix()
+        if relative in ALLOWED_JS_BRIDGE_PATHS:
+            continue
+        try:
+            path.unlink()
+            removed.append(relative)
+        except OSError:
+            # The caller reports a failed probe if the resulting CLI cannot
+            # start.  Do not turn a candidate-file cleanup issue into a
+            # verifier crash.
+            continue
+    return removed
+
+
+def _find_native_binary(package: Path) -> Path | None:
+    """Find the built Rust executable exposed by the candidate launcher."""
+
+    candidates: list[Path] = []
+    target_directories = list(package.rglob("target/release")) + list(package.rglob("target/debug"))
+    for directory in target_directories:
+        if not directory.is_dir():
+            continue
+        relative_directory = directory.relative_to(package)
+        if {".git", "node_modules", ".cargo-home"}.intersection(relative_directory.parts):
+            continue
+        candidates.extend(
+            path for path in directory.iterdir()
+            if path.is_file() and path.name != ".rustc_info.json" and os.access(path, os.X_OK)
+        )
+    return sorted(
+        candidates,
+        key=lambda path: (
+            "jscodeshift" not in path.name.lower(),
+            "release" not in path.parts,
+            path.name,
+        ),
+    )[0] if candidates else None
+
+
+def _module_trace_environment(package: Path, trace_root: Path) -> dict[str, str]:
+    """Trace Node workers and the compiled Rust process used by the probes."""
+
+    trace = trace_root / "module-trace.js"
+    trace.write_text(
+        r'''
+const fs = require('fs');
+const path = require('path');
+const Module = require('module');
+const traceFile = process.env.JSCODESHIFT_MODULE_TRACE;
+if (traceFile) {
+  fs.appendFileSync(traceFile, JSON.stringify({kind: 'node-process', pid: process.pid}) + '\n');
+}
+const originalLoad = Module._load;
+Module._load = function(request, parent, isMain) {
+  let resolved = null;
+  try { resolved = Module._resolveFilename(request, parent, isMain); } catch (_) {}
+  if (traceFile && typeof resolved === 'string') {
+    fs.appendFileSync(traceFile, JSON.stringify({kind: 'module', resolved}) + '\n');
+  }
+  return originalLoad.apply(this, arguments);
+};
+'''.strip()
+        + "\n",
+        encoding="utf-8",
+    )
+    node_wrapper = trace_root / "node"
+    node_binary = shutil.which("node") or "/usr/local/bin/node"
+    node_wrapper.write_text(
+        "#!/bin/sh\n"
+        f"exec {shlex.quote(node_binary)} --require {shlex.quote(str(trace))} \"$@\"\n",
+        encoding="utf-8",
+    )
+    node_wrapper.chmod(0o755)
+    original_path = os.environ.get("PATH", "")
+    environment = {
+        "PATH": f"{trace_root}{os.pathsep}{original_path}",
+        "JSCODESHIFT_ENGINE_ROOT": str(package.resolve()),
+        "JSCODESHIFT_MODULE_TRACE": str(trace_root / "modules.jsonl"),
+    }
+    native_binary = _find_native_binary(package)
+    if native_binary is not None:
+        native_wrapper = trace_root / "native-runner"
+        native_wrapper.write_text(
+            "#!/bin/sh\n"
+            "printf '%s\\n' '{\"kind\":\"native-process\"}' >> \"$JSCODESHIFT_MODULE_TRACE\"\n"
+            "exec \"$JSCODESHIFT_REAL_NATIVE\" \"$@\"\n",
+            encoding="utf-8",
+        )
+        native_wrapper.chmod(0o755)
+        environment.update({
+            "JSCODESHIFT_BINARY": str(native_wrapper),
+            "JSCODESHIFT_NATIVE_ENGINE": str(native_wrapper),
+            "JSCODESHIFT_REAL_NATIVE": str(native_binary),
+        })
+    return environment
+
+
+def _trace_loaded_package_modules(trace_file: Path, package: Path) -> tuple[set[str], int, int]:
+    """Return loaded source paths plus traced Node and native process counts."""
+
+    loaded: set[str] = set()
+    node_processes = 0
+    native_processes = 0
+    if not trace_file.is_file():
+        return loaded, node_processes, native_processes
+    package_root = package.resolve()
+    for raw in trace_file.read_text(encoding="utf-8", errors="replace").splitlines():
+        try:
+            event = json.loads(raw)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(event, dict) and event.get("kind") == "node-process":
+            node_processes += 1
+            continue
+        if isinstance(event, dict) and event.get("kind") == "native-process":
+            native_processes += 1
+            continue
+        resolved = event.get("resolved") if isinstance(event, dict) else None
+        if not isinstance(resolved, str):
+            continue
+        path = Path(resolved)
+        try:
+            relative = path.resolve().relative_to(package_root).as_posix()
+        except ValueError:
+            continue
+        if path.suffix.lower() in ENGINE_SOURCE_SUFFIXES:
+            loaded.add(relative)
+    return loaded, node_processes, native_processes
 
 
 def runtime_source_root(candidate: Path) -> str:
@@ -1518,143 +1671,7 @@ def check_rust_entrypoint(candidate: Path) -> tuple[bool, str]:
     return True, "public CLI is backed by the compiled Rust runner"
 
 
-def run_with_module_guard(
-    candidate: Path,
-    *,
-    blocked: list[str],
-    source_text: str = "const original = 1;\n",
-    transform_text: str = "module.exports = (file, api) => api.jscodeshift(file.source).toSource();\n",
-    cli_prefix: list[str] | None = None,
-) -> tuple[bool, str]:
-    """Run a public CLI transform while rejecting selected retained JS modules."""
-
-    package = source_root(candidate).resolve()
-    with tempfile.TemporaryDirectory(prefix="jscodeshift-engine-guard-") as raw:
-        root = Path(raw)
-        guard = root / "deny-retained-engine.js"
-        guard.write_text(
-            r'''
-const Module = require('module');
-const path = require('path');
-const root = path.resolve(process.env.JSCODESHIFT_ENGINE_ROOT);
-const blocked = JSON.parse(process.env.JSCODESHIFT_BLOCKED_MODULES || '[]');
-const originalLoad = Module._load;
-function retainedEngine(resolved) {
-  if (typeof resolved !== 'string') return false;
-  const relative = path.relative(root, path.resolve(resolved));
-  return blocked.some(item => item.endsWith('/') ? relative.startsWith(item) : relative === item);
-}
-Module._load = function(request, parent, isMain) {
-  const resolved = Module._resolveFilename(request, parent, isMain);
-  if (retainedEngine(resolved)) {
-    throw new Error(`retained JavaScript jscodeshift engine was loaded: ${resolved}`);
-  }
-  return originalLoad.apply(this, arguments);
-};
-'''.strip()
-            + "\n",
-            encoding="utf-8",
-        )
-        node_wrapper = root / "guarded-node"
-        node_binary = shutil.which("node") or "/usr/local/bin/node"
-        node_wrapper.write_text(
-            "#!/bin/sh\n"
-            f"exec {shlex.quote(node_binary)} --require {shlex.quote(str(guard))} \"$@\"\n",
-            encoding="utf-8",
-        )
-        node_wrapper.chmod(0o755)
-        environment = {
-            "NODE_OPTIONS": f"--require={guard}",
-            "JSCODESHIFT_ENGINE_ROOT": runtime_source_root(candidate),
-            "JSCODESHIFT_BLOCKED_MODULES": json.dumps(blocked),
-            # Rust implementations commonly launch a Node compatibility worker
-            # through this documented hook.  Wrapping that hook guarantees the
-            # module guard is loaded in every child process, not just in the
-            # JavaScript launcher process.
-            "JSCODESHIFT_NODE": str(node_wrapper),
-        }
-        source = root / "source.js"
-        source.write_text(source_text, encoding="utf-8")
-        transform = write_transform(
-            root / "transform.js",
-            transform_text,
-        )
-        result = run_cli(
-            candidate,
-            [*(cli_prefix or ["--run-in-band"]), "--transform", str(transform), str(source)],
-            cwd=root,
-            extra_env=environment,
-        )
-        output = result.stdout + result.stderr
-        if result.returncode != 0:
-            if "retained JavaScript jscodeshift engine was loaded" in output:
-                return False, "runtime executed one of the retained JavaScript modules under test"
-            return False, f"runtime ownership probe failed (rc={result.returncode})"
-    return True, "runtime completed a real JavaScript transform without loading the retained modules under test"
-
-
-def run_with_engine_quarantine(
-    candidate: Path,
-    *,
-    source_text: str = "const original = 1;\n",
-    transform_text: str = "module.exports = (file, api) => api.jscodeshift(file.source).toSource();\n",
-    cli_prefix: list[str] | None = None,
-) -> tuple[bool, str]:
-    """Run the public CLI after hiding the original first-party JS engine.
-
-    The candidate is staged into a temporary workspace so the submitted files
-    are never modified. User-supplied transforms remain available outside the
-    staged package, while the legacy src and parser trees are hidden. A Rust
-    implementation must therefore provide parser, printer, core, collections,
-    and worker behavior itself rather than delegating to the old JavaScript
-    implementation.
-    """
-
-    with tempfile.TemporaryDirectory(prefix="jscodeshift-engine-quarantine-") as raw:
-        root = Path(raw)
-        staged = root / "candidate"
-        try:
-            # Hard links keep this probe fast and avoid rewriting a potentially
-            # large node_modules/target tree. The fallback handles filesystems
-            # that do not permit linking across temporary-directory mounts.
-            shutil.copytree(candidate, staged, symlinks=True, copy_function=os.link)
-        except OSError:
-            if staged.exists():
-                shutil.rmtree(staged)
-            shutil.copytree(candidate, staged, symlinks=True)
-
-        package = source_root(staged)
-        # Quarantine by immutable source fingerprints where available, with
-        # the legacy directory list as a fallback for isolated unit tests.
-        # This allows a migrated implementation to choose any Rust layout or
-        # filename while still preventing renamed copies of the old engine
-        # from being used.
-        for relative in sorted(legacy_engine_paths(candidate), key=lambda value: (value.count("/"), value), reverse=True):
-            path = package / relative
-            if not path.exists() and not path.is_symlink():
-                continue
-            path.rename(path.with_name(path.name + ".engine-quarantined"))
-
-        source = root / "source.js"
-        source.write_text(source_text, encoding="utf-8")
-        transform = write_transform(root / "transform.js", transform_text)
-        effective_prefix = list(cli_prefix or ["--run-in-band"])
-        if "--fail-on-error" not in effective_prefix:
-            effective_prefix.append("--fail-on-error")
-        result = run_cli(
-            staged,
-            [*effective_prefix, "--transform", str(transform), str(source)],
-            cwd=root,
-        )
-        if result.returncode != 0:
-            output = result.stdout + result.stderr
-            detail = output.strip().splitlines()
-            suffix = f": {detail[-1]}" if detail else ""
-            return False, f"runtime could not execute with the retained JS engine quarantined{suffix}"
-    return True, "runtime completed with the original first-party JS engine quarantined"
-
-
-def run_with_engine_quarantine_files(
+def run_with_bridge_only_files(
     candidate: Path,
     *,
     source_files: dict[str, str],
@@ -1662,10 +1679,16 @@ def run_with_engine_quarantine_files(
     cli_prefix: list[str] | None = None,
     target: str = "project",
     stdin_paths: bool = False,
-) -> tuple[subprocess.CompletedProcess[str], dict[str, str]]:
-    """Run a multi-file probe after quarantining copied first-party JS code."""
+) -> tuple[subprocess.CompletedProcess[str], dict[str, str], str | None]:
+    """Run a probe after removing all submitted JS except the bridge.
 
-    with tempfile.TemporaryDirectory(prefix="jscodeshift-engine-quarantine-files-") as raw:
+    This is stronger than hiding known legacy directories: a rewritten JS
+    engine under an unfamiliar filename is removed too.  A Node wrapper traces
+    every child worker's module loads, so the probe also fails if an
+    unapproved package-relative JavaScript implementation is executed.
+    """
+
+    with tempfile.TemporaryDirectory(prefix="jscodeshift-bridge-only-") as raw:
         root = Path(raw)
         staged = root / "candidate"
         try:
@@ -1676,10 +1699,8 @@ def run_with_engine_quarantine_files(
             shutil.copytree(candidate, staged, symlinks=True)
 
         package = source_root(staged)
-        for relative in sorted(legacy_engine_paths(candidate), key=lambda value: (value.count("/"), value), reverse=True):
-            path = package / relative
-            if path.exists() or path.is_symlink():
-                path.rename(path.with_name(path.name + ".engine-quarantined"))
+        _remove_non_bridge_sources(package)
+        trace_environment = _module_trace_environment(package, root)
 
         for relative, content in source_files.items():
             path = root / relative
@@ -1691,12 +1712,24 @@ def run_with_engine_quarantine_files(
         if stdin_paths:
             stdin = "\n".join(str(root / relative) for relative in source_files) + "\n"
             args = [arg for arg in args if arg != str(root / target)]
-        result = run_cli(staged, args, cwd=root, stdin=stdin)
+        result = run_cli(staged, args, cwd=root, stdin=stdin, extra_env=trace_environment)
+
+        trace_file = root / "modules.jsonl"
+        loaded, node_processes, native_processes = _trace_loaded_package_modules(trace_file, package)
+        disallowed = sorted(loaded - ALLOWED_JS_BRIDGE_PATHS)
+        trace_error: str | None = None
+        if disallowed:
+            trace_error = "unapproved package JavaScript loaded: " + ", ".join(disallowed)
+        elif node_processes == 0:
+            trace_error = "no traced Node compatibility process was observed"
+        elif native_processes == 0:
+            trace_error = "no traced compiled Rust process was observed"
+
         contents = {}
         for relative in source_files:
             path = root / relative
             contents[relative] = path.read_text(encoding="utf-8") if path.exists() else ""
-        return result, contents
+        return result, contents, trace_error
 
 
 def ownership_probe(
@@ -1710,19 +1743,22 @@ def ownership_probe(
 ) -> tuple[bool, str]:
     """Run one independent ownership probe and report only its own boundary."""
 
-    result, contents = run_with_engine_quarantine_files(
+    result, contents, trace_error = run_with_bridge_only_files(
         candidate,
         source_files=source_files,
         transform_text=transform_text,
         cli_prefix=cli_prefix,
     )
+    if trace_error:
+        return False, f"{label} ownership trace failed: {trace_error}"
     if result.returncode != 0:
         detail = (result.stdout + result.stderr).strip().splitlines()
         suffix = f": {detail[-1]}" if detail else ""
         return False, f"{label} ownership probe failed (rc={result.returncode}){suffix}"
     if not contents or not all(marker in content for content in contents.values()):
-        return False, f"{label} ownership probe did not produce the expected native result"
-    return True, f"{label} completed with the retained JS engine quarantined"
+        missing = [name for name, content in contents.items() if marker not in content]
+        return False, f"{label} ownership probe did not produce the expected native result: {', '.join(missing)}"
+    return True, f"{label} completed with only the explicit JS bridge"
 
 
 def check_rust_parser_babel_ownership(candidate: Path) -> tuple[bool, str]:
@@ -1777,48 +1813,6 @@ def check_rust_printer_comments_ownership(candidate: Path) -> tuple[bool, str]:
         ),
         marker="printer-owned",
     )
-
-
-def check_rust_parser_printer_ownership(candidate: Path) -> tuple[bool, str]:
-    """Verify parse/print work does not delegate to retained JS parser modules."""
-
-    retained = retained_legacy_engine_copies(candidate)
-    if retained:
-        return False, "parser/printer ownership failed: retained copies of the public JS engine: " + ", ".join(sorted(retained)[:8])
-    passed, detail = run_with_engine_quarantine(
-        candidate,
-        source_text="const view = <Panel title=\"before\">{value?.name}</Panel>;\n",
-        transform_text=(
-            "module.exports = (file, api) => {\n"
-            "  const j = api.jscodeshift; const root = j(file.source);\n"
-            "  root.find(j.JSXAttribute, { name: { name: 'title' } }).forEach(p => { p.node.value.value = 'after'; });\n"
-            "  return root.toSource({ quote: 'single' });\n"
-            "};\n"
-        ),
-        cli_prefix=["--run-in-band", "--parser", "tsx"],
-    )
-    return passed, detail if passed else f"parser/printer ownership failed: {detail}"
-
-
-def check_rust_core_collections_ownership(candidate: Path) -> tuple[bool, str]:
-    """Verify the core API, collections, matching, and templates are Rust-owned."""
-
-    retained = retained_legacy_engine_copies(candidate)
-    if retained:
-        return False, "core/collections ownership failed: retained copies of the public JS engine: " + ", ".join(sorted(retained)[:8])
-    passed, detail = run_with_engine_quarantine(
-        candidate,
-        transform_text=(
-            "module.exports = (file, api) => {\n"
-            "  const j = api.jscodeshift; const root = j(file.source);\n"
-            "  if (root.find(j.Identifier, { name: 'original' }).size() !== 1) throw new Error('collection find failed');\n"
-            "  root.find(j.Identifier, { name: 'original' }).replaceWith(() => j.identifier('renamed'));\n"
-            "  root.find(j.Program).get('body').push(j.template.statement`const generated = renamed;`);\n"
-            "  return root.toSource();\n"
-            "};\n"
-        ),
-    )
-    return passed, detail if passed else f"core/collections ownership failed: {detail}"
 
 
 def check_rust_core_builders_ownership(candidate: Path) -> tuple[bool, str]:
@@ -1888,7 +1882,7 @@ def check_rust_edge_ast_ownership(candidate: Path) -> tuple[bool, str]:
 def check_rust_edge_cli_ownership(candidate: Path) -> tuple[bool, str]:
     """Exercise stdin file discovery and extension filtering independently."""
 
-    result, contents = run_with_engine_quarantine_files(
+    result, contents, trace_error = run_with_bridge_only_files(
         candidate,
         source_files={
             "project/edge.js": "const edge = 1;\n",
@@ -1898,13 +1892,15 @@ def check_rust_edge_cli_ownership(candidate: Path) -> tuple[bool, str]:
         cli_prefix=["--run-in-band", "--stdin", "--extensions", "js"],
         stdin_paths=True,
     )
+    if trace_error:
+        return False, f"edge-case CLI ownership trace failed: {trace_error}"
     if result.returncode != 0:
         detail = (result.stdout + result.stderr).strip().splitlines()
         suffix = f": {detail[-1]}" if detail else ""
         return False, f"edge-case CLI ownership probe failed (rc={result.returncode}){suffix}"
     if "edge-cli-owned" not in contents["project/edge.js"] or "edge-cli-owned" in contents["project/ignored.txt"]:
         return False, "edge-case CLI ownership probe did not preserve stdin and extension boundaries"
-    return True, "stdin and extension filtering completed with the retained JS engine quarantined"
+    return True, "stdin and extension filtering completed with only the explicit JS bridge"
 
 
 def _worker_files() -> dict[str, str]:
@@ -1935,7 +1931,7 @@ def check_rust_worker_parallel_ownership(candidate: Path) -> tuple[bool, str]:
 
 def check_rust_worker_failure_ownership(candidate: Path) -> tuple[bool, str]:
     files = {"project/good-a.js": "const a = 1;\n", "project/bad.js": "const bad = 1;\n", "project/good-b.js": "const b = 1;\n"}
-    result, contents = run_with_engine_quarantine_files(
+    result, contents, trace_error = run_with_bridge_only_files(
         candidate,
         source_files=files,
         transform_text=(
@@ -1944,29 +1940,33 @@ def check_rust_worker_failure_ownership(candidate: Path) -> tuple[bool, str]:
         ),
         cli_prefix=["--cpus", "2", "--fail-on-error"],
     )
+    if trace_error:
+        return False, f"worker failure ownership trace failed: {trace_error}"
     good = all("recovery-owned" in contents[name] for name in ("project/good-a.js", "project/good-b.js"))
     if result.returncode == 0 or not good:
         return False, f"worker failure recovery ownership failed (rc={result.returncode})"
-    return True, "parallel worker failure recovery preserved successful files with the JS engine quarantined"
+    return True, "parallel worker failure recovery preserved successful files with only the explicit JS bridge"
 
 
 def check_rust_worker_determinism_ownership(candidate: Path) -> tuple[bool, str]:
     files = _worker_files()
     transform = "module.exports = file => file.source + '\\n// deterministic-owned';\n"
-    first_result, first = run_with_engine_quarantine_files(candidate, source_files=files, transform_text=transform, cli_prefix=["--cpus", "2"])
-    second_result, second = run_with_engine_quarantine_files(candidate, source_files=files, transform_text=transform, cli_prefix=["--cpus", "2"])
+    first_result, first, first_trace_error = run_with_bridge_only_files(candidate, source_files=files, transform_text=transform, cli_prefix=["--cpus", "2"])
+    second_result, second, second_trace_error = run_with_bridge_only_files(candidate, source_files=files, transform_text=transform, cli_prefix=["--cpus", "2"])
+    if first_trace_error or second_trace_error:
+        return False, "parallel worker ownership trace failed"
     if first_result.returncode != 0 or second_result.returncode != 0 or first != second:
-        return False, "parallel worker replay changed outcomes under the ownership quarantine"
-    return True, "parallel worker replay was deterministic with the JS engine quarantined"
+        return False, "parallel worker replay changed outcomes with only the explicit JS bridge"
+    return True, "parallel worker replay was deterministic with only the explicit JS bridge"
 
 
 def check_rust_package_root_ownership(candidate: Path) -> tuple[bool, str]:
     package = source_root(candidate).resolve()
     probe = (
         "const j=require(process.env.JSCODESHIFT_PACKAGE);"
-        "if(typeof j!=='function'||typeof j.withParser!=='function'||typeof j.template!=='function') process.exit(2);"
+        "if(typeof j!=='function'||typeof j.withParser!=='function'||"
+        "(!j.template || typeof j.template.statement!=='function')) process.exit(2);"
         "const root=j('const value=1;'); if(!root.find(j.Identifier).size()) process.exit(3);"
-        "if(typeof j.template.statement!=='function') process.exit(4);"
     )
     result = subprocess.run(
         ["node", "-e", probe],
@@ -1982,12 +1982,104 @@ def check_rust_package_root_ownership(candidate: Path) -> tuple[bool, str]:
 
 
 def check_rust_package_clean_pack_ownership(candidate: Path) -> tuple[bool, str]:
-    passed, detail = check_package_boundary_compatibility(candidate)
-    return passed, detail if passed else f"clean package boundary ownership failed: {detail}"
+    """Verify a packed artifact still works after non-bridge JS is removed."""
+
+    with tempfile.TemporaryDirectory(prefix="jscodeshift-clean-pack-ownership-") as raw:
+        work = Path(raw)
+        staged = work / "candidate"
+        try:
+            shutil.copytree(candidate, staged, symlinks=True, copy_function=os.link)
+        except OSError:
+            if staged.exists():
+                shutil.rmtree(staged)
+            shutil.copytree(candidate, staged, symlinks=True)
+        package_root = source_root(staged)
+        _remove_non_bridge_sources(package_root)
+        packed = work / "packed"
+        packed.mkdir()
+        packed_result = subprocess.run(
+            ["npm", "pack", "--ignore-scripts", "--json", "--pack-destination", str(packed)],
+            cwd=package_root,
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=180,
+        )
+        tarballs = sorted(packed.glob("*.tgz"))
+        if packed_result.returncode != 0 or len(tarballs) != 1:
+            return False, "clean package ownership npm pack failed"
+        unpacked = work / "unpacked"
+        unpacked.mkdir()
+        with tarfile.open(tarballs[0], "r:gz") as archive:
+            base = unpacked.resolve()
+            for member in archive.getmembers():
+                target = (unpacked / member.name).resolve()
+                if target != base and base not in target.parents:
+                    return False, "clean package archive contains an unsafe path"
+            archive.extractall(unpacked)
+        package = unpacked / "package"
+        disallowed = sorted(
+            path.relative_to(package).as_posix()
+            for path in package.rglob("*")
+            if path.is_file()
+            and path.suffix.lower() in ENGINE_SOURCE_SUFFIXES
+            and path.relative_to(package).as_posix() not in ALLOWED_JS_BRIDGE_PATHS
+        )
+        if disallowed:
+            return False, "clean packed artifact retains non-bridge JavaScript: " + ", ".join(disallowed[:8])
+        bins = json.loads((package / "package.json").read_text(encoding="utf-8")).get("bin", {})
+        if isinstance(bins, str):
+            bins = {"jscodeshift": bins}
+        if not isinstance(bins, dict) or not bins:
+            return False, "clean packed artifact has no CLI bin"
+        bin_path = package / next(iter(bins.values()))
+        smoke = subprocess.run(
+            [str(bin_path), "--version"], cwd=work, text=True, capture_output=True, check=False
+        )
+        if smoke.returncode != 0 or "jscodeshift:" not in smoke.stdout:
+            return False, "clean packed Rust CLI did not execute"
+    return True, "clean packed artifact executes with only the explicit JS bridge"
 
 
 def check_rust_package_guard_ownership(candidate: Path) -> tuple[bool, str]:
-    return check_rust_package_api_ownership(candidate)
+    """Trace package-root loading and reject any non-bridge JS implementation."""
+
+    with tempfile.TemporaryDirectory(prefix="jscodeshift-package-guard-") as raw:
+        work = Path(raw)
+        staged = work / "candidate"
+        try:
+            shutil.copytree(candidate, staged, symlinks=True, copy_function=os.link)
+        except OSError:
+            if staged.exists():
+                shutil.rmtree(staged)
+            shutil.copytree(candidate, staged, symlinks=True)
+        package = source_root(staged)
+        _remove_non_bridge_sources(package)
+        trace_environment = _module_trace_environment(package, work)
+        probe = (
+            "const j=require(process.env.JSCODESHIFT_PACKAGE);"
+            "if(typeof j!=='function'||!j.template||typeof j.template.statement!=='function') process.exit(2);"
+            "if(j('const x=1;').find(j.Identifier).size()!==1) process.exit(3);"
+        )
+        result = subprocess.run(
+            ["node", "-e", probe],
+            cwd=package,
+            text=True,
+            capture_output=True,
+            check=False,
+            env={**os.environ, "JSCODESHIFT_PACKAGE": str(package), **trace_environment},
+        )
+        if result.returncode != 0:
+            return False, "package-root guard probe failed"
+        loaded, node_processes, native_processes = _trace_loaded_package_modules(work / "modules.jsonl", package)
+        disallowed = sorted(loaded - ALLOWED_JS_BRIDGE_PATHS)
+        if disallowed:
+            return False, "package-root loaded non-bridge JavaScript: " + ", ".join(disallowed)
+        if node_processes == 0:
+            return False, "package-root module trace observed no Node process"
+        if native_processes == 0:
+            return False, "package-root module trace observed no compiled Rust process"
+    return True, "package-root executes with only the explicit JS bridge"
 
 
 def check_rust_legacy_engine_boundary(candidate: Path) -> tuple[bool, str]:
@@ -1997,75 +2089,8 @@ def check_rust_legacy_engine_boundary(candidate: Path) -> tuple[bool, str]:
     return True, "no exact public-engine copies remain in the submitted package"
 
 
-def check_rust_worker_execution_ownership(candidate: Path) -> tuple[bool, str]:
-    """Verify the public CLI does not delegate scheduling or transform work to old workers."""
-
-    retained = retained_legacy_engine_copies(candidate)
-    if retained:
-        return False, "worker execution ownership failed: retained copies of the public JS engine: " + ", ".join(sorted(retained)[:8])
-    passed, detail = run_with_engine_quarantine(
-        candidate,
-        cli_prefix=["--cpus", "2"],
-    )
-    return passed, detail if passed else f"worker execution ownership failed: {detail}"
-
-
-def check_rust_package_api_ownership(candidate: Path) -> tuple[bool, str]:
-    """Verify package-root helpers are backed by the migrated implementation."""
-
-    package = source_root(candidate).resolve()
-    with tempfile.TemporaryDirectory(prefix="jscodeshift-package-guard-") as raw:
-        root = Path(raw)
-        guard = root / "deny-retained-package-engine.js"
-        blocked = legacy_engine_module_patterns(candidate)
-        guard.write_text(
-            r'''
-const Module = require('module');
-const path = require('path');
-const root = path.resolve(process.env.JSCODESHIFT_ENGINE_ROOT);
-const blocked = JSON.parse(process.env.JSCODESHIFT_BLOCKED_MODULES || '[]');
-const originalLoad = Module._load;
-Module._load = function(request, parent, isMain) {
-  const resolved = Module._resolveFilename(request, parent, isMain);
-  if (typeof resolved === 'string') {
-    const relative = path.relative(root, path.resolve(resolved));
-    if (blocked.some(item => item.endsWith('/') ? relative.startsWith(item) : relative === item)) {
-      throw new Error(`retained JavaScript jscodeshift engine was loaded: ${resolved}`);
-    }
-  }
-  return originalLoad.apply(this, arguments);
-};
-'''.strip()
-            + "\n",
-            encoding="utf-8",
-        )
-        environment = {
-            **os.environ,
-            "NODE_OPTIONS": f"--require={guard}",
-            "JSCODESHIFT_ENGINE_ROOT": str(package),
-            "JSCODESHIFT_BLOCKED_MODULES": json.dumps(blocked),
-            "JSCODESHIFT_PACKAGE": str(package),
-        }
-
-        export_probe = "const j=require(process.env.JSCODESHIFT_PACKAGE); if(typeof j !== 'function') process.exit(2); j('const x=1;');"
-        exported = subprocess.run(
-            ["node", "-e", export_probe],
-            cwd=package,
-            text=True,
-            capture_output=True,
-            check=False,
-            env=environment,
-        )
-        export_output = exported.stdout + exported.stderr
-        if exported.returncode != 0 and "retained JavaScript jscodeshift engine was loaded" in export_output:
-            return False, "package-root export executes retained JavaScript parser, core, collection, or template code"
-        if exported.returncode != 0:
-            return False, "package-root export is not backed by the migrated runtime"
-    return True, "package-root helpers execute without loading retained first-party JavaScript engine modules"
-
-
 def check_rust_core_collections_ownership(candidate: Path) -> tuple[bool, str]:
-    """Probe core collections independently with the retained JS engine quarantined."""
+    """Probe core collections independently with non-bridge sources removed."""
 
     return ownership_probe(
         candidate,

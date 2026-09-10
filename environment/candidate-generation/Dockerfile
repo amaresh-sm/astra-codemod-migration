@@ -45,18 +45,14 @@ RUN npm install --global --ignore-scripts --no-audit --no-fund "@openai/codex@${
 RUN npm install --global --no-audit --no-fund "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}" \
     && claude --version
 
-# OpenHands SDK is used through a small non-interactive adapter. Pin both
-# packages together so the benchmark image is reproducible and the built-in
-# terminal/file-editor tools match the SDK event model.
-ARG OPENHANDS_VERSION=1.44.1
-RUN python3.12 -m pip install --no-cache-dir \
-      "openhands-sdk==${OPENHANDS_VERSION}" \
-      "openhands-tools==${OPENHANDS_VERSION}"
+# Use the reusable HackerRank/OpenHands package for Gateway routing, Gemini
+# request compatibility, response capture, and standardized telemetry.
+COPY vendor/hackerrank-openhands-gateway /opt/hackerrank-openhands-gateway
+RUN python3.12 -m pip install --no-cache-dir /opt/hackerrank-openhands-gateway
 
 RUN useradd --create-home runner
 WORKDIR /work
 COPY environment/candidate-generation/entrypoint.sh /usr/local/bin/astra-generate
-COPY astra_harness/openhands_runner.py /opt/astra/openhands_runner.py
 RUN chmod 0555 /usr/local/bin/astra-generate \
     && mkdir -p /input /output /work/candidate \
     && chown -R runner:runner /input /output /work

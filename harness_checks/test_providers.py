@@ -27,13 +27,14 @@ class ProviderCommandTests(unittest.TestCase):
                 command = build_provider_command(provider, "example-model", "high")
                 self.assertIn("--json", command.command)
 
-    def test_openhands_uses_the_sdk_runner_and_explicit_settings(self) -> None:
+    def test_openhands_uses_the_reusable_gateway_package_and_explicit_settings(self) -> None:
         command = build_provider_command("openhands", "gpt-5.6-sol", "high")
 
-        self.assertIn("python3 /opt/astra/openhands_runner.py", command.command)
+        self.assertIn("hackerrank-openhands run", command.command)
         self.assertIn("--model gpt-5.6-sol", command.command)
         self.assertIn("--reasoning high", command.command)
         self.assertIn("/workspace/INSTRUCTION.md", command.command)
+        self.assertIn("--output /output", command.command)
 
 
 if __name__ == "__main__":

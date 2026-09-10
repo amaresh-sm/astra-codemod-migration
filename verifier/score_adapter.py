@@ -5,18 +5,10 @@ import argparse
 import json
 from pathlib import Path
 
-CRITERIA = (
-    "cli-transform-api", "parser-and-transform-variants", "file-selection-and-stdin",
-    "dry-run-print-and-reporting", "parallel-workers-and-results", "failure-and-exit-contract",
-    "cli-surface-and-identity", "silent-output-contract", "symlink-boundary",
-    "parallel-failure-recovery", "lifecycle-manifest", "custom-option-forwarding",
-    "atomic-write-on-error", "parallel-result-determinism", "utf8-source-preservation",
-    "ast-collections-and-builders", "ast-formatting-and-comments", "ast-modern-syntax",
-    "core-api-surface", "collection-extensions", "template-code-generation", "package-root-export",
-    "rust-runner-entrypoint", "rust-parser-printer-ownership", "rust-core-collections-ownership",
-    "rust-worker-execution-ownership", "rust-package-api-ownership", "cross-feature-compatibility",
-    "package-boundary-compatibility", "ast-composition-corpus", "worker-replay-consistency",
-)
+try:
+    from .jscodeshift_checks import CRITERIA
+except ImportError:  # Direct execution: ``python verifier/score_adapter.py``.
+    from jscodeshift_checks import CRITERIA
 
 
 def main() -> int:

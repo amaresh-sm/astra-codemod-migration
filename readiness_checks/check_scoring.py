@@ -65,6 +65,19 @@ def check_scoring(verifier_dir: Path, proof_dir: Path) -> dict[str, Any]:
         result["ok"] = False
         return result
     ids = [str(item["id"]) for item in criteria]
+    # The executable verifier is the authoritative criterion registry.  Keep
+    # scoring.yml as the tunable weight ledger, but fail immediately if it
+    # silently drops or invents a criterion.
+    executable_registry = verifier_dir / "jscodeshift_checks.py"
+    if executable_registry.is_file():
+        try:
+            sys.path.insert(0, str(verifier_dir))
+            from jscodeshift_checks import CRITERIA as executable_criteria
+        except (ImportError, OSError) as exc:
+            result["failures"].append(f"cannot load executable verifier criteria: {exc}")
+            executable_criteria = ()
+        if tuple(ids) != tuple(executable_criteria):
+            result["failures"].append("scoring.yml IDs do not match the executable verifier registry")
     weights = [float(item["weight"]) for item in criteria]
     total = sum(weights)
     result.update({"criterion_ids": ids, "criterion_count": len(ids), "weight_total": total})

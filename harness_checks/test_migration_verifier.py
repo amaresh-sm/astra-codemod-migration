@@ -3,6 +3,8 @@ import unittest
 from pathlib import Path
 
 from verifier.jscodeshift_checks import (
+    ALLOWED_JS_BRIDGE_PATHS,
+    _remove_non_bridge_sources,
     legacy_engine_module_patterns,
     legacy_engine_paths,
     retained_legacy_engine_copies,
@@ -10,6 +12,24 @@ from verifier.jscodeshift_checks import (
 
 
 class MigrationOwnershipTests(unittest.TestCase):
+    def test_bridge_only_cleanup_removes_renamed_implementation_sources(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            package = Path(raw) / "candidate"
+            package.mkdir()
+            (package / "rust-compat.js").write_text("module.exports = {};\n", encoding="utf-8")
+            (package / "lib/renamed-engine.js").parent.mkdir(parents=True)
+            (package / "lib/renamed-engine.js").write_text("module.exports = {};\n", encoding="utf-8")
+            (package / "src/parser.ts").parent.mkdir(parents=True)
+            (package / "src/parser.ts").write_text("export const parser = true;\n", encoding="utf-8")
+
+            removed = _remove_non_bridge_sources(package)
+
+            self.assertEqual(set(removed), {"lib/renamed-engine.js", "src/parser.ts"})
+            self.assertTrue((package / "rust-compat.js").is_file())
+            self.assertEqual(ALLOWED_JS_BRIDGE_PATHS, {
+                "index.js", "bin/jscodeshift.js", "rust-compat.js", "rust-compat-worker.js"
+            })
+
     def test_comments_in_rust_do_not_create_delegation_findings(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
             candidate = Path(raw) / "candidate"

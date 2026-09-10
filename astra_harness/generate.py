@@ -61,7 +61,7 @@ def ensure_image(args: argparse.Namespace) -> None:
     )
     required_cli = {
         "claude-code": "claude",
-        "openhands": "python3",
+        "openhands": "hackerrank-openhands",
     }.get(args.provider, "codex")
     if found.returncode == 0:
         installed = subprocess.run(
@@ -117,11 +117,20 @@ def run(args: argparse.Namespace) -> int:
     workspace_before = snapshot_workspace(workspace)
     ensure_image(args)
 
+    # The reusable OpenHands/Gateway package writes its complete telemetry
+    # bundle to the mounted output directory. Keep that output outside the
+    # candidate workspace so it cannot be mistaken for an agent edit.
+    package_output = run_dir / ".openhands-output"
+    if args.provider == "openhands":
+        package_output.mkdir(mode=0o777)
+
     provider_command = build_provider_command(args.provider, args.model, args.reasoning)
     generation_command = args.command or provider_command.command
     container_name = f"astra-generate-{task_id}-{run_id}".replace("_", "-")
     docker_args = ["docker", "run", "--detach", "--name", container_name,
                    "--mount", f"type=bind,src={workspace},dst=/workspace"]
+    if args.provider == "openhands":
+        docker_args += ["--mount", f"type=bind,src={package_output},dst=/output"]
     if args.env_file:
         docker_args += ["--env-file", str(args.env_file.resolve())]
     if args.ca_cert:
@@ -237,17 +246,27 @@ def run(args: argparse.Namespace) -> int:
     finally:
         if container_started:
             subprocess.run(["docker", "rm", "--force", container_name], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False)
+
+    if args.provider == "openhands":
+        # Promote the package-owned artifacts to the standard run layout used
+        # by reports and the benchmark UI, then discard the staging directory.
+        for name in ("events.jsonl", "gateway_responses.jsonl", "trajectory.json", "telemetry.json"):
+            source = package_output / name
+            if source.is_file():
+                shutil.copy2(source, run_dir / name)
+        shutil.rmtree(package_output, ignore_errors=True)
     metadata["finished_at"] = utc_now()
     metadata["duration_seconds"] = round(time.monotonic() - started, 3)
     metadata["container_cleaned"] = not container_started or subprocess.run(
         ["docker", "container", "inspect", container_name], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False
     ).returncode != 0
     (run_dir / "metadata.json").write_text(json.dumps(metadata, indent=2) + "\n")
-    telemetry = collect_telemetry(workspace, workspace_before, logs / "stdout.log")
-    telemetry["duration_seconds"] = metadata["duration_seconds"]
-    telemetry["started_at"] = metadata["started_at"]
-    telemetry["finished_at"] = metadata["finished_at"]
-    (run_dir / "telemetry.json").write_text(json.dumps(telemetry, indent=2) + "\n")
+    if args.provider != "openhands" or not (run_dir / "telemetry.json").is_file():
+        telemetry = collect_telemetry(workspace, workspace_before, logs / "stdout.log")
+        telemetry["duration_seconds"] = metadata["duration_seconds"]
+        telemetry["started_at"] = metadata["started_at"]
+        telemetry["finished_at"] = metadata["finished_at"]
+        (run_dir / "telemetry.json").write_text(json.dumps(telemetry, indent=2) + "\n")
     print(run_dir)
     return 0 if metadata["status"] == "completed" else 1
 

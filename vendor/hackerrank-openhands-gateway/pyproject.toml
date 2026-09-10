@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hackerrank-openhands-gateway"
+version = "0.1.0"
+description = "Reusable OpenHands runner for the HackerRank API Gateway with standardized telemetry"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = [
+  "openhands-sdk==1.44.1",
+  "openhands-tools==1.44.1",
+  "pydantic>=2.0,<3.0",
+  "python-dotenv>=1.0,<2.0",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8,<10"]
+
+[project.scripts]
+hackerrank-openhands = "hackerrank_openhands.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["live: optional live HackerRank Gateway smoke test"]

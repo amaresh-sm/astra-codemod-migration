@@ -1,90 +1,85 @@
 task_id: migrate-jscodeshift-runner-to-rust
 criteria:
   - id: cli-transform-api
-    requirement: The migrated CLI loads JavaScript and TypeScript transforms, including Babel-transpiled default exports, and preserves the jscodeshift transform API aliases.
+    requirement: JavaScript and TypeScript transforms, default exports, API aliases, and options remain compatible.
     contract: public/contracts/migration.contract.json
     hidden_test: jscodeshift.cli-transform-api
     mutant: transform-api-drift
     weight: 0.0075
   - id: parser-and-transform-variants
-    requirement: TSX, Flow, transform-declared parsers, asynchronous transforms, and URL-sourced transforms remain compatible.
+    requirement: TSX, Flow, transform-declared parsers, async transforms, and URL transforms remain compatible.
     contract: public/contracts/migration.contract.json
     hidden_test: jscodeshift.parser-and-transform-variants
     mutant: parser-source-drift
     weight: 0.0075
   - id: file-selection-and-stdin
-    requirement: Recursive paths, extension filters, ignore patterns, and newline-separated stdin paths select the intended files.
+    requirement: Recursive discovery, extensions, ignores, and newline-separated stdin paths select intended files.
     contract: public/contracts/migration.contract.json
     hidden_test: jscodeshift.file-selection-and-stdin
     mutant: selection-filter-drift
     weight: 0.0075
   - id: dry-run-print-and-reporting
-    requirement: Dry runs preserve files while print output, statistics, and transform reports remain observable.
+    requirement: Dry runs, printing, statistics, reports, and result statuses remain observable and non-mutating.
     contract: public/contracts/migration.contract.json
     hidden_test: jscodeshift.dry-run-print-and-reporting
     mutant: dry-run-write-leak
     weight: 0.0075
   - id: parallel-workers-and-results
-    requirement: The runner honors a CPU limit, processes every selected file, and reports aggregate worker results.
+    requirement: CPU limits, file processing, and aggregate worker results remain compatible.
     contract: public/contracts/migration.contract.json
     hidden_test: jscodeshift.parallel-workers-and-results
     mutant: worker-count-drift
     weight: 0.0075
   - id: failure-and-exit-contract
-    requirement: Transform failures are reported per file and --fail-on-error controls the process exit status.
+    requirement: Per-file failures and fail-on-error exit behavior remain compatible.
     contract: public/contracts/migration.contract.json
     hidden_test: jscodeshift.failure-and-exit-contract
     mutant: fail-on-error-drift
     weight: 0.0075
-
   - id: cli-surface-and-identity
-    requirement: Help and version output expose the supported CLI surface and identify the Rust runner.
+    requirement: Help and version expose the supported CLI surface and Rust runner identity.
     contract: public/contracts/migration.contract.json
     hidden_test: jscodeshift.cli-surface-and-identity
-    mutant: cli-surface-drift
+    mutant: cli-surface-help
     weight: 0.0075
-
   - id: silent-output-contract
-    requirement: --silent suppresses all CLI output without suppressing file transformation.
+    requirement: Silent mode suppresses output without suppressing transformation.
     contract: public/contracts/migration.contract.json
     hidden_test: jscodeshift.silent-output-contract
     mutant: silent-output-drift
     weight: 0.0075
-
   - id: symlink-boundary
-    requirement: File discovery preserves the legacy runner's processing behavior for in-root and out-of-root symlinks.
+    requirement: In-root and out-of-root symlink processing preserves the documented behavior.
     contract: public/contracts/migration.contract.json
     hidden_test: jscodeshift.symlink-boundary
     mutant: symlink-boundary-drift
     weight: 0.0075
-
   - id: parallel-failure-recovery
-    requirement: A worker failure is reported without preventing independent files from completing.
+    requirement: Worker failures do not prevent independent files from completing.
     contract: public/contracts/migration.contract.json
     hidden_test: jscodeshift.parallel-failure-recovery
     mutant: worker-failure-isolation-drift
     weight: 0.0075
-
   - id: lifecycle-manifest
-    requirement: The candidate declares valid build, reset, and start lifecycle commands.
+    requirement: Build, reset, and start lifecycle commands are declared and valid.
     contract: public/contracts/migration.contract.json
     hidden_test: jscodeshift.lifecycle-manifest
     mutant: lifecycle-manifest-drift
     weight: 0.0075
   - id: custom-option-forwarding
-    requirement: Repeatable and equals-form custom options reach JavaScript transforms without losing values.
+    requirement: Repeatable and equals-form custom options reach transforms without losing values.
     contract: public/contracts/migration.contract.json
     hidden_test: jscodeshift.custom-option-forwarding
     mutant: custom-option-forwarding-drift
     weight: 0.0075
   - id: atomic-write-on-error
-    requirement: A transform error never partially overwrites the input file.
+    requirement: Transform errors never partially overwrite source files.
     contract: public/contracts/migration.contract.json
     hidden_test: jscodeshift.atomic-write-on-error
     mutant: partial-write-on-error
     weight: 0.0075
   - id: parallel-result-determinism
-    requirement: Repeated parallel runs preserve stable aggregate status reporting.
+    requirement: Repeated parallel runs produce stable aggregate status reporting.
     contract: public/contracts/migration.contract.json
     hidden_test: jscodeshift.parallel-result-determinism
     mutant: nondeterministic-worker-report
@@ -96,100 +91,178 @@ criteria:
     mutant: encoding-preservation-drift
     weight: 0.0075
   - id: ast-collections-and-builders
-    requirement: Transforms can traverse collections and use standard jscodeshift builders before printing.
+    requirement: AST traversal and standard builders remain usable before printing.
     contract: public/contracts/migration.contract.json
     hidden_test: jscodeshift.ast-collections-and-builders
     mutant: ast-builder-drift
     weight: 0.0075
   - id: ast-formatting-and-comments
-    requirement: AST edits preserve leading comments and honor source formatting options.
+    requirement: AST edits preserve comments and honor source formatting options.
     contract: public/contracts/migration.contract.json
     hidden_test: jscodeshift.ast-formatting-and-comments
     mutant: ast-formatting-drift
     weight: 0.0075
   - id: ast-modern-syntax
-    requirement: TypeScript, TSX, and modern JavaScript syntax remain traversable by AST transforms.
+    requirement: TypeScript, TSX, and modern JavaScript remain traversable.
     contract: public/contracts/migration.contract.json
     hidden_test: jscodeshift.ast-modern-syntax
     mutant: ast-syntax-drift
     weight: 0.0075
-
   - id: core-api-surface
-    requirement: The package core export preserves parser binding, matching, plugin registration, builders, enriched API helpers, and its documented string, node, node-path, and array input forms.
+    requirement: Core exports preserve parser binding, matching, plugins, builders, and documented input forms.
     contract: public/contracts/migration.contract.json
     hidden_test: jscodeshift.core-api-surface
     mutant: core-api-surface-drift
     weight: 0.015
-
   - id: collection-extensions
-    requirement: Typed collections preserve import, variable, JSX, filter, mapping, mutation, predicate, indexing, and NodePath accessors.
+    requirement: Typed collections preserve traversal, filters, mappings, mutations, predicates, and NodePath accessors.
     contract: public/contracts/migration.contract.json
     hidden_test: jscodeshift.collection-extensions
     mutant: collection-extension-drift
     weight: 0.015
-
   - id: template-code-generation
-    requirement: Statement, expression, and async-expression template helpers produce compatible AST nodes, array interpolations, and printed code.
+    requirement: Statement, expression, and async-expression templates produce compatible nodes and code.
     contract: public/contracts/migration.contract.json
     hidden_test: jscodeshift.template-code-generation
     mutant: template-generation-drift
     weight: 0.015
-
   - id: package-root-export
-    requirement: The package root remains importable and exports the callable jscodeshift API with its standard helpers.
+    requirement: The package root remains importable and exports the callable jscodeshift API.
     contract: public/contracts/migration.contract.json
     hidden_test: jscodeshift.package-root-export
-    mutant: package-export-drift
+    mutant: package-root-export
     weight: 0.015
-
   - id: rust-runner-entrypoint
-    requirement: The public jscodeshift launcher executes the compiled Rust runner.
+    requirement: The public launcher executes the compiled Rust runner.
     contract: public/contracts/migration.contract.json
     hidden_test: jscodeshift.rust-runner-entrypoint
-    mutant: javascript-runner-fallback
-    weight: 0.05
-  - id: rust-parser-printer-ownership
-    requirement: Source parsing and printing execute without loading retained first-party JavaScript parser adapters or JavaScript parser/printer dependencies.
+    mutant: rust-entrypoint
+    weight: 0.03
+  - id: rust-parser-babel-ownership
+    requirement: Babel parsing and printing work with all non-bridge submitted JavaScript removed.
     contract: public/contracts/migration.contract.json
-    hidden_test: jscodeshift.rust-parser-printer-ownership
-    mutant: retained-javascript-parser-printer-delegation
-    weight: 0.20
+    hidden_test: jscodeshift.rust-parser-babel-ownership
+    mutant: parser-ownership
+    weight: 0.04
+  - id: rust-parser-typescript-ownership
+    requirement: TypeScript parsing works with all non-bridge submitted JavaScript removed.
+    contract: public/contracts/migration.contract.json
+    hidden_test: jscodeshift.rust-parser-typescript-ownership
+    mutant: parser-ownership
+    weight: 0.04
+  - id: rust-parser-tsx-ownership
+    requirement: TSX parsing works with all non-bridge submitted JavaScript removed.
+    contract: public/contracts/migration.contract.json
+    hidden_test: jscodeshift.rust-parser-tsx-ownership
+    mutant: parser-ownership
+    weight: 0.04
+  - id: rust-printer-comments-ownership
+    requirement: Comment-preserving printing works with all non-bridge submitted JavaScript removed.
+    contract: public/contracts/migration.contract.json
+    hidden_test: jscodeshift.rust-printer-comments-ownership
+    mutant: parser-ownership
+    weight: 0.04
   - id: rust-core-collections-ownership
-    requirement: The transform core API, collection traversal, matching, and templates execute without loading their retained first-party JavaScript implementation.
+    requirement: Core collection traversal and mutation work with all non-bridge submitted JavaScript removed.
     contract: public/contracts/migration.contract.json
     hidden_test: jscodeshift.rust-core-collections-ownership
-    mutant: retained-javascript-core-collections-delegation
-    weight: 0.20
-  - id: rust-worker-execution-ownership
-    requirement: The public CLI executes transforms without loading the retained JavaScript runner or worker implementation.
+    mutant: collections-ownership
+    weight: 0.04
+  - id: rust-core-builders-ownership
+    requirement: Native core builders work with all non-bridge submitted JavaScript removed.
     contract: public/contracts/migration.contract.json
-    hidden_test: jscodeshift.rust-worker-execution-ownership
-    mutant: retained-javascript-worker-delegation
-    weight: 0.15
-  - id: rust-package-api-ownership
-    requirement: Direct package-root helpers execute without loading retained first-party JavaScript parser, core, collection, or template code.
+    hidden_test: jscodeshift.rust-core-builders-ownership
+    mutant: collections-ownership
+    weight: 0.04
+  - id: rust-core-templates-ownership
+    requirement: Native template generation works with all non-bridge submitted JavaScript removed.
     contract: public/contracts/migration.contract.json
-    hidden_test: jscodeshift.rust-package-api-ownership
-    mutant: retained-javascript-package-api-delegation
-    weight: 0.15
-
+    hidden_test: jscodeshift.rust-core-templates-ownership
+    mutant: collections-ownership
+    weight: 0.04
+  - id: rust-core-nodepath-ownership
+    requirement: Native NodePath accessors work with all non-bridge submitted JavaScript removed.
+    contract: public/contracts/migration.contract.json
+    hidden_test: jscodeshift.rust-core-nodepath-ownership
+    mutant: collections-ownership
+    weight: 0.04
+  - id: rust-edge-ast-ownership
+    requirement: Edge-case TypeScript and TSX syntax works with all non-bridge submitted JavaScript removed.
+    contract: public/contracts/migration.contract.json
+    hidden_test: jscodeshift.rust-edge-ast-ownership
+    mutant: parser-ownership
+    weight: 0.025
+  - id: rust-edge-cli-ownership
+    requirement: Native CLI stdin and extension boundaries work with all non-bridge submitted JavaScript removed.
+    contract: public/contracts/migration.contract.json
+    hidden_test: jscodeshift.rust-edge-cli-ownership
+    mutant: rust-entrypoint
+    weight: 0.025
+  - id: rust-worker-multifile-ownership
+    requirement: Native multi-file execution works with all non-bridge submitted JavaScript removed.
+    contract: public/contracts/migration.contract.json
+    hidden_test: jscodeshift.rust-worker-multifile-ownership
+    mutant: worker-ownership
+    weight: 0.04
+  - id: rust-worker-parallel-ownership
+    requirement: Native parallel execution works with all non-bridge submitted JavaScript removed.
+    contract: public/contracts/migration.contract.json
+    hidden_test: jscodeshift.rust-worker-parallel-ownership
+    mutant: worker-ownership
+    weight: 0.04
+  - id: rust-worker-failure-ownership
+    requirement: Native worker failure recovery works with all non-bridge submitted JavaScript removed.
+    contract: public/contracts/migration.contract.json
+    hidden_test: jscodeshift.rust-worker-failure-ownership
+    mutant: worker-ownership
+    weight: 0.04
+  - id: rust-worker-determinism-ownership
+    requirement: Native worker replay is deterministic with all non-bridge submitted JavaScript removed.
+    contract: public/contracts/migration.contract.json
+    hidden_test: jscodeshift.rust-worker-determinism-ownership
+    mutant: worker-ownership
+    weight: 0.04
+  - id: rust-package-root-ownership
+    requirement: Package-root parser, collections, and templates work through the migrated runtime.
+    contract: public/contracts/migration.contract.json
+    hidden_test: jscodeshift.rust-package-root-ownership
+    mutant: package-api-ownership
+    weight: 0.05
+  - id: rust-package-clean-pack-ownership
+    requirement: A clean npm package runs with only the explicit JavaScript compatibility bridge.
+    contract: public/contracts/migration.contract.json
+    hidden_test: jscodeshift.rust-package-clean-pack-ownership
+    mutant: package-api-ownership
+    weight: 0.05
+  - id: rust-package-guard-ownership
+    requirement: Package-root loading does not execute unapproved JavaScript implementation modules.
+    contract: public/contracts/migration.contract.json
+    hidden_test: jscodeshift.rust-package-guard-ownership
+    mutant: package-api-ownership
+    weight: 0.05
+  - id: rust-legacy-engine-boundary
+    requirement: Exact copies of the public first-party JavaScript engine are absent from the package.
+    contract: public/contracts/migration.contract.json
+    hidden_test: jscodeshift.rust-legacy-engine-boundary
+    mutant: package-api-ownership
+    weight: 0.04
   - id: cross-feature-compatibility
-    requirement: CLI options, parser selection, worker scheduling, templates, and ignore rules compose correctly in a single run.
+    requirement: CLI, parser, worker, template, and ignore features compose correctly.
     hidden_test: jscodeshift.cross-feature-compatibility
     mutant: cross-feature-composition-drift
     weight: 0.02
   - id: package-boundary-compatibility
-    requirement: The packed npm artifact retains its public metadata, package export, and CLI entrypoint.
+    requirement: The packed npm artifact retains its metadata, package export, and CLI entrypoint.
     hidden_test: jscodeshift.package-boundary-compatibility
     mutant: package-boundary-drift
     weight: 0.005
   - id: ast-composition-corpus
-    requirement: A multi-file TypeScript/TSX AST corpus preserves syntax, plugins, collections, templates, and formatting.
+    requirement: A multi-file TypeScript/TSX corpus preserves syntax, plugins, collections, templates, and formatting.
     hidden_test: jscodeshift.ast-composition-corpus
     mutant: ast-corpus-drift
     weight: 0.01
   - id: worker-replay-consistency
-    requirement: Delayed and failed transforms produce the same successful and failed file outcomes in parallel and serial modes.
+    requirement: Delayed and failed transforms produce matching parallel and serial outcomes.
     hidden_test: jscodeshift.worker-replay-consistency
     mutant: worker-replay-drift
     weight: 0.02

@@ -1,11 +1,63 @@
 {
   "mutants": {
-    "cli-surface-help": { "hidden_test": "jscodeshift.cli-surface-and-identity", "expected_criteria": ["cli-surface-and-identity"], "related_criteria": [] },
-    "rust-entrypoint": { "hidden_test": "jscodeshift.rust-runner-entrypoint", "expected_criteria": ["rust-runner-entrypoint"], "related_criteria": ["cli-transform-api", "parser-and-transform-variants", "file-selection-and-stdin", "dry-run-print-and-reporting", "parallel-workers-and-results", "failure-and-exit-contract", "cli-surface-and-identity", "silent-output-contract", "symlink-boundary", "parallel-failure-recovery", "custom-option-forwarding", "atomic-write-on-error", "parallel-result-determinism", "utf8-source-preservation", "ast-collections-and-builders", "ast-formatting-and-comments", "ast-modern-syntax", "core-api-surface", "template-code-generation", "rust-parser-printer-ownership", "rust-core-collections-ownership", "rust-worker-execution-ownership", "cross-feature-compatibility", "package-boundary-compatibility", "ast-composition-corpus", "worker-replay-consistency"] },
-    "package-root-export": { "hidden_test": "jscodeshift.package-root-export", "expected_criteria": ["package-root-export"], "related_criteria": ["core-api-surface", "rust-package-api-ownership", "package-boundary-compatibility"] },
-    "package-api-ownership": { "hidden_test": "jscodeshift.rust-package-api-ownership", "expected_criteria": ["rust-package-api-ownership"], "related_criteria": ["package-boundary-compatibility"] },
-    "parser-ownership": { "hidden_test": "jscodeshift.rust-parser-printer-ownership", "expected_criteria": ["rust-parser-printer-ownership"], "related_criteria": [] },
-    "collections-ownership": { "hidden_test": "jscodeshift.rust-core-collections-ownership", "expected_criteria": ["rust-core-collections-ownership"], "related_criteria": [] },
-    "worker-ownership": { "hidden_test": "jscodeshift.rust-worker-execution-ownership", "expected_criteria": ["rust-worker-execution-ownership"], "related_criteria": ["cli-transform-api", "parser-and-transform-variants", "file-selection-and-stdin", "dry-run-print-and-reporting", "parallel-workers-and-results", "failure-and-exit-contract", "cli-surface-and-identity", "silent-output-contract", "symlink-boundary", "parallel-failure-recovery", "custom-option-forwarding", "atomic-write-on-error", "parallel-result-determinism", "ast-collections-and-builders", "ast-formatting-and-comments", "ast-modern-syntax", "core-api-surface", "template-code-generation", "rust-parser-printer-ownership", "rust-core-collections-ownership", "cross-feature-compatibility", "ast-composition-corpus", "worker-replay-consistency"] }
+    "cli-surface-help": {
+      "hidden_test": "jscodeshift.cli-surface-and-identity",
+      "expected_criteria": ["cli-surface-and-identity"],
+      "related_criteria": []
+    },
+    "rust-entrypoint": {
+      "hidden_test": "jscodeshift.rust-runner-entrypoint",
+      "expected_criteria": ["rust-runner-entrypoint"],
+      "related_criteria": [
+        "ast-collections-and-builders", "ast-composition-corpus", "ast-formatting-and-comments",
+        "ast-modern-syntax", "atomic-write-on-error", "cli-surface-and-identity", "cli-transform-api",
+        "core-api-surface", "cross-feature-compatibility", "custom-option-forwarding",
+        "dry-run-print-and-reporting", "failure-and-exit-contract", "file-selection-and-stdin",
+        "package-boundary-compatibility", "parallel-failure-recovery", "parallel-result-determinism",
+        "parallel-workers-and-results", "parser-and-transform-variants", "rust-package-clean-pack-ownership",
+        "silent-output-contract", "symlink-boundary", "template-code-generation", "utf8-source-preservation",
+        "worker-replay-consistency"
+      ]
+    },
+    "package-root-export": {
+      "hidden_test": "jscodeshift.package-root-export",
+      "expected_criteria": ["package-root-export"],
+      "related_criteria": [
+        "core-api-surface", "package-boundary-compatibility", "rust-package-root-ownership",
+        "rust-package-guard-ownership"
+      ]
+    },
+    "package-api-ownership": {
+      "hidden_test": "jscodeshift.rust-package-guard-ownership",
+      "expected_criteria": ["rust-package-guard-ownership"],
+      "related_criteria": ["package-boundary-compatibility"]
+    },
+    "parser-ownership": {
+      "hidden_test": "jscodeshift.rust-parser-tsx-ownership",
+      "expected_criteria": ["rust-parser-tsx-ownership"],
+      "related_criteria": ["rust-edge-ast-ownership"]
+    },
+    "collections-ownership": {
+      "hidden_test": "jscodeshift.rust-core-collections-ownership",
+      "expected_criteria": ["rust-core-collections-ownership"],
+      "related_criteria": []
+    },
+    "worker-ownership": {
+      "hidden_test": "jscodeshift.rust-worker-parallel-ownership",
+      "expected_criteria": ["rust-worker-parallel-ownership"],
+      "related_criteria": [
+        "ast-collections-and-builders", "ast-composition-corpus", "ast-formatting-and-comments",
+        "ast-modern-syntax", "atomic-write-on-error", "cli-surface-and-identity", "cli-transform-api", "core-api-surface",
+        "cross-feature-compatibility", "custom-option-forwarding", "dry-run-print-and-reporting",
+        "failure-and-exit-contract", "file-selection-and-stdin", "parallel-failure-recovery",
+        "parallel-result-determinism", "parallel-workers-and-results", "parser-and-transform-variants",
+        "rust-core-builders-ownership", "rust-core-collections-ownership", "rust-core-nodepath-ownership",
+        "rust-core-templates-ownership", "rust-edge-ast-ownership", "rust-edge-cli-ownership",
+        "rust-parser-babel-ownership", "rust-parser-tsx-ownership", "rust-parser-typescript-ownership",
+        "rust-printer-comments-ownership", "rust-worker-failure-ownership", "rust-worker-multifile-ownership",
+        "rust-worker-determinism-ownership", "silent-output-contract", "symlink-boundary",
+        "template-code-generation", "worker-replay-consistency"
+      ]
+    }
   }
 }

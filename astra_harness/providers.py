@@ -38,12 +38,14 @@ def build_provider_command(provider: str, model: str, reasoning: str) -> Provide
             ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_BASE_URL"),
         )
     if provider == "openhands":
-        # The SDK runner reads INSTRUCTION.md from the mounted workspace and
-        # emits one JSON event per line for the shared telemetry collector.
+        # Use the reusable HackerRank/OpenHands package.  It owns the SDK
+        # setup, Gateway compatibility fixes, response capture, and complete
+        # telemetry/trajectory artifacts.
         return ProviderCommand(
-            "python3 /opt/astra/openhands_runner.py "
+            "hackerrank-openhands run "
             f"--workspace /workspace --instruction /workspace/INSTRUCTION.md "
-            f"--model {model_arg} --reasoning {shlex.quote(reasoning)}",
-            ("LLM_API_KEY", "LLM_BASE_URL", "LLM_MODEL"),
+            f"--model {model_arg} --reasoning {shlex.quote(reasoning)} "
+            "--output /output --redact",
+            ("ASTRA_GATEWAY_API_KEY", "ASTRA_GATEWAY_BASE_URL", "LLM_API_KEY", "LLM_BASE_URL"),
         )
     raise ValueError("provider must be codex, openai-compatible, claude-code, or openhands")
