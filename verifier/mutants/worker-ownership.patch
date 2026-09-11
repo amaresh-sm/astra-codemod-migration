@@ -1,0 +1,11 @@
+diff --git a/rust/src/main.rs b/rust/src/main.rs
+--- a/rust/src/main.rs
++++ b/rust/src/main.rs
+@@ -308,6 +308,6 @@
+     };
+     let mut child = match Command::new("node")
+-        .arg(c.package_root.join("rust-compat-worker.js"))
++        .arg(c.package_root.join("src/Collection.js"))
+         .args([
+             tr.to_string_lossy().as_ref(),
+             file.to_string_lossy().as_ref(),

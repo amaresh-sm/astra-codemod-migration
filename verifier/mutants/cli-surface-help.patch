@@ -1,0 +1,9 @@
+diff --git a/rust/src/main.rs b/rust/src/main.rs
+--- a/rust/src/main.rs
++++ b/rust/src/main.rs
+@@ -74,4 +74,4 @@
+ }
+ fn usage() {
+-    println!("jscodeshift [options] PATH...\n  -t, --transform PATH  transform module\n  -c, --cpus N          worker count\n  --extensions LIST     file extensions\n  --ignore-pattern GLOB ignore matching paths\n  --ignore-config FILE  read ignore patterns\n  --gitignore            read .gitignore\n  --stdin                read newline-separated paths\n  --run-in-band          run serially\n  --dry --print --silent --fail-on-error\n  --parser NAME          parser adapter\n  --version --help");
++    println!("jscodeshift [options] PATH...\n  -t, --transform PATH  transform module\n  -c, --cpus N          worker count\n  --extensions LIST     file extensions\n  --ignore-pattern GLOB ignore matching paths\n  --ignore-config FILE  read ignore patterns\n  --gitignore            read .gitignore\n  --run-in-band          run serially\n  --dry --print --silent --fail-on-error\n  --parser NAME          parser adapter\n  --version --help");
+ }

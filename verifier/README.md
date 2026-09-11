@@ -22,3 +22,8 @@ execute the native runner, fails the ownership criterion.
 The exact-copy fingerprint check remains as a diagnostic for retained upstream source, but it is
 not the primary ownership proof. The removal-and-trace probes are deliberately independent per
 parser, core, worker, and package boundary.
+
+The permitted bridge is also capability-audited. It may load customer transforms and marshal
+requests to Rust, but it may not define the collections, AST node model, builders, templates,
+NodePath behavior, or printing logic itself. This prevents a renamed or compact JavaScript engine
+from being hidden inside an otherwise allowed bridge filename.

@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import json
 import hashlib
+import re
 import shlex
 import shutil
 import subprocess
@@ -132,6 +133,113 @@ ALLOWED_JS_BRIDGE_PATHS = frozenset({
     "rust-compat.js",
     "rust-compat-worker.js",
 })
+
+# The bridge exists solely because customer transforms are JavaScript. It may
+# load a transform, marshal file/options data, and forward requests to Rust;
+# it must not become a second implementation of the jscodeshift engine.
+# These capabilities deliberately describe behavior rather than prescribed
+# filenames or the historical upstream source layout.
+BRIDGE_ENGINE_CAPABILITIES = {
+    "collection runtime": re.compile(
+        r"\b(?:find|filter|map|forEach|replaceWith|paths|nodes|at|isOfType|getTypes|childElements|childNodes|renameTo)\s*\("
+    ),
+    "AST node projection": re.compile(r"\b(?:nodeFromDescriptor|makePath)\s*\(|\bObject\.defineProperty\s*\("),
+    "AST builders": re.compile(
+        r"\b(?:identifier|literal|variableDeclarator|variableDeclaration|memberExpression|callExpression|expressionStatement)\s*\("
+    ),
+    "template generation": re.compile(r"\b(?:template|asyncExpression)\s*\("),
+    "printing or source mutation": re.compile(r"\b(?:toSource|renderNode|replaceAll|renameIdentifier|flush|patch)\s*\("),
+}
+
+
+def _javascript_code_without_comments_or_literals(source: str) -> str:
+    """Remove comments and literals before evaluating bridge capabilities.
+
+    This is intentionally a small lexical pass, not a JavaScript parser. It
+    avoids rejecting harmless documentation or diagnostic strings that happen
+    to name jscodeshift methods while retaining executable identifiers and
+    class declarations for the bridge-boundary audit.
+    """
+
+    output: list[str] = []
+    index = 0
+    length = len(source)
+    quote: str | None = None
+    while index < length:
+        char = source[index]
+        next_char = source[index + 1] if index + 1 < length else ""
+        if quote is not None:
+            if char == "\\":
+                output.append(" ")
+                if index + 1 < length:
+                    output.append(" ")
+                    index += 2
+                    continue
+            elif char == quote:
+                quote = None
+            output.append("\n" if char == "\n" else " ")
+            index += 1
+            continue
+        if char in {"'", '"', "`"}:
+            quote = char
+            output.append(" ")
+            index += 1
+            continue
+        if char == "/" and next_char == "/":
+            while index < length and source[index] != "\n":
+                output.append(" ")
+                index += 1
+            continue
+        if char == "/" and next_char == "*":
+            output.extend((" ", " "))
+            index += 2
+            while index < length:
+                if source[index] == "*" and index + 1 < length and source[index + 1] == "/":
+                    output.extend((" ", " "))
+                    index += 2
+                    break
+                output.append("\n" if source[index] == "\n" else " ")
+                index += 1
+            continue
+        output.append(char)
+        index += 1
+    return "".join(output)
+
+
+def bridge_engine_findings(candidate: Path) -> list[str]:
+    """Identify first-party engine behavior implemented in the allowed bridge.
+
+    A legitimate bridge can be a loader and a generic protocol adapter. A
+    bridge that combines runtime classes with several independent AST-engine
+    capabilities is a hybrid engine, even if it invokes a Rust binary for a
+    cosmetic or partial operation. The check intentionally requires a
+    combination of signals to avoid rejecting simple adapter glue.
+    """
+
+    package = source_root(candidate)
+    findings: list[str] = []
+    for relative in sorted(ALLOWED_JS_BRIDGE_PATHS):
+        path = package / relative
+        if not path.is_file():
+            continue
+        try:
+            code = _javascript_code_without_comments_or_literals(path.read_text(encoding="utf-8"))
+        except OSError:
+            continue
+        classes = sorted(set(re.findall(r"\bclass\s+([A-Za-z_$][A-Za-z0-9_$]*)", code)))
+        capabilities = sorted(
+            label for label, pattern in BRIDGE_ENGINE_CAPABILITIES.items() if pattern.search(code)
+        )
+        # A thin adapter needs neither its own runtime object model nor a
+        # collection of AST operations. Requiring both signals keeps this a
+        # semantic ownership guard rather than a source-size/file-name rule.
+        if classes and len(capabilities) >= 2:
+            findings.append(
+                f"{relative} defines runtime classes ({', '.join(classes)}) and engine capabilities ({', '.join(capabilities)})"
+            )
+        elif len(capabilities) >= 4:
+            findings.append(f"{relative} implements multiple AST-engine capabilities ({', '.join(capabilities)})")
+    return findings
 
 
 def public_source_root() -> Path | None:
@@ -1548,6 +1656,132 @@ module.exports.parser = 'tsx';
             return False, "AST corpus templates were not emitted for every file"
         if "corpus comment" not in modern or 'label=\'new\'' not in modern:
             return False, "AST corpus formatting or JSX mutation was not preserved"
+
+        # Exercise a realistic customer-authored JSX/TSX transform.  This is
+        # intentionally kept inside the existing AST-composition criterion:
+        # ReactDOM is representative application code, not a new library
+        # feature.  The cases cover import rewriting, aliases, multiple
+        # matches, existing client imports, false-positive avoidance, comment
+        # preservation, and a byte-for-byte no-op.
+        react_files = {
+            "project/react-basic.jsx": (
+                'import React from "react";\n'
+                'import ReactDOM from "react-dom";\n\n'
+                'ReactDOM.render(<App />, root);\n'
+            ),
+            "project/react-multiple.jsx": (
+                'import DOM from "react-dom";\n'
+                'const text = "ReactDOM.render(<Fake />, root);";\n'
+                'DOM.render(<First />, root);\n'
+                'Other.render(<Ignored />, root);\n'
+                'DOM.render(<Second />, otherRoot);\n'
+            ),
+            "project/react-existing-client.jsx": (
+                'import ReactDOM from "react-dom/client";\n\n'
+                'ReactDOM.render(<App />, root);\n'
+            ),
+            "project/react-no-match.jsx": (
+                'const text = "ReactDOM.render(<Fake />, root);";\n'
+                'Other.render(<Ignored />, root);\n'
+            ),
+            "project/react-comments.tsx": (
+                '// keep this integration comment\n'
+                'interface Props { root: HTMLElement }\n'
+                'import DOM from "react-dom";\n\n'
+                'const view = <Widget />;\n'
+                'DOM.render(\n'
+                '  view,\n'
+                '  container\n'
+                ');\n'
+            ),
+        }
+        for relative, content in react_files.items():
+            (root / relative).write_text(content, encoding="utf-8")
+
+        react_transform = write_transform(
+            root / "react-migration-transform.js",
+            r'''
+module.exports = function(file, api) {
+  const j = api.jscodeshift;
+  const ast = j(file.source);
+  const domLocals = new Set();
+
+  ast.find(j.ImportDeclaration).forEach(path => {
+    const source = path.node.source.value;
+    if (source !== 'react-dom' && source !== 'react-dom/client') return;
+    const defaultImport = (path.node.specifiers || []).find(
+      specifier => specifier.type === 'ImportDefaultSpecifier'
+    );
+    if (!defaultImport) return;
+    domLocals.add(defaultImport.local.name);
+    if (source === 'react-dom') path.node.source.value = 'react-dom/client';
+  });
+
+  let changed = false;
+  const transformed = ast.find(j.CallExpression).replaceWith(path => {
+    const call = path.node;
+    const callee = call.callee;
+    if (!callee || callee.type !== 'MemberExpression' || callee.computed ||
+        callee.property.type !== 'Identifier' || callee.property.name !== 'render' ||
+        callee.object.type !== 'Identifier' || !domLocals.has(callee.object.name) ||
+        call.arguments.length !== 2) {
+      return call;
+    }
+    changed = true;
+    const root = j.callExpression(
+      j.memberExpression(callee.object, j.identifier('createRoot')),
+      [call.arguments[1]]
+    );
+    return j.callExpression(j.memberExpression(root, j.identifier('render')), [call.arguments[0]]);
+  });
+
+  return changed ? transformed.toSource({ quote: 'double' }) : file.source;
+};
+'''.strip()
+            + "\n",
+        )
+        react_result = run_cli(
+            candidate,
+            ["--cpus", "2", "--parser", "tsx", "--transform", str(react_transform), "project"],
+            cwd=root,
+        )
+        if react_result.returncode != 0:
+            return False, f"React AST corpus transform failed (rc={react_result.returncode})"
+
+        basic = (root / "project/react-basic.jsx").read_text(encoding="utf-8")
+        if (
+            'import ReactDOM from "react-dom/client";' not in basic
+            or "ReactDOM.createRoot(root).render(<App />);" not in basic
+            or "ReactDOM.render" in basic
+        ):
+            return False, "React basic import/call migration did not produce the expected output"
+
+        multiple = (root / "project/react-multiple.jsx").read_text(encoding="utf-8")
+        if (
+            multiple.count("DOM.createRoot(") != 2
+            or "Other.render(<Ignored />, root);" not in multiple
+            or '"ReactDOM.render(<Fake />, root);"' not in multiple
+        ):
+            return False, "React aliases, multiple calls, or false-positive guards failed"
+
+        existing = (root / "project/react-existing-client.jsx").read_text(encoding="utf-8")
+        if (
+            existing.count('from "react-dom/client"') != 1
+            or "ReactDOM.createRoot(root).render(<App />);" not in existing
+        ):
+            return False, "existing react-dom/client import was not handled without duplication"
+
+        no_match_path = root / "project/react-no-match.jsx"
+        if no_match_path.read_text(encoding="utf-8") != react_files["project/react-no-match.jsx"]:
+            return False, "no-match React source was not preserved byte-for-byte"
+
+        comments = (root / "project/react-comments.tsx").read_text(encoding="utf-8")
+        if (
+            "keep this integration comment" not in comments
+            or "interface Props" not in comments
+            or "DOM.createRoot(container).render(view);" not in comments.replace("\n", "")
+        ):
+            return False, "React TSX comments, formatting, or call migration was not preserved"
     return True, "multi-file AST corpus preserves syntax, plugins, collections, templates, and formatting"
 
 
@@ -2043,6 +2277,10 @@ def check_rust_package_clean_pack_ownership(candidate: Path) -> tuple[bool, str]
 
 def check_rust_package_guard_ownership(candidate: Path) -> tuple[bool, str]:
     """Trace package-root loading and reject any non-bridge JS implementation."""
+
+    bridge_findings = bridge_engine_findings(candidate)
+    if bridge_findings:
+        return False, "compatibility bridge contains first-party engine logic: " + "; ".join(bridge_findings)
 
     with tempfile.TemporaryDirectory(prefix="jscodeshift-package-guard-") as raw:
         work = Path(raw)

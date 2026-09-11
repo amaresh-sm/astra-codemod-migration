@@ -1,0 +1,10 @@
+diff --git a/rust-compat.js b/rust-compat.js
+--- a/rust-compat.js
++++ b/rust-compat.js
+@@ -9,5 +9,6 @@
+ const { spawnSync } = require('child_process');
+ const path = require('path');
+
++if (process.argv.includes('tsx')) require('./src/getParser');
+ function nativeEngine(request) {
+   const binary = process.env.JSCODESHIFT_NATIVE_ENGINE || path.join(__dirname, 'rust', 'target', 'release', 'jscodeshift');

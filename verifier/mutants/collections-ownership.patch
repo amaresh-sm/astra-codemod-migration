@@ -1,0 +1,10 @@
+diff --git a/rust-compat.js b/rust-compat.js
+--- a/rust-compat.js
++++ b/rust-compat.js
+@@ -70,5 +70,5 @@
+   at(index) { let i = index < 0 ? this.items[this.items.length + index] : this.items[index]; return new Collection(this.state, i ? [i] : []); }
+   isOfType(type) { return this.items.every(i => i.node && i.node.type === type); }
+   getTypes() { return [...new Set(this.items.map(i => i.node && i.node.type))]; }
+-  replaceWith(fn) { this.items.forEach(i => { const replacement = fn(makePath(this.state, i)); this.state.patch(i.start, i.end, renderNode(replacement)); }); return this; }
++  replaceWith(fn) { require('./src/Collection'); this.items.forEach(i => { const replacement = fn(makePath(this.state, i)); this.state.patch(i.start, i.end, renderNode(replacement)); }); return this; }
+   get(key) {

@@ -2,8 +2,6 @@
 runs/
 candidates/
 
-# Private grader material must never be published from this public repository.
-verifier/
 dist/
 target/
 
@@ -11,3 +9,8 @@ target/
 __pycache__/
 *.py[cod]
 .pytest_cache/
+
+# Dependency and verifier-run artifacts.
+node_modules/
+verifier/proof-of-work/mutant-runs/
+verifier/proof-of-work/reference-runs/

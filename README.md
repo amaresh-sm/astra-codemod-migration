@@ -111,8 +111,9 @@ mode, so all three supported paths can report structured tool use when their CLI
 
 Docker environments for the two isolated stages are in [environment/](environment/).
 
-The shared harness checks are in `harness_checks/`. They test the reusable scoring and orchestration
-code; task-specific behavioral tests belong in the private `verifier/` area of each task.
+The shared harness checks are in `harness_checks/`. They test reusable scoring and orchestration
+code. Verifier-specific unit tests are in `verifier/tests/`; task-specific behavioral probes belong
+in the private verifier itself.
 
 Checks that determine whether a task package is ready for evaluation belong in
 `readiness_checks/`.

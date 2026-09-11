@@ -235,7 +235,7 @@ criteria:
     mutant: package-api-ownership
     weight: 0.05
   - id: rust-package-guard-ownership
-    requirement: Package-root loading does not execute unapproved JavaScript implementation modules.
+    requirement: Package-root loading uses only a thin JavaScript transform-execution bridge and does not execute or implement the first-party AST/runtime engine in JavaScript.
     contract: public/contracts/migration.contract.json
     hidden_test: jscodeshift.rust-package-guard-ownership
     mutant: package-api-ownership

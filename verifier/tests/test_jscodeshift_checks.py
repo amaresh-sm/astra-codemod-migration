@@ -5,6 +5,7 @@ from pathlib import Path
 from verifier.jscodeshift_checks import (
     ALLOWED_JS_BRIDGE_PATHS,
     _remove_non_bridge_sources,
+    bridge_engine_findings,
     legacy_engine_module_patterns,
     legacy_engine_paths,
     retained_legacy_engine_copies,
@@ -12,6 +13,35 @@ from verifier.jscodeshift_checks import (
 
 
 class MigrationOwnershipTests(unittest.TestCase):
+    def test_bridge_engine_audit_rejects_hybrid_ast_runtime(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            candidate = Path(raw) / "candidate"
+            candidate.mkdir()
+            (candidate / "rust-compat.js").write_text(
+                "class Collection { find() {} replaceWith() {} toSource() {} }\n"
+                "function identifier() {}\n"
+                "function template() {}\n",
+                encoding="utf-8",
+            )
+
+            findings = bridge_engine_findings(candidate)
+
+            self.assertEqual(len(findings), 1)
+            self.assertIn("runtime classes (Collection)", findings[0])
+            self.assertIn("AST builders", findings[0])
+
+    def test_bridge_engine_audit_allows_loader_only_bridge(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            candidate = Path(raw) / "candidate"
+            candidate.mkdir()
+            (candidate / "rust-compat.js").write_text(
+                "const { spawnSync } = require('child_process');\n"
+                "module.exports = request => spawnSync(process.env.JSCODESHIFT_NATIVE_ENGINE, [], { input: request });\n",
+                encoding="utf-8",
+            )
+
+            self.assertEqual(bridge_engine_findings(candidate), [])
+
     def test_bridge_only_cleanup_removes_renamed_implementation_sources(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
             package = Path(raw) / "candidate"
@@ -55,7 +85,7 @@ class MigrationOwnershipTests(unittest.TestCase):
             renamed.parent.mkdir(parents=True)
             renamed.write_text(public_engine.read_text(encoding="utf-8"), encoding="utf-8")
 
-            # The verifier normally receives this mount from Docker.  The
+            # The verifier normally receives this mount from Docker. The
             # helper accepts the same location through an explicit test env.
             import os
 

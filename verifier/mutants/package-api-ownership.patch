@@ -1,0 +1,8 @@
+diff --git a/index.js b/index.js
+--- a/index.js
++++ b/index.js
+@@ -1,3 +1,4 @@
+ // JavaScript transforms remain supported at this deliberately small boundary.
+ // Discovery, scheduling, process lifecycle, and the executable are Rust-owned.
++require('./src/Collection');
+ module.exports = require('./rust-compat');

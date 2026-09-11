@@ -31,7 +31,8 @@ evidence.
 
 `check_package.py` checks the handoff boundary and the private package shape. It scans the
 candidate-visible `instruction.md` and `public/` files for evaluator material, host-local paths,
-and secret-like values. It also requires the task metadata, public contract files, private verifier
+and secret-like values. It also requires the task metadata, any contract required by the task
+profile, private verifier
 inputs, and the reference application's `app-setup/manifest.json`, `build.sh`, `start.sh`, and
 `reset.sh`.
 

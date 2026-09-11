@@ -101,15 +101,9 @@ def _missing_paths(task_dir: Path, verifier_dir: Path) -> list[str]:
         profile = tomllib.loads((task_dir / "task.toml").read_text(encoding="utf-8")).get("profile")
     except (OSError, tomllib.TOMLDecodeError):
         profile = None
-    contract = (
-        task_dir / "public/contracts/migration.contract.json"
-        if profile == "migration"
-        else task_dir / "public/contracts/openapi.contract.json"
-    )
     required_files = [
         task_dir / "task.toml",
         task_dir / "instruction.md",
-        contract,
         verifier_dir / "run.py",
         verifier_dir / "score_adapter.py",
         verifier_dir / "acceptance-criteria.yml",
@@ -119,9 +113,13 @@ def _missing_paths(task_dir: Path, verifier_dir: Path) -> list[str]:
         verifier_dir / "reference-solution/app-setup/start.sh",
         verifier_dir / "reference-solution/app-setup/reset.sh",
     ]
+    # Brownfield migration tasks define their compatibility target in the
+    # existing codebase and instruction. Greenfield tasks still require an
+    # explicit public API contract.
+    if profile != "migration":
+        required_files.append(task_dir / "public/contracts/openapi.contract.json")
     required_dirs = [
         task_dir / "public",
-        task_dir / "public/contracts",
         verifier_dir,
         verifier_dir / "hidden-tests",
         verifier_dir / "mutants",
