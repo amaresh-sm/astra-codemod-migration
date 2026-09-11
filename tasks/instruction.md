@@ -6,8 +6,7 @@ ignore rules, runner, workers, core API, collections, node matching, templates, 
 and package utilities. Preserve the package-root export and direct jscodeshift helpers as well as
 the CLI path. Keep existing JavaScript transforms working, including collection
 traversal, builders, comments, formatting, and supported JavaScript, TypeScript, and TSX syntax.
-Use the supplied source and public compatibility materials as the migration baseline. Additional
-behavior is checked privately by the verifier. The public behavior requirements are defined in
+Use the supplied source and public compatibility materials as the migration baseline. The public behavior requirements are defined in
 `contracts/migration.contract.json`; use that contract as the authoritative compatibility target.
 
 The public CLI, transform API, outputs, errors, options, file-writing behavior, and compatibility semantics must remain unchanged.
