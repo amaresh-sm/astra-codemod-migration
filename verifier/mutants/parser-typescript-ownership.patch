@@ -1,0 +1,8 @@
+diff --git a/rust/src/native_ast.rs b/rust/src/native_ast.rs
+--- a/rust/src/native_ast.rs
++++ b/rust/src/native_ast.rs
+@@ -52,3 +52,3 @@
+     match parser {
+-        "ts" => tree_sitter_typescript::LANGUAGE_TYPESCRIPT.into(),
++        "ts" => tree_sitter_javascript::LANGUAGE.into(),
+         "tsx" => tree_sitter_typescript::LANGUAGE_TSX.into(),

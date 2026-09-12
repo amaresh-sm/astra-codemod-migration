@@ -37,10 +37,55 @@
       "expected_criteria": ["rust-parser-tsx-ownership"],
       "related_criteria": ["rust-edge-ast-ownership"]
     },
+    "parser-babel-ownership": {
+      "hidden_test": "jscodeshift.rust-parser-babel-ownership",
+      "expected_criteria": ["rust-parser-babel-ownership"],
+      "related_criteria": ["ast-collections-and-builders", "ast-formatting-and-comments", "cli-transform-api", "collection-extensions", "core-api-surface", "package-boundary-compatibility", "package-root-export", "rust-core-builders-ownership", "rust-core-collections-ownership", "rust-core-nodepath-ownership", "rust-core-templates-ownership", "rust-package-guard-ownership", "rust-package-root-ownership", "rust-printer-comments-ownership", "template-code-generation"]
+    },
+    "parser-typescript-ownership": {
+      "hidden_test": "jscodeshift.rust-parser-typescript-ownership",
+      "expected_criteria": ["rust-parser-typescript-ownership"],
+      "related_criteria": ["parser-and-transform-variants", "ast-modern-syntax", "rust-edge-ast-ownership"]
+    },
+    "printer-comments-ownership": {
+      "hidden_test": "jscodeshift.rust-printer-comments-ownership",
+      "expected_criteria": ["rust-printer-comments-ownership"],
+      "related_criteria": ["ast-formatting-and-comments", "ast-composition-corpus", "cross-feature-compatibility"]
+    },
     "collections-ownership": {
       "hidden_test": "jscodeshift.rust-core-collections-ownership",
       "expected_criteria": ["rust-core-collections-ownership"],
-      "related_criteria": []
+      "related_criteria": ["ast-collections-and-builders", "ast-composition-corpus"]
+    },
+    "builders-ownership": {
+      "hidden_test": "jscodeshift.rust-core-builders-ownership",
+      "expected_criteria": ["rust-core-builders-ownership"],
+      "related_criteria": ["ast-collections-and-builders", "ast-composition-corpus", "core-api-surface", "cross-feature-compatibility", "rust-core-collections-ownership", "template-code-generation"]
+    },
+    "templates-ownership": {
+      "hidden_test": "jscodeshift.rust-core-templates-ownership",
+      "expected_criteria": ["rust-core-templates-ownership"],
+      "related_criteria": ["ast-composition-corpus", "core-api-surface", "cross-feature-compatibility", "template-code-generation"]
+    },
+    "nodepath-ownership": {
+      "hidden_test": "jscodeshift.rust-core-nodepath-ownership",
+      "expected_criteria": ["rust-core-nodepath-ownership"],
+      "related_criteria": ["collection-extensions", "ast-collections-and-builders"]
+    },
+    "worker-multifile-ownership": {
+      "hidden_test": "jscodeshift.rust-worker-multifile-ownership",
+      "expected_criteria": ["rust-worker-multifile-ownership"],
+      "related_criteria": ["ast-composition-corpus", "failure-and-exit-contract", "file-selection-and-stdin", "parallel-failure-recovery", "parallel-result-determinism", "parallel-workers-and-results", "rust-worker-failure-ownership", "rust-worker-parallel-ownership", "symlink-boundary", "worker-replay-consistency"]
+    },
+    "worker-failure-ownership": {
+      "hidden_test": "jscodeshift.rust-worker-failure-ownership",
+      "expected_criteria": ["rust-worker-failure-ownership"],
+      "related_criteria": ["parallel-failure-recovery", "failure-and-exit-contract", "atomic-write-on-error", "worker-replay-consistency"]
+    },
+    "worker-determinism-ownership": {
+      "hidden_test": "jscodeshift.rust-worker-determinism-ownership",
+      "expected_criteria": ["rust-worker-determinism-ownership"],
+      "related_criteria": ["parallel-result-determinism", "worker-replay-consistency", "parallel-workers-and-results"]
     },
     "worker-ownership": {
       "hidden_test": "jscodeshift.rust-worker-parallel-ownership",
@@ -58,6 +103,31 @@
         "rust-worker-determinism-ownership", "silent-output-contract", "symlink-boundary",
         "template-code-generation", "worker-replay-consistency"
       ]
+    },
+    "bridge-engine-loophole": {
+      "hidden_test": "jscodeshift.rust-package-guard-ownership",
+      "expected_criteria": ["rust-package-guard-ownership"],
+      "related_criteria": ["rust-legacy-engine-boundary"]
+    },
+    "package-dependency-leak": {
+      "hidden_test": "jscodeshift.package-boundary-compatibility",
+      "expected_criteria": ["package-boundary-compatibility"],
+      "related_criteria": ["rust-package-clean-pack-ownership", "package-root-export", "rust-package-guard-ownership"]
+    },
+    "react-alias-drift": {
+      "hidden_test": "jscodeshift.ast-composition-corpus",
+      "expected_criteria": ["ast-composition-corpus"],
+      "related_criteria": ["cross-feature-compatibility"]
+    },
+    "react-multiple-drift": {
+      "hidden_test": "jscodeshift.ast-composition-corpus",
+      "expected_criteria": ["ast-composition-corpus"],
+      "related_criteria": ["cross-feature-compatibility"]
+    },
+    "react-noop-drift": {
+      "hidden_test": "jscodeshift.ast-composition-corpus",
+      "expected_criteria": ["ast-composition-corpus"],
+      "related_criteria": ["cross-feature-compatibility"]
     }
   }
 }

@@ -1,0 +1,9 @@
+diff --git a/rust-compat.js b/rust-compat.js
+--- a/rust-compat.js
++++ b/rust-compat.js
+@@ -12,6 +12,7 @@
+  * adapter only projects native descriptors for transform callbacks and
+  * sends requested edits back to the native service.
+  */
++class HybridCollectionMutant { find() {} toSource() {} }
+ const { spawnSync } = require('child_process');

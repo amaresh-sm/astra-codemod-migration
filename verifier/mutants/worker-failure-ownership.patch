@@ -1,0 +1,17 @@
+diff --git a/rust/src/main.rs b/rust/src/main.rs
+--- a/rust/src/main.rs
++++ b/rust/src/main.rs
+@@ -435,5 +435,7 @@
+     let mut st = Stats::default();
+     let mut had = false;
++    let mut abort_after_error = false;
+     let start = Instant::now();
+     for (f, status, out, msg) in rs {
++        if abort_after_error { continue; }
+         match status.as_str() {
+@@ -475,4 +475,5 @@
+             _ => {
+                 st.error += 1;
+                 had = true;
++                abort_after_error = true;
+                 if !c.silent {

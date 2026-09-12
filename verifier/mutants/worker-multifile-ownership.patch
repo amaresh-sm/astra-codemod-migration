@@ -1,0 +1,7 @@
+diff --git a/rust/src/main.rs b/rust/src/main.rs
+--- a/rust/src/main.rs
++++ b/rust/src/main.rs
+@@ -376,1 +376,2 @@
+-    files.sort();
++    files.sort();
++    files.truncate(1);

@@ -1,0 +1,7 @@
+diff --git a/rust/src/native_ast.rs b/rust/src/native_ast.rs
+--- a/rust/src/native_ast.rs
++++ b/rust/src/native_ast.rs
+@@ -60,2 +60,3 @@
+ fn parse(source: &str, parser_name: &str) -> Result<tree_sitter::Tree, String> {
++    if parser_name == "babel" { return Err("mutant: Babel parser unavailable".to_string()); }
+     let mut parser = Parser::new();

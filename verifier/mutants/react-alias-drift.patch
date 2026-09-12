@@ -1,0 +1,10 @@
+diff --git a/rust-compat.js b/rust-compat.js
+--- a/rust-compat.js
++++ b/rust-compat.js
+@@ -72,7 +72,7 @@
+   if (descriptor.type === 'ImportDeclaration') {
+     const source = watched(state, { type: 'Literal', value: descriptor.source.value, raw: descriptor.source.value }, descriptor.source.sourceStart, descriptor.source.sourceEnd, 'value');
+-    const node = { type: 'ImportDeclaration', source, specifiers: (descriptor.specifiers || []).map(specifier => ({ type: specifier.type, local: lift(state, specifier.local) })) };
++    const node = { type: 'ImportDeclaration', source, specifiers: (descriptor.specifiers || []).map(specifier => ({ type: specifier.type, local: lift(state, descriptor.source.value === 'react-dom' ? { ...specifier.local, name: 'ReactDOM' } : specifier.local) })) };
+     node.__state = state;
+     return node;

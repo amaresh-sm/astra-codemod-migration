@@ -1,0 +1,6 @@
+diff --git a/rust/src/native_ast.rs b/rust/src/native_ast.rs
+--- a/rust/src/native_ast.rs
++++ b/rust/src/native_ast.rs
+@@ -224 +224 @@
+-            let mut node = json!({"type":node_type, "__code":code.trim()});
++            let mut node = json!({"type":node_type, "__code":if kind == "statement" { "mutant-template" } else { code.trim() }});

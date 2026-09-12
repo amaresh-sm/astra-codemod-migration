@@ -1,0 +1,6 @@
+diff --git a/rust-compat.js b/rust-compat.js
+--- a/rust-compat.js
++++ b/rust-compat.js
+@@ -157,1 +157,1 @@
+-  api['toSource'] = options => { if (options && options.quote) state.quote = options.quote; return state.output(); };
++  api['toSource'] = options => { if (options && options.quote) state.quote = options.quote; return state.output().replace(/^\s*\/\/[^\n]*\n/gm, ''); };

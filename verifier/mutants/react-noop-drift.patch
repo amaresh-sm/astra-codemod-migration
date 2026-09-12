@@ -1,0 +1,12 @@
+diff --git a/rust-compat.js b/rust-compat.js
+--- a/rust-compat.js
++++ b/rust-compat.js
+@@ -177,3 +177,8 @@
+     if (kind === 'StringLiteral') kind = 'Literal';
+     const response = callNative({ operation: 'find', source: active.source, parser: active.parser, kind });
++    if (kind === 'ImportDeclaration' && active.source.includes('Other.render')) {
++      response.nodes = [{ type: 'ImportDeclaration', start: 0, end: 0,
++        source: { type: 'Literal', value: 'react-dom', sourceStart: 0, sourceEnd: 0 },
++        specifiers: [{ type: 'ImportDefaultSpecifier', local: { type: 'Identifier', start: 0, end: 0, name: 'Other' } }] }];
++    }
+     const out = [];

@@ -1578,10 +1578,11 @@ def check_package_boundary_compatibility(candidate: Path) -> tuple[bool, str]:
         # a path in package.json does not prove that the published launcher is
         # executable or resolves its relative files correctly.
         bin_path = package / next(iter(bins.values()))
+        isolated_env = {**os.environ, "NODE_PATH": "", "NO_COLOR": "1"}
         smoke = subprocess.run(
             [str(bin_path), "--version"],
             cwd=work,
-            env={**os.environ, "NODE_PATH": str(root / "node_modules"), "NO_COLOR": "1"},
+            env=isolated_env,
             text=True,
             capture_output=True,
             check=False,
@@ -1594,8 +1595,7 @@ def check_package_boundary_compatibility(candidate: Path) -> tuple[bool, str]:
             "typeof j.registerMethods!=='function') process.exit(2);"
             "if(j('const packaged=1;').find(j.Identifier,{name:'packaged'}).size()!==1) process.exit(3);"
         )
-        env = {**os.environ, "NODE_PATH": str(root / "node_modules")}
-        imported = subprocess.run(["node", "-e", probe], cwd=package, env=env, text=True, capture_output=True, check=False)
+        imported = subprocess.run(["node", "-e", probe], cwd=package, env=isolated_env, text=True, capture_output=True, check=False)
         if imported.returncode != 0:
             return False, "packed package root export could not be loaded"
     return True, "npm packaging retains the public package export and CLI entrypoint"
@@ -2000,7 +2000,11 @@ def check_rust_parser_babel_ownership(candidate: Path) -> tuple[bool, str]:
         candidate,
         label="Babel parser/printer",
         source_files={"project/babel.js": "const value = 1;\n"},
-        transform_text="module.exports = (file, api) => api.jscodeshift(file.source).toSource() + '\\n// babel-owned';\n",
+        transform_text=(
+            "module.exports = (file, api) => { const j = api.jscodeshift; const root = j(file.source); "
+            "if (root.find(j.Identifier, {name:'value'}).size() !== 1) throw new Error('Babel parser failed'); "
+            "return root.toSource() + '\\n// babel-owned'; };\n"
+        ),
         marker="babel-owned",
     )
 
@@ -2036,17 +2040,24 @@ def check_rust_parser_tsx_ownership(candidate: Path) -> tuple[bool, str]:
 
 
 def check_rust_printer_comments_ownership(candidate: Path) -> tuple[bool, str]:
-    return ownership_probe(
+    source_files = {"project/comments.js": "// preserve this comment\nconst value = \"old\";\n"}
+    result, contents, trace_error = run_with_bridge_only_files(
         candidate,
-        label="comment-preserving printer",
-        source_files={"project/comments.js": "// preserve this comment\nconst value = \"old\";\n"},
+        source_files=source_files,
         transform_text=(
             "module.exports = (file, api) => { const j = api.jscodeshift; const root = j(file.source); "
             "root.find(j.Literal, {value:'old'}).forEach(p => {p.node.value='new';}); "
             "return root.toSource({quote:'single'}) + '\\n// printer-owned'; };\n"
         ),
-        marker="printer-owned",
     )
+    if trace_error:
+        return False, f"comment-preserving printer ownership trace failed: {trace_error}"
+    if result.returncode != 0:
+        return False, f"comment-preserving printer ownership probe failed (rc={result.returncode})"
+    output = contents["project/comments.js"]
+    if "printer-owned" not in output or "// preserve this comment" not in output or "'new'" not in output:
+        return False, "comment-preserving printer did not retain comments, formatting, and the edited literal"
+    return True, "comment-preserving printer completed with only the explicit JS bridge"
 
 
 def check_rust_core_builders_ownership(candidate: Path) -> tuple[bool, str]:

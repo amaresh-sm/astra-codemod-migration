@@ -142,13 +142,13 @@ criteria:
     requirement: Babel parsing and printing work with all non-bridge submitted JavaScript removed.
     contract: public/contracts/migration.contract.json
     hidden_test: jscodeshift.rust-parser-babel-ownership
-    mutant: parser-ownership
+    mutant: parser-babel-ownership
     weight: 0.04
   - id: rust-parser-typescript-ownership
     requirement: TypeScript parsing works with all non-bridge submitted JavaScript removed.
     contract: public/contracts/migration.contract.json
     hidden_test: jscodeshift.rust-parser-typescript-ownership
-    mutant: parser-ownership
+    mutant: parser-typescript-ownership
     weight: 0.04
   - id: rust-parser-tsx-ownership
     requirement: TSX parsing works with all non-bridge submitted JavaScript removed.
@@ -160,7 +160,7 @@ criteria:
     requirement: Comment-preserving printing works with all non-bridge submitted JavaScript removed.
     contract: public/contracts/migration.contract.json
     hidden_test: jscodeshift.rust-printer-comments-ownership
-    mutant: parser-ownership
+    mutant: printer-comments-ownership
     weight: 0.04
   - id: rust-core-collections-ownership
     requirement: Core collection traversal and mutation work with all non-bridge submitted JavaScript removed.
@@ -172,19 +172,19 @@ criteria:
     requirement: Native core builders work with all non-bridge submitted JavaScript removed.
     contract: public/contracts/migration.contract.json
     hidden_test: jscodeshift.rust-core-builders-ownership
-    mutant: collections-ownership
+    mutant: builders-ownership
     weight: 0.04
   - id: rust-core-templates-ownership
     requirement: Native template generation works with all non-bridge submitted JavaScript removed.
     contract: public/contracts/migration.contract.json
     hidden_test: jscodeshift.rust-core-templates-ownership
-    mutant: collections-ownership
+    mutant: templates-ownership
     weight: 0.04
   - id: rust-core-nodepath-ownership
     requirement: Native NodePath accessors work with all non-bridge submitted JavaScript removed.
     contract: public/contracts/migration.contract.json
     hidden_test: jscodeshift.rust-core-nodepath-ownership
-    mutant: collections-ownership
+    mutant: nodepath-ownership
     weight: 0.04
   - id: rust-edge-ast-ownership
     requirement: Edge-case TypeScript and TSX syntax works with all non-bridge submitted JavaScript removed.
@@ -202,7 +202,7 @@ criteria:
     requirement: Native multi-file execution works with all non-bridge submitted JavaScript removed.
     contract: public/contracts/migration.contract.json
     hidden_test: jscodeshift.rust-worker-multifile-ownership
-    mutant: worker-ownership
+    mutant: worker-multifile-ownership
     weight: 0.04
   - id: rust-worker-parallel-ownership
     requirement: Native parallel execution works with all non-bridge submitted JavaScript removed.
@@ -214,13 +214,13 @@ criteria:
     requirement: Native worker failure recovery works with all non-bridge submitted JavaScript removed.
     contract: public/contracts/migration.contract.json
     hidden_test: jscodeshift.rust-worker-failure-ownership
-    mutant: worker-ownership
+    mutant: worker-failure-ownership
     weight: 0.04
   - id: rust-worker-determinism-ownership
     requirement: Native worker replay is deterministic with all non-bridge submitted JavaScript removed.
     contract: public/contracts/migration.contract.json
     hidden_test: jscodeshift.rust-worker-determinism-ownership
-    mutant: worker-ownership
+    mutant: worker-determinism-ownership
     weight: 0.04
   - id: rust-package-root-ownership
     requirement: Package-root parser, collections, and templates work through the migrated runtime.
@@ -232,13 +232,13 @@ criteria:
     requirement: A clean npm package runs with only the explicit JavaScript compatibility bridge.
     contract: public/contracts/migration.contract.json
     hidden_test: jscodeshift.rust-package-clean-pack-ownership
-    mutant: package-api-ownership
+    mutant: package-dependency-leak
     weight: 0.05
   - id: rust-package-guard-ownership
     requirement: Package-root loading uses only a thin JavaScript transform-execution bridge and does not execute or implement the first-party AST/runtime engine in JavaScript.
     contract: public/contracts/migration.contract.json
     hidden_test: jscodeshift.rust-package-guard-ownership
-    mutant: package-api-ownership
+    mutant: bridge-engine-loophole
     weight: 0.05
   - id: rust-legacy-engine-boundary
     requirement: Exact copies of the public first-party JavaScript engine are absent from the package.
@@ -254,12 +254,12 @@ criteria:
   - id: package-boundary-compatibility
     requirement: The packed npm artifact retains its metadata, package export, and CLI entrypoint.
     hidden_test: jscodeshift.package-boundary-compatibility
-    mutant: package-boundary-drift
+    mutant: package-dependency-leak
     weight: 0.005
   - id: ast-composition-corpus
     requirement: A multi-file TypeScript/TSX corpus preserves syntax, plugins, collections, templates, and formatting.
     hidden_test: jscodeshift.ast-composition-corpus
-    mutant: ast-corpus-drift
+    mutant: react-alias-drift
     weight: 0.01
   - id: worker-replay-consistency
     requirement: Delayed and failed transforms produce matching parallel and serial outcomes.

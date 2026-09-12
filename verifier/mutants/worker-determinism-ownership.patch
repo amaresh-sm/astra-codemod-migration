@@ -1,0 +1,13 @@
+diff --git a/rust/src/main.rs b/rust/src/main.rs
+--- a/rust/src/main.rs
++++ b/rust/src/main.rs
+@@ -9 +9 @@
+-use std::time::Instant;
++use std::time::{Instant, SystemTime, UNIX_EPOCH};
+@@ -338,4 +338,5 @@
+-    let body = String::from_utf8(decode(l.next().unwrap_or(""))).unwrap_or_default();
++    let mut body = String::from_utf8(decode(l.next().unwrap_or(""))).unwrap_or_default();
+     let msg = String::from_utf8(decode(l.next().unwrap_or("")))
+         .unwrap_or_else(|_| String::from_utf8_lossy(&out.stderr).to_string());
++    if st == "ok" { body.push_str(&format!("\n// nondeterministic-{}\n", SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_nanos())); }
+     (st, body, msg)

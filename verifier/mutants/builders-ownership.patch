@@ -1,0 +1,6 @@
+diff --git a/rust/src/native_ast.rs b/rust/src/native_ast.rs
+--- a/rust/src/native_ast.rs
++++ b/rust/src/native_ast.rs
+@@ -165 +165 @@
+-            let name = value(0).as_str().unwrap_or_default().to_string();
++            let name = "mutantIdentifier".to_string();
