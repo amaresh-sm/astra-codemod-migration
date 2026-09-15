@@ -43,7 +43,7 @@ def build_provider_command(provider: str, model: str, reasoning: str) -> Provide
         # telemetry/trajectory artifacts.
         return ProviderCommand(
             "hackerrank-openhands run "
-            f"--workspace /workspace --instruction /workspace/INSTRUCTION.md "
+            f"--workspace /workspace --instruction-file /workspace/INSTRUCTION.md "
             f"--model {model_arg} --reasoning {shlex.quote(reasoning)} "
             "--output /output --redact",
             ("ASTRA_GATEWAY_API_KEY", "ASTRA_GATEWAY_BASE_URL", "LLM_API_KEY", "LLM_BASE_URL"),

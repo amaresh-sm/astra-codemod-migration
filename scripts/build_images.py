@@ -42,6 +42,13 @@ def source_digest(paths: tuple[Path, ...]) -> str:
     return digest.hexdigest()
 
 
+def package_sources() -> tuple[Path, ...]:
+    """Return all files copied into the candidate image for Gateway routing."""
+
+    package_root = REPOSITORY_ROOT / "vendor/hackerrank-openhands-gateway"
+    return tuple(path for path in sorted(package_root.rglob("*")) if path.is_file())
+
+
 def build(tag: str, dockerfile: Path, sources: tuple[Path, ...]) -> None:
     """Build one image from the repository root so Docker COPY paths are stable."""
     digest = source_digest(sources)
@@ -70,7 +77,7 @@ def main() -> int:
         (
             REPOSITORY_ROOT / "environment/candidate-generation/Dockerfile",
             REPOSITORY_ROOT / "environment/candidate-generation/entrypoint.sh",
-            REPOSITORY_ROOT / "astra_harness/openhands_runner.py",
+            *package_sources(),
         ),
     )
     build(

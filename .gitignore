@@ -1,6 +1,7 @@
 # Candidate generations and verifier reports are run artifacts, not task source.
 runs/
 candidates/
+benchmarking-candidates/
 
 dist/
 target/

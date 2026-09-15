@@ -237,8 +237,8 @@ def _capture_gateway_response(
 def install_gateway_fix(base_url: str) -> None:
     """Adapt OpenHands requests for the HackerRank Gateway, including Gemini."""
     parsed = urlparse(base_url)
-    if parsed.scheme != "https" or not parsed.netloc or parsed.username or parsed.password:
-        raise ValueError("Gateway base URL must be HTTPS and must not contain credentials")
+    if not parsed.netloc or parsed.username or parsed.password:
+        raise ValueError("Gateway base URL must contain a host and must not contain credentials")
     if "gateway-central.ai.private.hackerrank.link" not in base_url:
         return
 

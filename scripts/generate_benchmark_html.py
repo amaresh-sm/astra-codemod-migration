@@ -9,7 +9,11 @@ from pathlib import Path
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
-CANDIDATE_ROOT = REPOSITORY_ROOT / "runs/migrate-jscodeshift-runner-to-rust"
+CANDIDATE_ROOTS = (
+    REPOSITORY_ROOT / "benchmarking-candidates",
+    REPOSITORY_ROOT / "runs/migrate-jscodeshift-runner-to-rust",
+)
+RUN_ROOTS = (REPOSITORY_ROOT / "benchmarking-candidates", REPOSITORY_ROOT / "runs")
 
 # These are the current benchmark candidates. Historical score artifacts are
 # discovered by model key and the newest report is selected.
@@ -70,16 +74,15 @@ def read_json(path: Path) -> dict:
 
 
 def candidate_path(candidate_id: str) -> Path | None:
-    matches = list(CANDIDATE_ROOT.rglob(candidate_id + "/candidate"))
-    return matches[0] if matches else None
+    for root in CANDIDATE_ROOTS:
+        matches = list(root.rglob(candidate_id + "/candidate"))
+        if matches:
+            return matches[0]
+    return None
 
 
 def latest_score_path(model_key: str) -> Path | None:
-    matches = [
-        path
-        for path in (REPOSITORY_ROOT / "runs").rglob("score.json")
-        if model_key in str(path)
-    ]
+    matches = [path for root in RUN_ROOTS for path in root.rglob("score.json") if model_key in str(path)]
     return max(matches, key=lambda path: path.stat().st_mtime, default=None)
 
 

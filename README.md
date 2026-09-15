@@ -91,7 +91,7 @@ tools that best fit the task, such as `pytest`, Playwright, `cargo test`, or a N
 Each generation and evaluation run uses a separate directory:
 
 ```text
-runs/<task-id>/<candidate-id>/
+benchmarking-candidates/<candidate-id>/
 ├── candidate/       # the candidate's modified workspace
 ├── metadata.json    # provider, model, reasoning, timing, status, and cleanup
 ├── telemetry.json   # token/tool evidence and solution-size metrics

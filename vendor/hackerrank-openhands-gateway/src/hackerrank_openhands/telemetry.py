@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from .harness import redact
+from .pricing import estimate_custom_cost, normalize_usage
 
 
 _OUTCOME_EVENT_TYPES = {
@@ -25,9 +26,12 @@ def _number(value: Any) -> int | float | None:
 def _usage(
     metrics: dict[str, Any],
     *,
-    gateway_total_tokens: int | float | None = None,
-) -> dict[str, int | float | None]:
-    """Normalize token field names emitted by OpenHands and Gateway adapters."""
+    gateway_usage: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Return one normalized usage object, preferring Gateway data."""
+    if gateway_usage is not None:
+        return gateway_usage
+
     input_tokens = _number(metrics.get("input_tokens", metrics.get("prompt_tokens")))
     output_tokens = _number(metrics.get("output_tokens", metrics.get("completion_tokens")))
     cache_read = _number(metrics.get("cache_read_input_tokens", metrics.get("cache_read_tokens")))
@@ -37,15 +41,14 @@ def _usage(
         cached = (cache_read or 0) + (cache_write or 0)
     reasoning = _number(metrics.get("reasoning_tokens", metrics.get("reasoning_output_tokens")))
     # `prompt_tokens`/`input_tokens` already includes cache-read tokens in the
-    # OpenAI/LiteLLM usage shape.  Adding `cached` here would count those tokens
-    # twice. Prefer an explicitly reported total, then the Gateway aggregate,
-    # and only then derive total usage from input plus output.
+    # OpenAI/LiteLLM usage shape. Adding `cached` here would count those tokens
+    # twice. Prefer an explicitly reported total, then derive total usage from
+    # input plus output.
     total = _number(metrics.get("total_tokens"))
-    if total is None:
-        total = _number(gateway_total_tokens)
     if total is None and any(value is not None for value in (input_tokens, output_tokens)):
         total = (input_tokens or 0) + (output_tokens or 0)
     return {
+        "source": "openhands" if any(value is not None for value in (input_tokens, output_tokens, total)) else None,
         "input_tokens": input_tokens,
         "cached_input_tokens": cached,
         "cache_read_tokens": cache_read,
@@ -97,13 +100,11 @@ def _gateway_cost(path: Path | None) -> tuple[float | None, int]:
     return (total if reported_responses else None), reported_responses
 
 
-def _gateway_total_tokens(path: Path | None) -> int | float | None:
-    """Return the complete Gateway-reported token total when available."""
+def _gateway_usages(path: Path | None) -> list[dict[str, Any]]:
+    """Return successful Gateway usage objects for custom cost estimation."""
     if path is None or not path.exists():
-        return None
-
-    total = 0
-    response_count = 0
+        return []
+    usages: list[dict[str, Any]] = []
     for line in path.read_text(encoding="utf-8").splitlines():
         try:
             record = json.loads(line)
@@ -113,12 +114,42 @@ def _gateway_total_tokens(path: Path | None) -> int | float | None:
             continue
         response = record.get("response")
         usage = response.get("usage") if isinstance(response, dict) else None
-        reported = _number(usage.get("total_tokens")) if isinstance(usage, dict) else None
-        if reported is None:
-            return None
-        total += reported
-        response_count += 1
-    return total if response_count else None
+        usages.append(usage if isinstance(usage, dict) else {})
+    return usages
+
+
+def _gateway_usage(path: Path | None) -> dict[str, Any] | None:
+    """Aggregate normalized Gateway usage for the single public usage object."""
+    normalized: list[dict[str, int | float]] = []
+    if path is None or not path.exists():
+        return None
+    for line in path.read_text(encoding="utf-8").splitlines():
+        try:
+            record = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(record, dict) or record.get("status") != "ok":
+            continue
+        response = record.get("response")
+        usage = response.get("usage") if isinstance(response, dict) else None
+        if not isinstance(usage, dict):
+            continue
+        parsed = normalize_usage(usage)
+        if parsed is not None:
+            normalized.append(parsed)
+    if not normalized:
+        return None
+    return {
+        "source": "gateway",
+        "requests": len(normalized),
+        "input_tokens": sum(item["input_tokens"] for item in normalized),
+        "cached_input_tokens": sum(item["cached_input_tokens"] for item in normalized),
+        "cache_read_tokens": sum(item["cache_read_tokens"] for item in normalized),
+        "cache_write_tokens": sum(item["cache_write_tokens"] for item in normalized),
+        "output_tokens": sum(item["output_tokens"] for item in normalized),
+        "reasoning_tokens": sum(item["reasoning_tokens"] for item in normalized),
+        "total_tokens": sum(item["total_tokens"] for item in normalized),
+    }
 
 
 def _gateway_latency(path: Path | None) -> dict[str, int | float | None]:
@@ -292,7 +323,8 @@ def collect(
     # not present that fallback as authoritative billing data.
     cost = raw_cost if raw_cost is not None and raw_cost > 0 else None
     gateway_cost, gateway_cost_responses = _gateway_cost(gateway_responses_path)
-    gateway_total_tokens = _gateway_total_tokens(gateway_responses_path)
+    gateway_usage = _gateway_usage(gateway_responses_path)
+    gateway_usages = _gateway_usages(gateway_responses_path)
     gateway_latency = _gateway_latency(gateway_responses_path)
     successful = sum(record.get("status") == "ok" for record in trajectory)
     failed = sum(record.get("status") == "error" for record in trajectory)
@@ -310,7 +342,7 @@ def collect(
             "duration_ms": _duration_ms(started_at, completed_at),
             "llm_requests": gateway_latency,
         },
-        "usage": _usage(metrics, gateway_total_tokens=gateway_total_tokens),
+        "usage": _usage(metrics, gateway_usage=gateway_usage),
         "cost": {
             "gateway": {
                 "amount_usd": gateway_cost,
@@ -325,6 +357,11 @@ def collect(
                 "status": "reported" if cost is not None else "unavailable",
                 "source": "openhands",
             },
+            "custom_estimation": estimate_custom_cost(
+                model,
+                gateway_usages=gateway_usages,
+                openhands_usage=metrics,
+            ),
         },
         "workspace": redact(workspace_metrics, enabled=redact_output) if workspace_metrics else {"status": "unavailable", "reason": "workspace metrics event not found"},
         "tools": {"total": len(trajectory), "successful": successful, "failed": failed, "cancelled": cancelled, "rejected": rejected, "unknown": unknown, "by_tool": by_tool},

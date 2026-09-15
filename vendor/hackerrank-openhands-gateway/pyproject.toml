@@ -25,6 +25,9 @@ hackerrank-openhands = "hackerrank_openhands.cli:main"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+hackerrank_openhands = ["pricing.json"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 markers = ["live: optional live HackerRank Gateway smoke test"]

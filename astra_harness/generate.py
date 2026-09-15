@@ -17,6 +17,10 @@ from .telemetry import collect as collect_telemetry
 from .telemetry import snapshot_workspace
 
 
+REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_CANDIDATE_ROOT = REPOSITORY_ROOT / "benchmarking-candidates"
+
+
 def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -28,7 +32,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--model", required=True)
     parser.add_argument("--reasoning", choices=("low", "medium", "high", "xhigh", "max"), default="medium")
     parser.add_argument("--run-id", default=None)
-    parser.add_argument("--runs-root", type=Path, default=Path("runs"))
+    parser.add_argument(
+        "--runs-root",
+        type=Path,
+        default=DEFAULT_CANDIDATE_ROOT,
+        help="Root directory for generated candidates and run artifacts; each run is a direct child",
+    )
     parser.add_argument("--image", default="astra-candidate-generation:latest")
     parser.add_argument("--dockerfile", type=Path, default=None)
     parser.add_argument("--env-file", type=Path, default=None, help="Private provider env file; never commit it")
@@ -109,7 +118,10 @@ def run(args: argparse.Namespace) -> int:
     task_dir = args.task.resolve()
     task_id = task_identifier(task_dir)
     run_id = args.run_id or f"{args.provider}-{int(time.time())}"
-    run_dir = (args.runs_root / task_id / run_id).resolve()
+    # Match the shared benchmark layout: benchmarking-candidates/<run-id>/...
+    # The task ID remains in metadata and container names, so it does not need
+    # to be repeated as a path segment for this single-task benchmark.
+    run_dir = (args.runs_root / run_id).resolve()
     logs = run_dir / "logs"
     run_dir.mkdir(parents=True, exist_ok=False)
     logs.mkdir()
