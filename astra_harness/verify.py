@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import subprocess
@@ -12,6 +13,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from .redaction import redact_tree
+from .score import verifier_revision
 
 
 def utc_now() -> str:
@@ -69,6 +71,23 @@ def load_candidate_manifest(candidate: Path) -> tuple[dict[str, list[str]], str]
             raise SystemExit(f"manifest commands.{name} must be a non-empty argument array")
         selected[name] = value
     return selected, str(path.relative_to(candidate))
+
+
+def candidate_workspace_root(candidate: Path) -> Path:
+    """Resolve the generated artifact's runnable workspace.
+
+    Newer generation artifacts retain the lifecycle handoff at the candidate
+    root. Older artifacts place the complete runnable codebase under
+    ``candidate/codebase``. Both layouts are valid benchmark evidence and
+    must be mounted consistently for lifecycle execution and verification.
+    """
+
+    if (candidate / "app-setup" / "manifest.json").is_file():
+        return candidate
+    nested = candidate / "codebase"
+    if (nested / "app-setup" / "manifest.json").is_file():
+        return nested
+    return candidate
 
 
 def stop_process(process: subprocess.Popen[bytes] | None) -> None:
@@ -184,6 +203,7 @@ def task_identifier(task_dir: Path) -> str:
 def run(args: argparse.Namespace) -> int:
     task_dir = args.task.resolve()
     candidate = args.candidate.resolve()
+    workspace = candidate_workspace_root(candidate)
     verifier = locate_verifier(task_dir).resolve()
     public = (task_dir / "public").resolve()
     run_dir = args.run.resolve()
@@ -198,19 +218,23 @@ def run(args: argparse.Namespace) -> int:
     reports.mkdir(exist_ok=True)
 
     task_id = task_identifier(task_dir)
-    name = f"astra-verify-{task_id}-{run_dir.name}".replace("_", "-")
+    # Run directories are commonly named the same across candidate folders
+    # (for example ``verification-score-v3``). Include a stable candidate
+    # token so independent benchmark runs can safely execute in parallel.
+    candidate_token = hashlib.sha256(str(candidate).encode("utf-8")).hexdigest()[:10]
+    name = f"astra-verify-{task_id}-{run_dir.name}-{candidate_token}".replace("_", "-")
     runtime_name = f"{name}-runtime"
-    commands, manifest_path = load_candidate_manifest(candidate)
+    commands, manifest_path = load_candidate_manifest(workspace)
     runtime_args = [
         "docker", "run", "--detach", "--rm", "--name", runtime_name,
         "--cap-drop", "NET_RAW", "--security-opt", "no-new-privileges",
-        "--mount", f"type=bind,src={candidate},dst=/workspace",
+        "--mount", f"type=bind,src={workspace},dst=/workspace",
         args.runtime_image,
     ]
     docker_args = [
         "docker", "run", "--rm", "--name", name,
         "--network", f"container:{runtime_name}",
-        "--mount", f"type=bind,src={candidate},dst=/input/candidate,readonly",
+        "--mount", f"type=bind,src={workspace},dst=/input/candidate,readonly",
         "--mount", f"type=bind,src={verifier},dst=/input/verifier,readonly",
     ]
     if public.is_dir():
@@ -236,6 +260,7 @@ def run(args: argparse.Namespace) -> int:
         "image": args.image,
         "runtime_image": args.runtime_image,
         "manifest": manifest_path,
+        "verifier_revision": verifier_revision(verifier),
         "started_at": utc_now(),
         "status": "running",
     }

@@ -6,7 +6,8 @@ The public CLI, transform API, outputs, errors, options, file-writing behavior, 
 
 Include `app-setup/manifest.json` in the completed workspace. It is the harness lifecycle handoff
 for this CLI task: define non-empty argument arrays under `commands` for `build`, `reset`, and
-`start`.
+`start`. If JavaScript bridge modules beyond the public package entrypoints are retained to load
+and execute transforms, list their package-relative paths in `javascriptBridge`.
 
 ```json
 {
@@ -15,6 +16,7 @@ for this CLI task: define non-empty argument arrays under `commands` for `build`
     "build": ["bash", "app-setup/build.sh"],
     "reset": ["bash", "app-setup/reset.sh"],
     "start": ["bash", "app-setup/start.sh"]
-  }
+  },
+  "javascriptBridge": ["bridge/transform-host.js"]
 }
 ```

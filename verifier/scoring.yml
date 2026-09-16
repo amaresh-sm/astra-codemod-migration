@@ -1,138 +1,248 @@
 scale: normalized_1
+# The verifier scores Rust migration, not merely compatibility. A retained
+# JavaScript engine is reported as compatibility evidence but is capped at
+# 0.0400. Behavior earns migration credit only through its matching Rust
+# ownership domain. A validated Rust foundation also carries a small,
+# separately evidenced migration-progress allowance.
 criteria:
-  - id: cli-transform-api
-    weight: 0.0075
-    blocked_policy: zero
-  - id: parser-and-transform-variants
-    weight: 0.0075
-    blocked_policy: zero
-  - id: file-selection-and-stdin
-    weight: 0.0075
-    blocked_policy: zero
-  - id: dry-run-print-and-reporting
-    weight: 0.0075
-    blocked_policy: zero
-  - id: parallel-workers-and-results
-    weight: 0.0075
-    blocked_policy: zero
-  - id: failure-and-exit-contract
-    weight: 0.0075
-    blocked_policy: zero
+  # Operational surface: 0.04. This is the full possible score for a working
+  # thin launcher that delegates the engine to JavaScript.
   - id: cli-surface-and-identity
-    weight: 0.0075
-    blocked_policy: zero
-  - id: silent-output-contract
-    weight: 0.0075
-    blocked_policy: zero
-  - id: symlink-boundary
-    weight: 0.0075
-    blocked_policy: zero
-  - id: parallel-failure-recovery
-    weight: 0.0075
+    component: operational
+    weight: 0.010
     blocked_policy: zero
   - id: lifecycle-manifest
-    weight: 0.0075
-    blocked_policy: zero
-  - id: custom-option-forwarding
-    weight: 0.0075
-    blocked_policy: zero
-  - id: atomic-write-on-error
-    weight: 0.0075
-    blocked_policy: zero
-  - id: parallel-result-determinism
-    weight: 0.0075
-    blocked_policy: zero
-  - id: utf8-source-preservation
-    weight: 0.0075
-    blocked_policy: zero
-  - id: ast-collections-and-builders
-    weight: 0.0075
-    blocked_policy: zero
-  - id: ast-formatting-and-comments
-    weight: 0.0075
-    blocked_policy: zero
-  - id: ast-modern-syntax
-    weight: 0.0075
-    blocked_policy: zero
-  - id: core-api-surface
-    weight: 0.015
-    blocked_policy: zero
-  - id: collection-extensions
-    weight: 0.015
-    blocked_policy: zero
-  - id: template-code-generation
-    weight: 0.015
+    component: operational
+    weight: 0.010
     blocked_policy: zero
   - id: package-root-export
-    weight: 0.015
+    component: operational
+    weight: 0.010
     blocked_policy: zero
-  - id: rust-runner-entrypoint
-    weight: 0.03
-    blocked_policy: zero
-  - id: rust-parser-babel-ownership
-    weight: 0.04
-    blocked_policy: zero
-  - id: rust-parser-typescript-ownership
-    weight: 0.04
-    blocked_policy: zero
-  - id: rust-parser-tsx-ownership
-    weight: 0.04
-    blocked_policy: zero
-  - id: rust-printer-comments-ownership
-    weight: 0.04
-    blocked_policy: zero
-  - id: rust-core-collections-ownership
-    weight: 0.04
-    blocked_policy: zero
-  - id: rust-core-builders-ownership
-    weight: 0.04
-    blocked_policy: zero
-  - id: rust-core-templates-ownership
-    weight: 0.04
-    blocked_policy: zero
-  - id: rust-core-nodepath-ownership
-    weight: 0.04
-    blocked_policy: zero
-  - id: rust-edge-ast-ownership
-    weight: 0.025
-    blocked_policy: zero
-  - id: rust-edge-cli-ownership
-    weight: 0.025
-    blocked_policy: zero
-  - id: rust-worker-multifile-ownership
-    weight: 0.04
-    blocked_policy: zero
-  - id: rust-worker-parallel-ownership
-    weight: 0.04
-    blocked_policy: zero
-  - id: rust-worker-failure-ownership
-    weight: 0.04
-    blocked_policy: zero
-  - id: rust-worker-determinism-ownership
-    weight: 0.04
-    blocked_policy: zero
-  - id: rust-package-root-ownership
-    weight: 0.05
-    blocked_policy: zero
-  - id: rust-package-clean-pack-ownership
-    weight: 0.05
-    blocked_policy: zero
-  - id: rust-package-guard-ownership
-    weight: 0.05
-    blocked_policy: zero
-  - id: rust-legacy-engine-boundary
-    weight: 0.04
+  - id: silent-output-contract
+    component: operational
+    weight: 0.010
     blocked_policy: zero
 
-  - id: cross-feature-compatibility
-    weight: 0.02
+  # Behavior: 0.09. Each row is unlocked proportionally by independently
+  # proven Rust ownership in the named domain.
+  - id: cli-transform-api
+    component: behavior
+    domain: cli
+    weight: 0.030
     blocked_policy: zero
-  - id: package-boundary-compatibility
-    weight: 0.005
+  - id: parser-and-transform-variants
+    component: behavior
+    domain: ast
+    weight: 0.004
+    blocked_policy: zero
+  - id: ast-collections-and-builders
+    component: behavior
+    domain: ast
+    weight: 0.004
+    blocked_policy: zero
+  - id: ast-formatting-and-comments
+    component: behavior
+    domain: ast
+    weight: 0.004
+    blocked_policy: zero
+  - id: ast-modern-syntax
+    component: behavior
+    domain: ast
+    weight: 0.004
     blocked_policy: zero
   - id: ast-composition-corpus
-    weight: 0.01
+    component: behavior
+    domain: ast
+    weight: 0.004
+    blocked_policy: zero
+  - id: core-api-surface
+    component: behavior
+    domain: core
+    weight: 0.004
+    blocked_policy: zero
+  - id: collection-extensions
+    component: behavior
+    domain: core
+    weight: 0.004
+    blocked_policy: zero
+  - id: template-code-generation
+    component: behavior
+    domain: core
+    weight: 0.004
+    blocked_policy: zero
+  - id: file-selection-and-stdin
+    component: behavior
+    domain: files
+    weight: 0.003
+    blocked_policy: zero
+  - id: dry-run-print-and-reporting
+    component: behavior
+    domain: files
+    weight: 0.002
+    blocked_policy: zero
+  - id: symlink-boundary
+    component: behavior
+    domain: files
+    weight: 0.001
+    blocked_policy: zero
+  - id: custom-option-forwarding
+    component: behavior
+    domain: files
+    weight: 0.002
+    blocked_policy: zero
+  - id: atomic-write-on-error
+    component: behavior
+    domain: files
+    weight: 0.002
+    blocked_policy: zero
+  - id: utf8-source-preservation
+    component: behavior
+    domain: files
+    weight: 0.002
+    blocked_policy: zero
+  - id: parallel-workers-and-results
+    component: behavior
+    domain: workers
+    weight: 0.002
+    blocked_policy: zero
+  - id: failure-and-exit-contract
+    component: behavior
+    domain: workers
+    weight: 0.002
+    blocked_policy: zero
+  - id: parallel-failure-recovery
+    component: behavior
+    domain: workers
+    weight: 0.002
+    blocked_policy: zero
+  - id: parallel-result-determinism
+    component: behavior
+    domain: workers
+    weight: 0.002
     blocked_policy: zero
   - id: worker-replay-consistency
-    weight: 0.02
+    component: behavior
+    domain: workers
+    weight: 0.002
+    blocked_policy: zero
+  - id: cross-feature-compatibility
+    component: behavior
+    domain: workers
+    weight: 0.002
+    blocked_policy: zero
+  - id: package-boundary-compatibility
+    component: behavior
+    domain: package
+    weight: 0.004
+    blocked_policy: zero
+
+  # Foundation and migration progress: 0.17. The first 0.05 proves the
+  # native public entrypoint; the remaining 0.12 rewards independently
+  # evidenced Rust CLI, files, runner, worker, and package implementation.
+  - id: rust-runner-entrypoint
+    component: migration_foundation
+    domain: foundation
+    weight: 0.170
+    blocked_policy: zero
+
+  # Independently proven Rust domains: 0.70.
+  # AST parser/printer: 0.16
+  - id: rust-parser-babel-ownership
+    component: rust_ownership
+    domain: ast
+    weight: 0.030
+    blocked_policy: zero
+  - id: rust-parser-typescript-ownership
+    component: rust_ownership
+    domain: ast
+    weight: 0.030
+    blocked_policy: zero
+  - id: rust-parser-tsx-ownership
+    component: rust_ownership
+    domain: ast
+    weight: 0.030
+    blocked_policy: zero
+  - id: rust-printer-comments-ownership
+    component: rust_ownership
+    domain: ast
+    weight: 0.030
+    blocked_policy: zero
+  - id: rust-edge-ast-ownership
+    component: rust_ownership
+    domain: ast
+    weight: 0.040
+    blocked_policy: zero
+
+  # Collections, builders, templates, and NodePath: 0.18
+  - id: rust-core-collections-ownership
+    component: rust_ownership
+    domain: core
+    weight: 0.045
+    blocked_policy: zero
+  - id: rust-core-builders-ownership
+    component: rust_ownership
+    domain: core
+    weight: 0.045
+    blocked_policy: zero
+  - id: rust-core-templates-ownership
+    component: rust_ownership
+    domain: core
+    weight: 0.045
+    blocked_policy: zero
+  - id: rust-core-nodepath-ownership
+    component: rust_ownership
+    domain: core
+    weight: 0.045
+    blocked_policy: zero
+
+  # Public Rust CLI orchestration and file handling: 0.22
+  - id: rust-legacy-engine-boundary
+    component: rust_ownership
+    domain: cli
+    weight: 0.120
+    blocked_policy: zero
+  - id: rust-edge-cli-ownership
+    component: rust_ownership
+    domain: files
+    weight: 0.100
+    blocked_policy: zero
+
+  # Workers: 0.08
+  - id: rust-worker-multifile-ownership
+    component: rust_ownership
+    domain: workers
+    weight: 0.020
+    blocked_policy: zero
+  - id: rust-worker-parallel-ownership
+    component: rust_ownership
+    domain: workers
+    weight: 0.020
+    blocked_policy: zero
+  - id: rust-worker-failure-ownership
+    component: rust_ownership
+    domain: workers
+    weight: 0.020
+    blocked_policy: zero
+  - id: rust-worker-determinism-ownership
+    component: rust_ownership
+    domain: workers
+    weight: 0.020
+    blocked_policy: zero
+
+  # Package root and a clean packed artifact: 0.06
+  - id: rust-package-root-ownership
+    component: rust_ownership
+    domain: package
+    weight: 0.020
+    blocked_policy: zero
+  - id: rust-package-clean-pack-ownership
+    component: rust_ownership
+    domain: package
+    weight: 0.020
+    blocked_policy: zero
+  - id: rust-package-guard-ownership
+    component: rust_ownership
+    domain: package
+    weight: 0.020
     blocked_policy: zero

@@ -21,7 +21,7 @@ except ImportError:
     from common import emit_result
 
 
-REQUIRED_FIELDS = ("id", "requirement", "hidden_test", "mutant", "weight")
+REQUIRED_FIELDS = ("id", "requirement", "hidden_test", "mutant", "component", "weight")
 
 
 def task_id(task_dir: Path) -> str:
@@ -95,6 +95,18 @@ def check_acceptance(task_dir: Path, verifier_dir: Path) -> dict[str, Any]:
         if not math.isclose(acceptance_weight, scoring_weight, rel_tol=0.0, abs_tol=1e-9):
             result["failures"].append(
                 f"weight differs for {criterion_id}: acceptance={acceptance_weight}, scoring={scoring_weight}"
+            )
+        acceptance_component = acceptance_by_id[criterion_id].get("component")
+        scoring_component = scoring_by_id[criterion_id].get("component")
+        if acceptance_component != scoring_component:
+            result["failures"].append(
+                f"component differs for {criterion_id}: acceptance={acceptance_component!r}, scoring={scoring_component!r}"
+            )
+        acceptance_domain = acceptance_by_id[criterion_id].get("domain")
+        scoring_domain = scoring_by_id[criterion_id].get("domain")
+        if acceptance_domain != scoring_domain:
+            result["failures"].append(
+                f"domain differs for {criterion_id}: acceptance={acceptance_domain!r}, scoring={scoring_domain!r}"
             )
     result["ok"] = not result["failures"]
     return result

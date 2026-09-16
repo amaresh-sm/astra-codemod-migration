@@ -35,6 +35,7 @@ class ProviderCommandTests(unittest.TestCase):
         self.assertIn("--reasoning high", command.command)
         self.assertIn("/workspace/INSTRUCTION.md", command.command)
         self.assertIn("--output /output", command.command)
+        self.assertIn("--env-file /tmp/openhands.env", command.command)
 
 
 if __name__ == "__main__":

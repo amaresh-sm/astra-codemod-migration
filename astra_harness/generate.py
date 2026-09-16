@@ -194,6 +194,7 @@ fi
 python3.12 - {model_arg} {reasoning_arg} <<'PY'
 import json
 import os
+from pathlib import Path
 import sys
 import urllib.error
 import urllib.request
@@ -202,6 +203,14 @@ model, reasoning = sys.argv[1:]
 supported_reasoning = {OPENHANDS_REASONING_OPTIONS!r}
 if reasoning not in supported_reasoning:
     raise SystemExit("unsupported OpenHands reasoning value: " + reasoning)
+env_file = Path("/tmp/openhands.env")
+if env_file.is_file():
+    for line in env_file.read_text(encoding="utf-8").splitlines():
+        if "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        if key in {"ASTRA_GATEWAY_API_KEY", "ASTRA_GATEWAY_BASE_URL", "LLM_API_KEY", "LLM_BASE_URL"}:
+            os.environ.setdefault(key, value)
 base_url = (os.environ.get("ASTRA_GATEWAY_BASE_URL") or os.environ.get("LLM_BASE_URL") or "").rstrip("/")
 api_key = os.environ.get("ASTRA_GATEWAY_API_KEY") or os.environ.get("LLM_API_KEY")
 if not base_url:
@@ -216,18 +225,22 @@ try:
     with urllib.request.urlopen(request, timeout=15) as response:
         payload = json.load(response)
 except urllib.error.HTTPError as exc:
-    raise SystemExit("Gateway model catalog check failed with HTTP " + str(exc.code))
+    if exc.code not in {404, 405}:
+        raise SystemExit("Gateway model catalog check failed with HTTP " + str(exc.code))
+    payload = None
+    print("Gateway has no /models catalog; model support will be checked by the generation request")
 except (urllib.error.URLError, TimeoutError, ValueError) as exc:
     raise SystemExit("Gateway connectivity check failed: " + exc.__class__.__name__)
-items = payload.get("data") if isinstance(payload, dict) else None
-model_ids = set(
-    str(item.get("id"))
-    for item in items
-    if isinstance(item, dict) and item.get("id")
-) if isinstance(items, list) else set()
-accepted = (model, "openai/" + model)
-if not model_ids or not any(item in model_ids for item in accepted):
-    raise SystemExit("model is not advertised by Gateway: " + model)
+if payload is not None:
+    items = payload.get("data") if isinstance(payload, dict) else None
+    model_ids = set(
+        str(item.get("id"))
+        for item in items
+        if isinstance(item, dict) and item.get("id")
+    ) if isinstance(items, list) else set()
+    accepted = (model, "openai/" + model)
+    if not model_ids or not any(item in model_ids for item in accepted):
+        raise SystemExit("model is not advertised by Gateway: " + model)
 print("preflight ok: model=" + model + " reasoning=" + reasoning + " gateway=" + base_url)
 PY
 '''

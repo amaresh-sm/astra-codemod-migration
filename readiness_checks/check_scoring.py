@@ -76,7 +76,7 @@ def check_scoring(verifier_dir: Path, proof_dir: Path) -> dict[str, Any]:
         except (ImportError, OSError) as exc:
             result["failures"].append(f"cannot load executable verifier criteria: {exc}")
             executable_criteria = ()
-        if tuple(ids) != tuple(executable_criteria):
+        if set(ids) != set(executable_criteria) or len(ids) != len(executable_criteria):
             result["failures"].append("scoring.yml IDs do not match the executable verifier registry")
     weights = [float(item["weight"]) for item in criteria]
     total = sum(weights)

@@ -19,6 +19,10 @@
           "fixture": { "type": "string" },
           "hidden_test": { "type": "string", "minLength": 1 },
           "mutant": { "type": "string", "minLength": 1 },
+          "component": {
+            "enum": ["operational", "behavior", "migration_foundation", "rust_ownership"]
+          },
+          "domain": { "type": "string", "minLength": 1 },
           "weight": { "type": "number", "exclusiveMinimum": 0 }
         }
       }

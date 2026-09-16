@@ -22,9 +22,11 @@ def main() -> int:
     for criterion in CRITERIA:
         row = statuses.get(criterion, {})
         status = row.get("status", "blocked") if isinstance(row, dict) else str(row)
+        numeric = row.get("score") if isinstance(row, dict) else None
+        score = float(numeric) if isinstance(numeric, (int, float)) else (1.0 if status == "pass" else 0.0)
         criteria[criterion] = {
             "status": status,
-            "score": 1.0 if status == "pass" else 0.0,
+            "score": score,
             "source": f"migration.{criterion}",
         }
     report = {"schema_version": 1, "criteria": criteria, "evidence": {"backend": str(args.backend)}}

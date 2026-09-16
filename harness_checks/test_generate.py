@@ -62,7 +62,9 @@ class OpenHandsEnvironmentTests(unittest.TestCase):
             self.assertIn(f"missing required tool: $tool", script)
         self.assertIn("df -Pk /workspace", script)
         self.assertIn("df -Pi /workspace", script)
+        self.assertIn("/tmp/openhands.env", script)
         self.assertIn("/models", script)
+        self.assertIn("model support will be checked by the generation request", script)
         self.assertIn("glm-5.2", script)
         self.assertTrue(all(value in OPENHANDS_REASONING_OPTIONS for value in ("medium", "high")))
 

@@ -54,6 +54,10 @@ evidence once.
 unique criterion IDs, positive weights, and a total weight of `1.0`. It also scans recorded proof
 reports and rejects any blocked criterion that has a non-zero score or award.
 
+Migration scoring assigns criteria to additive components. The scorer reports each component and
+the normalized total so the migration boundary remains
+reviewable and is applied uniformly to every candidate.
+
 ## Reference determinism
 
 `check_determinism.py` requires at least two reference runs. It compares only stable outcomes—the

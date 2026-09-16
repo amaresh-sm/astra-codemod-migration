@@ -123,17 +123,6 @@ def source_root(candidate: Path) -> Path:
 ENGINE_SOURCE_SUFFIXES = frozenset({".cjs", ".js", ".mjs", ".ts", ".tsx"})
 ENGINE_EXCLUDED_PARTS = frozenset({".git", "node_modules", "target", ".cargo-home"})
 
-# JavaScript is allowed only at the compatibility boundary.  The boundary
-# keeps customer-authored transforms working; parsing, printing, collections,
-# and scheduling must remain in the Rust implementation.  This is an explicit
-# policy rather than a filename heuristic for detecting the old engine.
-ALLOWED_JS_BRIDGE_PATHS = frozenset({
-    "index.js",
-    "bin/jscodeshift.js",
-    "rust-compat.js",
-    "rust-compat-worker.js",
-})
-
 # The bridge exists solely because customer transforms are JavaScript. It may
 # load a transform, marshal file/options data, and forward requests to Rust;
 # it must not become a second implementation of the jscodeshift engine.
@@ -141,15 +130,129 @@ ALLOWED_JS_BRIDGE_PATHS = frozenset({
 # filenames or the historical upstream source layout.
 BRIDGE_ENGINE_CAPABILITIES = {
     "collection runtime": re.compile(
-        r"\b(?:find|filter|map|forEach|replaceWith|paths|nodes|at|isOfType|getTypes|childElements|childNodes|renameTo)\s*\("
+        r"(?:\.\s*(?:find|filter|map|forEach|replaceWith|paths|nodes|at|isOfType|getTypes|childElements|childNodes|renameTo)\s*\(|"
+        r"\[\s*['\"](?:find|filter|map|forEach|replaceWith|paths|nodes|at|isOfType|getTypes|childElements|childNodes|renameTo)['\"]\s*\]\s*=)"
     ),
-    "AST node projection": re.compile(r"\b(?:nodeFromDescriptor|makePath)\s*\(|\bObject\.defineProperty\s*\("),
+    "AST node projection": re.compile(r"\b(?:nodeFromDescriptor|makePath|lift|port|bag)\s*\(|\bObject\.defineProperty\s*\("),
     "AST builders": re.compile(
-        r"\b(?:identifier|literal|variableDeclarator|variableDeclaration|memberExpression|callExpression|expressionStatement)\s*\("
+        r"(?:\{\s*type\s*:\s*['\"]|\b(?:identifier|literal|variableDeclarator|variableDeclaration|memberExpression|callExpression|expressionStatement)\s*\()"
     ),
-    "template generation": re.compile(r"\b(?:template|asyncExpression)\s*\("),
-    "printing or source mutation": re.compile(r"\b(?:toSource|renderNode|replaceAll|renameIdentifier|flush|patch)\s*\("),
+    "template generation": re.compile(r"(?:\.\s*template\s*\.|\b(?:template|asyncExpression)\s*\()"),
+    "printing or source mutation": re.compile(
+        r"(?:\.\s*(?:toSource|renderNode|replaceAll|renameIdentifier|flush|patch)\s*\(|"
+        r"\[\s*['\"](?:toSource|renderNode|replaceAll|renameIdentifier|flush|patch)['\"]\s*\]\s*=)"
+    ),
 }
+
+
+def _declared_relative_js_paths(value: object) -> set[str]:
+    """Validate candidate-declared package-relative compatibility modules."""
+
+    values = [value] if isinstance(value, str) else value if isinstance(value, list) else []
+    paths: set[str] = set()
+    for item in values:
+        if not isinstance(item, str):
+            continue
+        path = Path(item)
+        if path.is_absolute() or ".." in path.parts or path.suffix.lower() not in ENGINE_SOURCE_SUFFIXES:
+            continue
+        paths.add(path.as_posix())
+    return paths
+
+
+def allowed_js_bridge_paths(package: Path) -> frozenset[str]:
+    """Return JavaScript modules explicitly allowed at the package boundary.
+
+    Public entrypoints come from ``package.json`` rather than fixed historical
+    names. Any additional transform-execution bridge must be declared in
+    ``app-setup/manifest.json`` as ``javascriptBridge``. This lets a migration
+    choose its own layout without treating familiar filenames as evidence.
+    """
+
+    allowed: set[str] = set()
+    try:
+        package_json = json.loads((package / "package.json").read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        package_json = {}
+    if isinstance(package_json, dict):
+        allowed.update(_declared_relative_js_paths(package_json.get("main")))
+        allowed.update(_declared_relative_js_paths(package_json.get("exports")))
+        bins = package_json.get("bin")
+        if isinstance(bins, str):
+            allowed.update(_declared_relative_js_paths(bins))
+        elif isinstance(bins, dict):
+            for value in bins.values():
+                allowed.update(_declared_relative_js_paths(value))
+    try:
+        manifest = json.loads((package / "app-setup" / "manifest.json").read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        manifest = {}
+    if isinstance(manifest, dict):
+        allowed.update(_declared_relative_js_paths(manifest.get("javascriptBridge")))
+    return frozenset(allowed)
+
+
+_RELATIVE_JS_IMPORT = re.compile(
+    r"(?:require\s*\(|import\s*\()\s*['\"]([^'\"]+)['\"]|"
+    r"(?:from\s*|import\s*)['\"]([^'\"]+)['\"]"
+)
+
+
+def _resolve_relative_js_import(package: Path, parent: Path, request: str) -> Path | None:
+    """Resolve a package-relative static JavaScript import conservatively."""
+
+    if not request.startswith("."):
+        return None
+    base = (parent.parent / request).resolve()
+    package_root = package.resolve()
+    try:
+        base.relative_to(package_root)
+    except ValueError:
+        return None
+    candidates = [base]
+    if not base.suffix:
+        candidates.extend(base.with_suffix(suffix) for suffix in ENGINE_SOURCE_SUFFIXES)
+        candidates.extend(base / f"index{suffix}" for suffix in ENGINE_SOURCE_SUFFIXES)
+    for candidate in candidates:
+        if candidate.is_file() and candidate.suffix.lower() in ENGINE_SOURCE_SUFFIXES:
+            return candidate
+    return None
+
+
+def bridge_reachable_js_paths(package: Path) -> frozenset[str]:
+    """Return first-party JavaScript reachable from a public bridge entrypoint.
+
+    A candidate cannot evade the bridge audit by leaving only a tiny public
+    entrypoint and importing the retained engine one hop later.  We follow
+    static relative imports from declared entrypoints, while runtime tracing
+    covers dynamic imports and spawned Node workers during actual probes.
+    """
+
+    package_root = package.resolve()
+    pending = [package_root / path for path in allowed_js_bridge_paths(package)]
+    visited: set[str] = set()
+    while pending:
+        path = pending.pop()
+        if not path.is_file() or path.suffix.lower() not in ENGINE_SOURCE_SUFFIXES:
+            continue
+        try:
+            relative = path.resolve().relative_to(package_root).as_posix()
+        except ValueError:
+            continue
+        if relative in visited:
+            continue
+        visited.add(relative)
+        try:
+            source = path.read_text(encoding="utf-8")
+        except OSError:
+            continue
+        for match in _RELATIVE_JS_IMPORT.finditer(source):
+            request = match.group(1) or match.group(2)
+            if request:
+                resolved = _resolve_relative_js_import(package, path, request)
+                if resolved is not None:
+                    pending.append(resolved)
+    return frozenset(visited)
 
 
 def _javascript_code_without_comments_or_literals(source: str) -> str:
@@ -217,27 +320,28 @@ def bridge_engine_findings(candidate: Path) -> list[str]:
     """
 
     package = source_root(candidate)
+    reachable = bridge_reachable_js_paths(package)
     findings: list[str] = []
-    for relative in sorted(ALLOWED_JS_BRIDGE_PATHS):
-        path = package / relative
-        if not path.is_file():
+    for path in sorted(package.rglob("*")):
+        if not path.is_file() or path.suffix.lower() not in ENGINE_SOURCE_SUFFIXES:
+            continue
+        relative = path.relative_to(package).as_posix()
+        if relative not in reachable:
             continue
         try:
-            code = _javascript_code_without_comments_or_literals(path.read_text(encoding="utf-8"))
+            # Keep bracket-property names such as api['find']; they are real
+            # executable capabilities and were the loophole in the former
+            # lexical stripping approach.
+            code = path.read_text(encoding="utf-8")
         except OSError:
             continue
-        classes = sorted(set(re.findall(r"\bclass\s+([A-Za-z_$][A-Za-z0-9_$]*)", code)))
         capabilities = sorted(
             label for label, pattern in BRIDGE_ENGINE_CAPABILITIES.items() if pattern.search(code)
         )
-        # A thin adapter needs neither its own runtime object model nor a
-        # collection of AST operations. Requiring both signals keeps this a
-        # semantic ownership guard rather than a source-size/file-name rule.
-        if classes and len(capabilities) >= 2:
-            findings.append(
-                f"{relative} defines runtime classes ({', '.join(classes)}) and engine capabilities ({', '.join(capabilities)})"
-            )
-        elif len(capabilities) >= 4:
+        # A thin loader can call the native binary and marshal JSON. Three
+        # independent engine capabilities instead prove that this JavaScript
+        # file owns a meaningful part of parsing/collections/printing.
+        if len(capabilities) >= 3:
             findings.append(f"{relative} implements multiple AST-engine capabilities ({', '.join(capabilities)})")
     return findings
 
@@ -359,12 +463,13 @@ def _remove_non_bridge_sources(package: Path) -> list[str]:
     and remain available to the compatibility worker.
     """
 
+    allowed = allowed_js_bridge_paths(package)
     removed: list[str] = []
     for path in sorted(package.rglob("*"), key=lambda value: len(value.parts), reverse=True):
         if not (path.is_file() or path.is_symlink()) or path.suffix.lower() not in ENGINE_SOURCE_SUFFIXES:
             continue
         relative = path.relative_to(package).as_posix()
-        if relative in ALLOWED_JS_BRIDGE_PATHS:
+        if relative in allowed:
             continue
         try:
             path.unlink()
@@ -377,29 +482,67 @@ def _remove_non_bridge_sources(package: Path) -> list[str]:
     return removed
 
 
-def _find_native_binary(package: Path) -> Path | None:
-    """Find the built Rust executable exposed by the candidate launcher."""
+def _is_native_executable(path: Path) -> bool:
+    """Return whether a candidate file is a native executable, not a script."""
 
-    candidates: list[Path] = []
-    target_directories = list(package.rglob("target/release")) + list(package.rglob("target/debug"))
-    for directory in target_directories:
-        if not directory.is_dir():
-            continue
-        relative_directory = directory.relative_to(package)
-        if {".git", "node_modules", ".cargo-home"}.intersection(relative_directory.parts):
-            continue
-        candidates.extend(
-            path for path in directory.iterdir()
-            if path.is_file() and path.name != ".rustc_info.json" and os.access(path, os.X_OK)
-        )
+    if not path.is_file() or not os.access(path, os.X_OK):
+        return False
+    try:
+        magic = path.open("rb").read(4)
+    except OSError:
+        return False
+    # ELF is produced by the Linux candidate runtime. The Mach-O values keep
+    # the helper correct for an equivalent local build.
+    return magic == b"\x7fELF" or magic in {
+        b"\xfe\xed\xfa\xce", b"\xfe\xed\xfa\xcf", b"\xce\xfa\xed\xfe", b"\xcf\xfa\xed\xfe",
+    }
+
+
+def _native_binaries(package: Path) -> list[Path]:
+    """Find first-party compiled executables that a public launcher can reach."""
+
+    ignored = {".git", "node_modules", ".cargo-home"}
+    binaries = [
+        path
+        for path in package.rglob("*")
+        if not ignored.intersection(path.relative_to(package).parts) and _is_native_executable(path)
+    ]
     return sorted(
-        candidates,
+        binaries,
         key=lambda path: (
             "jscodeshift" not in path.name.lower(),
             "release" not in path.parts,
-            path.name,
+            path.as_posix(),
         ),
-    )[0] if candidates else None
+    )
+
+
+def _instrument_native_binaries(package: Path, trace_file: Path) -> int:
+    """Replace staged native binaries with trace wrappers that exec the real file.
+
+    Candidate launchers often resolve a native executable by a private path,
+    rather than honoring an environment-variable override. Instrumenting the
+    disposable staged copy catches either form without assuming a filename.
+    """
+
+    count = 0
+    for index, binary in enumerate(_native_binaries(package)):
+        real = binary.with_name(f".{binary.name}.astra-real-{index}")
+        try:
+            binary.rename(real)
+            binary.write_text(
+                "#!/bin/sh\n"
+                f"printf '%s\\n' '{{\"kind\":\"native-process\"}}' >> {shlex.quote(str(trace_file))}\n"
+                f"exec {shlex.quote(str(real))} \"$@\"\n",
+                encoding="utf-8",
+            )
+            binary.chmod(0o755)
+            count += 1
+        except OSError:
+            # A failed instrumentation makes the ownership probe fail closed:
+            # no native trace event will be available for that executable.
+            continue
+    return count
 
 
 def _module_trace_environment(package: Path, trace_root: Path) -> dict[str, str]:
@@ -442,21 +585,7 @@ Module._load = function(request, parent, isMain) {
         "JSCODESHIFT_ENGINE_ROOT": str(package.resolve()),
         "JSCODESHIFT_MODULE_TRACE": str(trace_root / "modules.jsonl"),
     }
-    native_binary = _find_native_binary(package)
-    if native_binary is not None:
-        native_wrapper = trace_root / "native-runner"
-        native_wrapper.write_text(
-            "#!/bin/sh\n"
-            "printf '%s\\n' '{\"kind\":\"native-process\"}' >> \"$JSCODESHIFT_MODULE_TRACE\"\n"
-            "exec \"$JSCODESHIFT_REAL_NATIVE\" \"$@\"\n",
-            encoding="utf-8",
-        )
-        native_wrapper.chmod(0o755)
-        environment.update({
-            "JSCODESHIFT_BINARY": str(native_wrapper),
-            "JSCODESHIFT_NATIVE_ENGINE": str(native_wrapper),
-            "JSCODESHIFT_REAL_NATIVE": str(native_binary),
-        })
+    _instrument_native_binaries(package, trace_root / "modules.jsonl")
     return environment
 
 
@@ -505,14 +634,58 @@ def runtime_source_root(candidate: Path) -> str:
 
 
 def cli_path(candidate: Path) -> Path:
-    """Return the stable jscodeshift shell entrypoint."""
+    """Return the package-declared public jscodeshift entrypoint.
+
+    ``package.json#bin`` is the public contract.  The legacy fallback only
+    supports incomplete historical artifacts that omit that declaration; it
+    must not cause a verifier to bypass a candidate's replacement launcher.
+    """
 
     root = source_root(candidate)
+    try:
+        package_json = json.loads((root / "package.json").read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        package_json = {}
+    declared = package_json.get("bin") if isinstance(package_json, dict) else None
+    values: list[str] = []
+    if isinstance(declared, str):
+        values.append(declared)
+    elif isinstance(declared, dict):
+        preferred = declared.get("jscodeshift")
+        if isinstance(preferred, str):
+            values.append(preferred)
+        values.extend(
+            value for name, value in sorted(declared.items())
+            if name != "jscodeshift" and isinstance(value, str)
+        )
+    for value in values:
+        relative = Path(value)
+        if relative.is_absolute() or ".." in relative.parts:
+            continue
+        path = root / relative
+        if path.is_file():
+            return path
     for relative in ("bin/jscodeshift.sh", "bin/jscodeshift.js"):
         path = root / relative
         if path.is_file():
             return path
     raise RuntimeError("candidate does not provide a jscodeshift launcher")
+
+
+def cli_command(candidate: Path) -> list[str]:
+    """Build the public CLI command without assuming source-file mode bits.
+
+    npm's ``bin`` installation creates an executable shim for JavaScript
+    launchers. The verifier receives the raw package tree, where that source
+    file need not be executable, so invoke JavaScript through ``node`` just
+    as the generated shim would. Keeping ``node`` unresolved lets the module
+    trace wrapper observe the process during ownership probes.
+    """
+
+    path = cli_path(candidate)
+    if path.suffix.lower() in ENGINE_SOURCE_SUFFIXES:
+        return ["node", str(path)]
+    return [str(path)]
 
 
 def run_cli(
@@ -527,7 +700,7 @@ def run_cli(
     """Invoke the submitted CLI as a black box."""
 
     return subprocess.run(
-        [str(cli_path(candidate)), *args],
+        [*cli_command(candidate), *args],
         cwd=cwd,
         input=stdin,
         text=True,
@@ -1749,39 +1922,45 @@ module.exports = function(file, api) {
             return False, f"React AST corpus transform failed (rc={react_result.returncode})"
 
         basic = (root / "project/react-basic.jsx").read_text(encoding="utf-8")
-        if (
-            'import ReactDOM from "react-dom/client";' not in basic
-            or "ReactDOM.createRoot(root).render(<App />);" not in basic
-            or "ReactDOM.render" in basic
-        ):
-            return False, "React basic import/call migration did not produce the expected output"
+        react_cases: dict[str, bool] = {}
+        react_cases["basic import and call"] = (
+            'import ReactDOM from "react-dom/client";' in basic
+            and "ReactDOM.createRoot(root).render(<App />);" in basic
+            and "ReactDOM.render" not in basic
+        )
 
         multiple = (root / "project/react-multiple.jsx").read_text(encoding="utf-8")
-        if (
-            multiple.count("DOM.createRoot(") != 2
-            or "Other.render(<Ignored />, root);" not in multiple
-            or '"ReactDOM.render(<Fake />, root);"' not in multiple
-        ):
-            return False, "React aliases, multiple calls, or false-positive guards failed"
+        react_cases["aliases, multiple calls, and false positives"] = (
+            multiple.count("DOM.createRoot(") == 2
+            and "Other.render(<Ignored />, root);" in multiple
+            and '"ReactDOM.render(<Fake />, root);"' in multiple
+        )
 
         existing = (root / "project/react-existing-client.jsx").read_text(encoding="utf-8")
-        if (
-            existing.count('from "react-dom/client"') != 1
-            or "ReactDOM.createRoot(root).render(<App />);" not in existing
-        ):
-            return False, "existing react-dom/client import was not handled without duplication"
+        react_cases["existing client import"] = (
+            existing.count('from "react-dom/client"') == 1
+            and "ReactDOM.createRoot(root).render(<App />);" in existing
+        )
 
         no_match_path = root / "project/react-no-match.jsx"
-        if no_match_path.read_text(encoding="utf-8") != react_files["project/react-no-match.jsx"]:
-            return False, "no-match React source was not preserved byte-for-byte"
+        react_cases["no-op preservation"] = (
+            no_match_path.read_text(encoding="utf-8") == react_files["project/react-no-match.jsx"]
+        )
 
         comments = (root / "project/react-comments.tsx").read_text(encoding="utf-8")
-        if (
-            "keep this integration comment" not in comments
-            or "interface Props" not in comments
-            or "DOM.createRoot(container).render(view);" not in comments.replace("\n", "")
-        ):
-            return False, "React TSX comments, formatting, or call migration was not preserved"
+        react_cases["TSX comments and formatting"] = (
+            "keep this integration comment" in comments
+            and "interface Props" in comments
+            and "DOM.createRoot(container).render(view);" in comments.replace("\n", "")
+        )
+        passed_cases = [name for name, passed in react_cases.items() if passed]
+        if len(passed_cases) != len(react_cases):
+            missing = [name for name, passed in react_cases.items() if not passed]
+            return False, (
+                "React AST corpus passed "
+                f"{len(passed_cases)}/{len(react_cases)} scenario groups; missing: {', '.join(missing)}",
+                len(passed_cases) / len(react_cases),
+            )
     return True, "multi-file AST corpus preserves syntax, plugins, collections, templates, and formatting"
 
 
@@ -1859,8 +2038,140 @@ def check_package_root_export(candidate: Path) -> tuple[bool, str]:
     return True, "package root exports the callable jscodeshift API and parses source"
 
 
+def substantive_rust_migration_evidence(root: Path, manifests: list[Path]) -> tuple[bool, str]:
+    """Identify a meaningful Rust migration foundation without prescribing layout.
+
+    This deliberately supports partial migrations: it proves that the public
+    native launcher is backed by a non-trivial first-party Rust implementation
+    of migration-relevant concerns.  It does *not* prove AST/core ownership;
+    those higher-value domains still require bridge-only dynamic probes.
+    """
+
+    ignored_parts = {"node_modules", "target", ".git", ".cargo-home"}
+    sources: list[tuple[Path, int, str]] = []
+    for manifest in manifests:
+        for path in manifest.parent.rglob("*.rs"):
+            relative = path.relative_to(root)
+            if ignored_parts.intersection(relative.parts):
+                continue
+            try:
+                lines = [
+                    line for line in path.read_text(encoding="utf-8").splitlines()
+                    if line.strip() and not line.lstrip().startswith("//")
+                ]
+            except OSError:
+                continue
+            sources.append((path, len(lines), "\n".join(lines)))
+
+    total_lines = sum(lines for _, lines, _ in sources)
+    substantial_files = sum(1 for _, lines, _ in sources if lines >= 40)
+    if total_lines < 400 or substantial_files < 3:
+        return False, (
+            "Rust launcher is not backed by a substantive migration foundation "
+            f"({total_lines} executable lines across {substantial_files} substantial modules)"
+        )
+
+    combined = "\n".join(source for _, _, source in sources)
+    semantic_signals = {
+        "argument handling": r"(?:clap::|ArgMatches|std::env::args(?:_os)?|\.arg\()",
+        "file handling": r"(?:std::fs::|walkdir|read_dir|glob|ignore)",
+        "execution or writing": r"(?:std::process::|Command::new|write_all|rename\(|create_dir|stdin\()",
+    }
+    found = [label for label, pattern in semantic_signals.items() if re.search(pattern, combined)]
+    if len(found) < 2:
+        return False, "Rust foundation lacks migration-relevant implementation signals"
+    return True, (
+        "substantive Rust migration foundation: "
+        f"{total_lines} executable lines across {substantial_files} modules; "
+        f"signals={', '.join(found)}"
+    )
+
+
+def rust_migration_progress_evidence(root: Path, manifests: list[Path]) -> tuple[float, str]:
+    """Award bounded credit for reachable-looking Rust migration subsystems.
+
+    This is deliberately an implementation-progress signal, not behavioral
+    ownership. Every point still requires the public Rust launcher trace in
+    ``check_rust_entrypoint``. The later bridge-only probes remain the only
+    path to AST, core, worker, and package ownership credit.
+    """
+
+    ignored_parts = {"node_modules", "target", ".git", ".cargo-home"}
+    sources: list[tuple[int, str]] = []
+    for manifest in manifests:
+        for path in manifest.parent.rglob("*.rs"):
+            relative = path.relative_to(root)
+            if ignored_parts.intersection(relative.parts):
+                continue
+            try:
+                lines = [
+                    line for line in path.read_text(encoding="utf-8").splitlines()
+                    if line.strip() and not line.lstrip().startswith("//")
+                ]
+            except OSError:
+                continue
+            sources.append((len(lines), "\n".join(lines)))
+
+    def has_signal(pattern: str) -> bool:
+        return any(lines >= 40 and re.search(pattern, source) for lines, source in sources)
+
+    def has_all_signals(*patterns: str) -> bool:
+        """Require a coherent implementation pattern in one substantive module.
+
+        A standalone token such as ``write_all`` or ``package`` is common in
+        unrelated Rust glue. Progress credit is only meaningful when the
+        relevant operations occur together in an implementation-sized module.
+        """
+
+        return any(
+            lines >= 40 and all(re.search(pattern, source) for pattern in patterns)
+            for lines, source in sources
+        )
+
+    earned: list[str] = []
+    score = 0.0
+    if has_all_signals(
+        r"(?:clap::|ArgMatches|fn\s+(?:parse|process)\w*|struct\s+(?:Option|Cli)\w*|option_definitions)",
+        r"(?:parser|transform|extensions|cpus|ignore-pattern|dry)",
+    ):
+        score += 0.025
+        earned.append("arguments")
+    if has_all_signals(r"(?:glob|walkdir|WalkDir|read_dir)", r"(?:Path|PathBuf|fs::)"):
+        score += 0.010
+        earned.append("file discovery")
+    if has_all_signals(r"(?:ignore(?:_files)?|gitignore)", r"(?:Path|pattern|glob)"):
+        score += 0.010
+        earned.append("ignore handling")
+    if has_all_signals(
+        r"(?:atomic|temporary|tempfile|\.tmp|_tmp)",
+        r"rename\(",
+        r"write_all",
+    ):
+        score += 0.015
+        earned.append("atomic writing")
+    if has_all_signals(
+        r"Command::new",
+        r"(?:serde_json|stdin\(|--transform|bridge)",
+    ):
+        score += 0.025
+        earned.append("runner protocol")
+    if has_all_signals(
+        r"(?:thread::spawn|rayon|spawn\()",
+        r"(?:available_parallelism|--cpus|parallel|worker)",
+    ):
+        score += 0.020
+        earned.append("worker orchestration")
+    if has_all_signals(
+        r"(?:package\.json|CARGO_PKG|npm\s+pack)",
+        r"(?:node_modules|ancestor|package root|Package)",
+    ):
+        score += 0.015
+        earned.append("package integration")
+    return min(score, 0.12), "migration progress: " + (", ".join(earned) if earned else "no scored subsystems")
+
+
 def check_rust_entrypoint(candidate: Path) -> tuple[bool, str]:
-    """Check that the public launcher executes a compiled Rust runner.
+    """Check that the public launcher executes a substantive compiled Rust runner.
 
     This intentionally checks the migration boundary, not a prescribed
     directory layout or executable name.  A candidate may keep its Cargo
@@ -1877,32 +2188,41 @@ def check_rust_entrypoint(candidate: Path) -> tuple[bool, str]:
         if not any(part in ignored_parts for part in path.relative_to(root).parts)
         and len(path.relative_to(root).parts) <= 3
     ]
-    launchers = [root / relative for relative in ("bin/jscodeshift.sh", "bin/jscodeshift.js")]
-    launcher = next((path for path in launchers if path.is_file()), None)
+    try:
+        launcher = cli_path(candidate)
+    except RuntimeError:
+        launcher = None
     if not cargo_manifests or launcher is None:
         return False, "Rust runner manifest or launcher is missing"
 
-    has_rust_source = any(any(manifest.parent.rglob("*.rs")) for manifest in cargo_manifests)
-    if not has_rust_source:
-        return False, "Rust runner manifest has no Rust source files"
+    substantive, foundation_detail = substantive_rust_migration_evidence(root, cargo_manifests)
+    if not substantive:
+        return False, foundation_detail
 
-    text = "\n".join(path.read_text(encoding="utf-8") for path in launchers if path.is_file())
-    native_launcher_signals = (
-        "JSCODESHIFT_BINARY",
-        "cargo run",
-        "target/release",
-        "target/debug",
-        "'target', 'release'",
-        "'target', 'debug'",
-        '"target", "release"',
-        '"target", "debug"',
-    )
-    if not any(signal in text for signal in native_launcher_signals):
-        return False, "launcher does not invoke the compiled Rust runner"
-    result = run_cli(candidate, ["--version"], cwd=root)
+    with tempfile.TemporaryDirectory(prefix="jscodeshift-rust-entrypoint-") as raw:
+        staged = Path(raw) / "candidate"
+        try:
+            shutil.copytree(candidate, staged, symlinks=True, copy_function=os.link)
+        except OSError:
+            if staged.exists():
+                shutil.rmtree(staged)
+            shutil.copytree(candidate, staged, symlinks=True)
+        staged_root = source_root(staged)
+        trace_environment = _module_trace_environment(staged_root, Path(raw))
+        result = run_cli(staged, ["--version"], cwd=staged_root, extra_env=trace_environment)
+        _, _, native_processes = _trace_loaded_package_modules(Path(raw) / "modules.jsonl", staged_root)
     if result.returncode != 0 or "jscodeshift:" not in result.stdout:
         return False, "Rust-backed version output was not observed through the public CLI"
-    return True, "public CLI is backed by the compiled Rust runner"
+    if native_processes == 0:
+        return False, "public CLI did not execute a compiled Rust runner"
+    progress_score, progress_detail = rust_migration_progress_evidence(root, cargo_manifests)
+    # 0.05 is the native-entrypoint foundation. The remaining 0.12 is a
+    # bounded, auditable implementation-progress allowance.
+    return (
+        True,
+        "public CLI is backed by the compiled Rust runner; " + foundation_detail + "; " + progress_detail,
+        (0.05 + progress_score) / 0.17,
+    )
 
 
 def run_with_bridge_only_files(
@@ -1950,7 +2270,7 @@ def run_with_bridge_only_files(
 
         trace_file = root / "modules.jsonl"
         loaded, node_processes, native_processes = _trace_loaded_package_modules(trace_file, package)
-        disallowed = sorted(loaded - ALLOWED_JS_BRIDGE_PATHS)
+        disallowed = sorted(loaded - allowed_js_bridge_paths(package))
         trace_error: str | None = None
         if disallowed:
             trace_error = "unapproved package JavaScript loaded: " + ", ".join(disallowed)
@@ -1974,8 +2294,14 @@ def ownership_probe(
     transform_text: str,
     marker: str,
     cli_prefix: list[str] | None = None,
+    reject_bridge_engine: bool = False,
 ) -> tuple[bool, str]:
     """Run one independent ownership probe and report only its own boundary."""
+
+    if reject_bridge_engine:
+        findings = bridge_engine_findings(candidate)
+        if findings:
+            return False, f"{label} is still implemented by the JavaScript bridge: " + "; ".join(findings)
 
     result, contents, trace_error = run_with_bridge_only_files(
         candidate,
@@ -2006,6 +2332,7 @@ def check_rust_parser_babel_ownership(candidate: Path) -> tuple[bool, str]:
             "return root.toSource() + '\\n// babel-owned'; };\n"
         ),
         marker="babel-owned",
+        reject_bridge_engine=True,
     )
 
 
@@ -2021,6 +2348,7 @@ def check_rust_parser_typescript_ownership(candidate: Path) -> tuple[bool, str]:
         ),
         marker="typescript-owned",
         cli_prefix=["--run-in-band", "--parser", "ts"],
+        reject_bridge_engine=True,
     )
 
 
@@ -2036,10 +2364,14 @@ def check_rust_parser_tsx_ownership(candidate: Path) -> tuple[bool, str]:
         ),
         marker="tsx-owned",
         cli_prefix=["--run-in-band", "--parser", "tsx"],
+        reject_bridge_engine=True,
     )
 
 
 def check_rust_printer_comments_ownership(candidate: Path) -> tuple[bool, str]:
+    findings = bridge_engine_findings(candidate)
+    if findings:
+        return False, "comment-preserving printer is still implemented by the JavaScript bridge: " + "; ".join(findings)
     source_files = {"project/comments.js": "// preserve this comment\nconst value = \"old\";\n"}
     result, contents, trace_error = run_with_bridge_only_files(
         candidate,
@@ -2071,6 +2403,7 @@ def check_rust_core_builders_ownership(candidate: Path) -> tuple[bool, str]:
             "return root.toSource(); };\n"
         ),
         marker="builderOwned",
+        reject_bridge_engine=True,
     )
 
 
@@ -2085,6 +2418,7 @@ def check_rust_core_templates_ownership(candidate: Path) -> tuple[bool, str]:
             "root.find(j.Program).get('body').value.push(j.template.statement(quasi)); return root.toSource(); };\n"
         ),
         marker="templateOwned",
+        reject_bridge_engine=True,
     )
 
 
@@ -2099,6 +2433,7 @@ def check_rust_core_nodepath_ownership(candidate: Path) -> tuple[bool, str]:
             "return file.source + '\\n// nodepath-owned'; };\n"
         ),
         marker="nodepath-owned",
+        reject_bridge_engine=True,
     )
 
 
@@ -2121,6 +2456,7 @@ def check_rust_edge_ast_ownership(candidate: Path) -> tuple[bool, str]:
         ),
         marker="edge-ast-owned",
         cli_prefix=["--run-in-band", "--parser", "tsx"],
+        reject_bridge_engine=True,
     )
 
 
@@ -2206,28 +2542,57 @@ def check_rust_worker_determinism_ownership(candidate: Path) -> tuple[bool, str]
 
 
 def check_rust_package_root_ownership(candidate: Path) -> tuple[bool, str]:
-    package = source_root(candidate).resolve()
-    probe = (
-        "const j=require(process.env.JSCODESHIFT_PACKAGE);"
-        "if(typeof j!=='function'||typeof j.withParser!=='function'||"
-        "(!j.template || typeof j.template.statement!=='function')) process.exit(2);"
-        "const root=j('const value=1;'); if(!root.find(j.Identifier).size()) process.exit(3);"
-    )
-    result = subprocess.run(
-        ["node", "-e", probe],
-        cwd=package,
-        text=True,
-        capture_output=True,
-        check=False,
-        env={**os.environ, "JSCODESHIFT_PACKAGE": str(package)},
-    )
-    if result.returncode != 0:
-        return False, "package-root API did not expose callable parser, collections, and template helpers"
-    return True, "package-root API exposes callable parser, collections, and template helpers"
+    """Exercise the package-root API after removing non-bridge JavaScript."""
+
+    bridge_findings = bridge_engine_findings(candidate)
+    if bridge_findings:
+        return False, "package-root API is still implemented by the JavaScript bridge: " + "; ".join(bridge_findings)
+
+    with tempfile.TemporaryDirectory(prefix="jscodeshift-package-root-ownership-") as raw:
+        work = Path(raw)
+        staged = work / "candidate"
+        try:
+            shutil.copytree(candidate, staged, symlinks=True, copy_function=os.link)
+        except OSError:
+            if staged.exists():
+                shutil.rmtree(staged)
+            shutil.copytree(candidate, staged, symlinks=True)
+        package = source_root(staged)
+        _remove_non_bridge_sources(package)
+        trace_environment = _module_trace_environment(package, work)
+        probe = (
+            "const j=require(process.env.JSCODESHIFT_PACKAGE);"
+            "if(typeof j!=='function'||typeof j.withParser!=='function'||"
+            "(!j.template || typeof j.template.statement!=='function')) process.exit(2);"
+            "const root=j('const value=1;'); if(!root.find(j.Identifier).size()) process.exit(3);"
+        )
+        result = subprocess.run(
+            ["node", "-e", probe],
+            cwd=package,
+            text=True,
+            capture_output=True,
+            check=False,
+            env={**os.environ, "JSCODESHIFT_PACKAGE": str(package), **trace_environment},
+        )
+        if result.returncode != 0:
+            return False, "package-root API failed after non-bridge JavaScript was removed"
+        loaded, node_processes, native_processes = _trace_loaded_package_modules(work / "modules.jsonl", package)
+        disallowed = sorted(loaded - allowed_js_bridge_paths(package))
+        if disallowed:
+            return False, "package-root loaded non-bridge JavaScript: " + ", ".join(disallowed)
+        if node_processes == 0:
+            return False, "package-root ownership trace observed no Node compatibility process"
+        if native_processes == 0:
+            return False, "package-root ownership trace observed no compiled Rust process"
+    return True, "package-root API completed with only the explicit JS bridge"
 
 
 def check_rust_package_clean_pack_ownership(candidate: Path) -> tuple[bool, str]:
     """Verify a packed artifact still works after non-bridge JS is removed."""
+
+    bridge_findings = bridge_engine_findings(candidate)
+    if bridge_findings:
+        return False, "clean package retains a JavaScript engine bridge: " + "; ".join(bridge_findings)
 
     with tempfile.TemporaryDirectory(prefix="jscodeshift-clean-pack-ownership-") as raw:
         work = Path(raw)
@@ -2268,7 +2633,7 @@ def check_rust_package_clean_pack_ownership(candidate: Path) -> tuple[bool, str]
             for path in package.rglob("*")
             if path.is_file()
             and path.suffix.lower() in ENGINE_SOURCE_SUFFIXES
-            and path.relative_to(package).as_posix() not in ALLOWED_JS_BRIDGE_PATHS
+            and path.relative_to(package).as_posix() not in allowed_js_bridge_paths(package)
         )
         if disallowed:
             return False, "clean packed artifact retains non-bridge JavaScript: " + ", ".join(disallowed[:8])
@@ -2278,8 +2643,9 @@ def check_rust_package_clean_pack_ownership(candidate: Path) -> tuple[bool, str]
         if not isinstance(bins, dict) or not bins:
             return False, "clean packed artifact has no CLI bin"
         bin_path = package / next(iter(bins.values()))
+        isolated_env = {**os.environ, "NODE_PATH": "", "NO_COLOR": "1"}
         smoke = subprocess.run(
-            [str(bin_path), "--version"], cwd=work, text=True, capture_output=True, check=False
+            [str(bin_path), "--version"], cwd=work, env=isolated_env, text=True, capture_output=True, check=False
         )
         if smoke.returncode != 0 or "jscodeshift:" not in smoke.stdout:
             return False, "clean packed Rust CLI did not execute"
@@ -2321,7 +2687,7 @@ def check_rust_package_guard_ownership(candidate: Path) -> tuple[bool, str]:
         if result.returncode != 0:
             return False, "package-root guard probe failed"
         loaded, node_processes, native_processes = _trace_loaded_package_modules(work / "modules.jsonl", package)
-        disallowed = sorted(loaded - ALLOWED_JS_BRIDGE_PATHS)
+        disallowed = sorted(loaded - allowed_js_bridge_paths(package))
         if disallowed:
             return False, "package-root loaded non-bridge JavaScript: " + ", ".join(disallowed)
         if node_processes == 0:
@@ -2332,10 +2698,31 @@ def check_rust_package_guard_ownership(candidate: Path) -> tuple[bool, str]:
 
 
 def check_rust_legacy_engine_boundary(candidate: Path) -> tuple[bool, str]:
-    retained = retained_legacy_engine_copies(candidate)
-    if retained:
-        return False, "retained copies of the public JS engine: " + ", ".join(sorted(retained)[:8])
-    return True, "no exact public-engine copies remain in the submitted package"
+    """Prove native CLI orchestration with only the declared JS transform bridge.
+
+    This is intentionally a bridge-only run rather than a filename check. It
+    verifies the public CLI, option/file handoff, native child process, and a
+    loader-only JavaScript transform bridge at the same time. The AST and
+    collection domains have their own independent probes.
+    """
+
+    result, contents, trace_error = run_with_bridge_only_files(
+        candidate,
+        source_files={"project/cli-owned.js": "const cliOwned = 1;\n"},
+        transform_text=(
+            "module.exports = (file, _api, options) => { "
+            "if (!file.path || options.marker !== 'native-cli') throw new Error('CLI handoff failed'); "
+            "return file.source + '\\n// native-cli-owned'; };\n"
+        ),
+        cli_prefix=["--run-in-band", "--marker", "native-cli"],
+    )
+    if trace_error:
+        return False, f"Rust CLI ownership trace failed: {trace_error}"
+    if result.returncode != 0:
+        return False, f"Rust CLI ownership probe failed (rc={result.returncode})"
+    if "native-cli-owned" not in contents["project/cli-owned.js"]:
+        return False, "Rust CLI ownership probe did not write the transform result"
+    return True, "public CLI orchestration completed with only the explicit JS bridge"
 
 
 def check_rust_core_collections_ownership(candidate: Path) -> tuple[bool, str]:
@@ -2352,10 +2739,11 @@ def check_rust_core_collections_ownership(candidate: Path) -> tuple[bool, str]:
             "return root.toSource(); };\n"
         ),
         marker="collectionOwned",
+        reject_bridge_engine=True,
     )
 
 
-def check(candidate: Path) -> dict[str, dict[str, str]]:
+def check(candidate: Path) -> dict[str, dict[str, object]]:
     """Run all private criteria and retain concise diagnostic evidence."""
 
     checks = {
@@ -2405,11 +2793,14 @@ def check(candidate: Path) -> dict[str, dict[str, str]]:
         "ast-composition-corpus": check_ast_composition_corpus,
         "worker-replay-consistency": check_worker_replay_consistency,
     }
-    result: dict[str, dict[str, str]] = {}
+    result: dict[str, dict[str, object]] = {}
     for criterion in CRITERIA:
         try:
-            passed, detail = checks[criterion](candidate)
-            result[criterion] = {"status": "pass" if passed else "fail", "detail": detail}
+            outcome = checks[criterion](candidate)
+            passed, detail = outcome[:2]
+            fraction = float(outcome[2]) if len(outcome) > 2 else (1.0 if passed else 0.0)
+            status = "pass" if fraction == 1.0 else "partial" if fraction > 0.0 else "fail"
+            result[criterion] = {"status": status, "score": fraction, "detail": detail}
         except (OSError, RuntimeError, subprocess.SubprocessError) as exc:
-            result[criterion] = {"status": "blocked", "detail": f"verifier setup failed: {exc}"}
+            result[criterion] = {"status": "blocked", "score": 0.0, "detail": f"verifier setup failed: {exc}"}
     return result

@@ -21,7 +21,7 @@ python3 -m astra_harness.generate \
   --provider <codex|openai-compatible|claude-code|openhands> \
   --model <model-name> \
   --reasoning <low|medium|high|xhigh|max> \
-  --env-file /absolute/path/to/private-provider.env
+  [--openhands-env-file /absolute/path/to/private-openhands.env]
 ```
 
 Generated candidates and their run artifacts are stored under
@@ -29,8 +29,11 @@ Generated candidates and their run artifacts are stored under
 root is intentional. The task ID is retained in `metadata.json`; it is not duplicated in the path.
 
 The adapter selects the provider's native CLI flags. The container receives only `instruction.md`
-and `public/`; credentials are injected from the private env file at runtime. Use `--command` when
-a site-specific CLI installation has a different invocation syntax.
+and `public/`; credentials are injected at runtime. OpenHands reads the private `.env` from
+`../hackerrank-openhands-gateway/.env` by default; `--openhands-env-file` overrides that location.
+Only `ASTRA_GATEWAY_API_KEY`, `ASTRA_GATEWAY_BASE_URL`, `LLM_API_KEY`, and `LLM_BASE_URL` are
+accepted, and the filtered values are streamed into the container's `/tmp` tmpfs. Use `--command`
+when a site-specific CLI installation has a different invocation syntax.
 
 For `claude-code`, provide `ANTHROPIC_API_KEY` in the private env file. A Claude Code login can
 also be copied explicitly with `--claude-credentials-file /absolute/path/to/.credentials.json`.
@@ -43,7 +46,7 @@ model. A Portkey key is not an OpenAI key; the env file must match the endpoint 
 
 `openhands` uses the vendored `hackerrank-openhands-gateway` package and routes OpenHands through
 the HackerRank Gateway. Its command and telemetry are handled inside the isolated generation image;
-the private env file supplies the Gateway credentials and base URL at runtime.
+the reusable package's `.env` is the single source for Gateway credentials and optional base URL.
 
 ## Verification and scoring
 

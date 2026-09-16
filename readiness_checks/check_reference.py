@@ -5,13 +5,17 @@ from __future__ import annotations
 
 import argparse
 import math
+import sys
 import tomllib
 from pathlib import Path
 from typing import Any
 
 try:
+    from astra_harness.score import verifier_revision
     from .common import PASS_STATUSES, emit_result, load_json, status_value
 except ImportError:  # Direct execution: ``python readiness_checks/check_reference.py``.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    from astra_harness.score import verifier_revision
     from common import PASS_STATUSES, emit_result, load_json, status_value
 
 
@@ -38,6 +42,7 @@ def check_reference(proof_dir: Path) -> dict[str, Any]:
     # an entirely different task.  The current scoring ledger is the stable
     # source of truth for the expected criterion set.
     scoring_path = proof_dir.parent / "scoring.yml"
+    expected_revision = verifier_revision(proof_dir.parent)
     expected_criteria: set[str] = set()
     if scoring_path.is_file():
         for raw in scoring_path.read_text(encoding="utf-8").splitlines():
@@ -76,6 +81,15 @@ def check_reference(proof_dir: Path) -> dict[str, Any]:
         if expected_task_id is not None and task_id != expected_task_id:
             result["failures"].append(
                 f"{run_dir.name}: task_id is {task_id!r}, expected {expected_task_id!r}"
+            )
+        verification_path = run_dir / "verification.json"
+        try:
+            verification = load_json(verification_path)
+        except (OSError, ValueError, TypeError):
+            verification = {}
+        if verification.get("verifier_revision") != expected_revision:
+            result["failures"].append(
+                f"{run_dir.name}: verifier revision is stale; regenerate the reference proof"
             )
         if (
             isinstance(score, bool)

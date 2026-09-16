@@ -26,6 +26,7 @@ def main() -> int:
         "criterionStatus": {
             key: {
                 "status": value["status"],
+                "score": value["score"],
                 "scenarioId": SCENARIO_IDS[key],
                 "detail": value["detail"],
             }
