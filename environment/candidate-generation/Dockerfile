@@ -13,7 +13,7 @@ ENV PATH="/opt/cargo/bin:${PATH}"
 # slim Node image includes Node's bundled roots but not the system CA bundle,
 # which causes TLS failures against the provider endpoint.
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends ca-certificates curl build-essential python3 python3-pip \
+    && apt-get install -y --no-install-recommends ca-certificates curl build-essential python3 python3-pip rsync tmux \
     && rm -rf /var/lib/apt/lists/*
 
 # Keep Node 22 from the base image while adding the Python 3.12 runtime
@@ -48,7 +48,11 @@ RUN npm install --global --no-audit --no-fund "@anthropic-ai/claude-code@${CLAUD
 # Use the reusable HackerRank/OpenHands package for Gateway routing, Gemini
 # request compatibility, response capture, and standardized telemetry.
 COPY vendor/hackerrank-openhands-gateway /opt/hackerrank-openhands-gateway
-RUN python3.12 -m pip install --no-cache-dir /opt/hackerrank-openhands-gateway
+RUN python3.12 -m pip install --no-cache-dir /opt/hackerrank-openhands-gateway \
+    && test "$(python3.12 -c 'import importlib.metadata as m; print(m.version("hackerrank-openhands-gateway"))')" = "0.1.0" \
+    && command -v rsync \
+    && command -v tmux \
+    && command -v hackerrank-openhands
 
 RUN useradd --create-home runner
 WORKDIR /work
