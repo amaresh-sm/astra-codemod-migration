@@ -13,11 +13,24 @@ from verifier.jscodeshift_checks import (
     legacy_engine_paths,
     rust_migration_progress_evidence,
     retained_legacy_engine_copies,
+    ProbeTimeoutError,
+    run_probe,
     substantive_rust_migration_evidence,
 )
 
 
 class MigrationOwnershipTests(unittest.TestCase):
+    def test_probe_timeout_kills_process_group_and_preserves_diagnostics(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            with self.assertRaises(ProbeTimeoutError) as caught:
+                run_probe(["sh", "-c", "printf probe-start; sleep 5"], cwd=Path(raw), timeout=0.05)
+
+        error = caught.exception
+        self.assertEqual(error.diagnostics()["kind"], "timeout")
+        self.assertEqual(error.diagnostics()["command"][0], "sh")
+        self.assertLess(error.timeout, 1.0)
+        self.assertIn("probe timed out", str(error))
+
     def test_cli_path_uses_package_declared_bin_over_legacy_filename(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
             candidate = Path(raw) / "candidate"
@@ -131,6 +144,28 @@ class MigrationOwnershipTests(unittest.TestCase):
 
             self.assertTrue(passed)
             self.assertIn("substantive Rust migration foundation", detail)
+
+    def test_rust_foundation_accepts_a_large_multi_domain_monolith(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            manifest = root / "Cargo.toml"
+            manifest.write_text("[package]\nname = 'candidate'\nversion = '0.1.0'\n")
+            source = root / "src/main.rs"
+            source.parent.mkdir()
+            helpers = "\n".join(f"fn stage_{number}() {{ }}" for number in range(12))
+            source.write_text(
+                "fn parse_args() { let _ = std::env::args(); }\n"
+                "fn discover() { let _ = std::fs::read_dir(\".\"); }\n"
+                "fn execute() { let _ = std::process::Command::new(\"true\"); }\n"
+                f"{helpers}\n"
+                + ("let padding = 0;\n" * 800),
+                encoding="utf-8",
+            )
+
+            passed, detail = substantive_rust_migration_evidence(root, [manifest])
+
+            self.assertTrue(passed)
+            self.assertIn("monolithic layout", detail)
 
     def test_migration_progress_requires_complete_subsystem_patterns(self) -> None:
         with tempfile.TemporaryDirectory() as raw:

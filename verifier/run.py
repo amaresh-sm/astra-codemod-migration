@@ -29,6 +29,7 @@ def main() -> int:
                 "score": value["score"],
                 "scenarioId": SCENARIO_IDS[key],
                 "detail": value["detail"],
+                **({"diagnostics": value["diagnostics"]} if "diagnostics" in value else {}),
             }
             for key, value in statuses.items()
         },

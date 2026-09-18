@@ -114,14 +114,113 @@ SCENARIO_IDS = {
 
 
 def source_root(candidate: Path) -> Path:
-    """Resolve the public codebase directory in a candidate workspace."""
+    """Resolve the public codebase directory in a candidate workspace.
+
+    Most candidates place their code inside a ``codebase/`` subdirectory.
+    Some place their Rust implementation as a sibling of a retained
+    ``codebase/`` legacy directory and wire it at the repo root via
+    ``package.json#bin`` pointing to a shell or compiled-binary launcher.
+    In that layout the candidate root is the real package root.
+    """
 
     nested = candidate / "codebase"
-    return nested if nested.is_dir() else candidate
+    if not nested.is_dir():
+        return candidate
+    # If the root package.json declares a non-JavaScript launcher that exists
+    # on disk, the root is the actively maintained package.  The nested
+    # ``codebase/`` directory is retained legacy JS, not the new entrypoint.
+    _js_suffixes = frozenset({".cjs", ".js", ".mjs", ".ts", ".tsx"})
+    root_pkg_path = candidate / "package.json"
+    if root_pkg_path.is_file():
+        try:
+            root_pkg = json.loads(root_pkg_path.read_text(encoding="utf-8"))
+            declared = root_pkg.get("bin") if isinstance(root_pkg, dict) else None
+            if isinstance(declared, str):
+                declared = {"jscodeshift": declared}
+            if isinstance(declared, dict):
+                for v in declared.values():
+                    if isinstance(v, str) and Path(v).suffix.lower() not in _js_suffixes:
+                        if (candidate / v).is_file():
+                            return candidate
+        except (OSError, json.JSONDecodeError):
+            pass
+    return nested
 
 
 ENGINE_SOURCE_SUFFIXES = frozenset({".cjs", ".js", ".mjs", ".ts", ".tsx"})
 ENGINE_EXCLUDED_PARTS = frozenset({".git", "node_modules", "target", ".cargo-home"})
+
+# Individual probes must be bounded independently.  The value is deliberately
+# configurable for slow verifier environments, but the default is short
+# enough that one wedged candidate process cannot stall aggregation for many
+# minutes.
+PROBE_TIMEOUT_SECONDS = float(os.environ.get("ASTRA_VERIFIER_PROBE_TIMEOUT_SECONDS", "30"))
+
+
+class ProbeTimeoutError(subprocess.SubprocessError):
+    """A probe exceeded its deadline and was terminated as a process group."""
+
+    def __init__(self, command: list[str], timeout: float, stdout: str = "", stderr: str = "") -> None:
+        self.command = command
+        self.timeout = timeout
+        self.stdout = stdout
+        self.stderr = stderr
+        super().__init__(self._message())
+
+    def _message(self) -> str:
+        command = shlex.join(self.command)
+        output = " ".join(part.strip() for part in (self.stdout, self.stderr) if part.strip())
+        suffix = f"; output={output[-1200:]}" if output else ""
+        return f"probe timed out after {self.timeout:g}s: {command}{suffix}"
+
+    def diagnostics(self) -> dict[str, object]:
+        return {
+            "kind": "timeout",
+            "command": self.command,
+            "timeout_seconds": self.timeout,
+            "stdout_tail": self.stdout[-4000:],
+            "stderr_tail": self.stderr[-4000:],
+        }
+
+
+def run_probe(
+    command: list[str],
+    *,
+    cwd: Path,
+    timeout: float | None = None,
+    input: str | None = None,
+    env: dict[str, str] | None = None,
+) -> subprocess.CompletedProcess[str]:
+    """Run one untrusted probe with a hard process-group deadline.
+
+    ``subprocess.run(timeout=...)`` only terminates the immediate child. A
+    candidate can spawn a worker that inherits the capture pipes, leaving the
+    verifier waiting even after the parent is killed. Starting a new session
+    and terminating the whole process group prevents that leak and lets the
+    caller record a blocked probe and continue with independent checks.
+    """
+
+    deadline = PROBE_TIMEOUT_SECONDS if timeout is None else min(timeout, PROBE_TIMEOUT_SECONDS)
+    process = subprocess.Popen(
+        command,
+        cwd=cwd,
+        text=True,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        start_new_session=True,
+        env=env,
+    )
+    try:
+        stdout, stderr = process.communicate(input=input, timeout=deadline)
+    except subprocess.TimeoutExpired as exc:
+        try:
+            os.killpg(process.pid, 9)
+        except ProcessLookupError:
+            pass
+        stdout, stderr = process.communicate()
+        raise ProbeTimeoutError(command, deadline, stdout or "", stderr or "") from exc
+    return subprocess.CompletedProcess(command, process.returncode, stdout, stderr)
 
 # The bridge exists solely because customer transforms are JavaScript. It may
 # load a transform, marshal file/options data, and forward requests to Rust;
@@ -699,14 +798,11 @@ def run_cli(
 ) -> subprocess.CompletedProcess[str]:
     """Invoke the submitted CLI as a black box."""
 
-    return subprocess.run(
+    return run_probe(
         [*cli_command(candidate), *args],
         cwd=cwd,
         input=stdin,
-        text=True,
-        capture_output=True,
         timeout=timeout,
-        check=False,
         env={
             **os.environ,
             "NO_COLOR": "1",
@@ -1554,12 +1650,9 @@ def check_collection_extensions(candidate: Path) -> tuple[bool, str]:
         "if(!output.includes('renamed-pkg')||!output.includes('renamedTarget')||!output.includes('label=\"new\"'))process.exit(6);"
         "process.stdout.write('ok\\n');"
     )
-    result = subprocess.run(
+    result = run_probe(
         ["node", "-e", program],
         cwd=source_root(candidate),
-        text=True,
-        capture_output=True,
-        check=False,
         timeout=90,
     )
     if result.returncode != 0 or result.stdout.strip() != "ok":
@@ -1707,12 +1800,9 @@ def check_package_boundary_compatibility(candidate: Path) -> tuple[bool, str]:
         work = Path(raw)
         packed = work / "packed"
         packed.mkdir()
-        result = subprocess.run(
+        result = run_probe(
             ["npm", "pack", "--ignore-scripts", "--json", "--pack-destination", str(packed)],
             cwd=root,
-            text=True,
-            capture_output=True,
-            check=False,
             timeout=180,
         )
         tarballs = sorted(packed.glob("*.tgz"))
@@ -1752,13 +1842,10 @@ def check_package_boundary_compatibility(candidate: Path) -> tuple[bool, str]:
         # executable or resolves its relative files correctly.
         bin_path = package / next(iter(bins.values()))
         isolated_env = {**os.environ, "NODE_PATH": "", "NO_COLOR": "1"}
-        smoke = subprocess.run(
+        smoke = run_probe(
             [str(bin_path), "--version"],
             cwd=work,
             env=isolated_env,
-            text=True,
-            capture_output=True,
-            check=False,
         )
         if smoke.returncode != 0 or "jscodeshift:" not in smoke.stdout:
             return False, "packed CLI entrypoint could not execute outside the source tree"
@@ -1768,7 +1855,7 @@ def check_package_boundary_compatibility(candidate: Path) -> tuple[bool, str]:
             "typeof j.registerMethods!=='function') process.exit(2);"
             "if(j('const packaged=1;').find(j.Identifier,{name:'packaged'}).size()!==1) process.exit(3);"
         )
-        imported = subprocess.run(["node", "-e", probe], cwd=package, env=isolated_env, text=True, capture_output=True, check=False)
+        imported = run_probe(["node", "-e", probe], cwd=package, env=isolated_env)
         if imported.returncode != 0:
             return False, "packed package root export could not be loaded"
     return True, "npm packaging retains the public package export and CLI entrypoint"
@@ -2024,12 +2111,9 @@ def check_package_root_export(candidate: Path) -> tuple[bool, str]:
         "const ast = j('const exported = 1;');"
         "if (ast.find(j.Identifier, {name: 'exported'}).size() !== 1) process.exit(3);"
     )
-    result = subprocess.run(
+    result = run_probe(
         ["node", "-e", probe],
         cwd=root,
-        text=True,
-        capture_output=True,
-        check=False,
         env={**os.environ, "JSCODESHIFT_PACKAGE": str(root)},
     )
     if result.returncode != 0:
@@ -2063,26 +2147,39 @@ def substantive_rust_migration_evidence(root: Path, manifests: list[Path]) -> tu
                 continue
             sources.append((path, len(lines), "\n".join(lines)))
 
+    combined = "\n".join(source for _, _, source in sources)
     total_lines = sum(lines for _, lines, _ in sources)
     substantial_files = sum(1 for _, lines, _ in sources if lines >= 40)
-    if total_lines < 400 or substantial_files < 3:
+    largest_file = max((lines for _, lines, _ in sources), default=0)
+    functions = set(re.findall(r"^\s*(?:pub\s+)?fn\s+([A-Za-z_][A-Za-z0-9_]*)", combined, re.MULTILINE))
+
+    # A serious migration may be deliberately modular, or it may initially be
+    # a large single Rust runner. Requiring an arbitrary number of files
+    # incorrectly classifies the latter as a thin wrapper. The monolithic path
+    # is intentionally stricter: it needs a substantially larger body of
+    # executable Rust and many independently named implementation functions.
+    modular_layout = total_lines >= 400 and substantial_files >= 3
+    monolithic_layout = total_lines >= 800 and largest_file >= 800 and len(functions) >= 12
+    if not modular_layout and not monolithic_layout:
         return False, (
             "Rust launcher is not backed by a substantive migration foundation "
-            f"({total_lines} executable lines across {substantial_files} substantial modules)"
+            f"({total_lines} executable lines across {substantial_files} substantial modules; "
+            f"largest module {largest_file} lines; {len(functions)} functions)"
         )
 
-    combined = "\n".join(source for _, _, source in sources)
     semantic_signals = {
         "argument handling": r"(?:clap::|ArgMatches|std::env::args(?:_os)?|\.arg\()",
         "file handling": r"(?:std::fs::|walkdir|read_dir|glob|ignore)",
         "execution or writing": r"(?:std::process::|Command::new|write_all|rename\(|create_dir|stdin\()",
     }
     found = [label for label, pattern in semantic_signals.items() if re.search(pattern, combined)]
-    if len(found) < 2:
+    required_signals = 3 if monolithic_layout else 2
+    if len(found) < required_signals:
         return False, "Rust foundation lacks migration-relevant implementation signals"
+    layout = "monolithic" if monolithic_layout else "modular"
     return True, (
         "substantive Rust migration foundation: "
-        f"{total_lines} executable lines across {substantial_files} modules; "
+        f"{layout} layout with {total_lines} executable lines across {substantial_files} modules; "
         f"signals={', '.join(found)}"
     )
 
@@ -2218,10 +2315,13 @@ def check_rust_entrypoint(candidate: Path) -> tuple[bool, str]:
     progress_score, progress_detail = rust_migration_progress_evidence(root, cargo_manifests)
     # 0.05 is the native-entrypoint foundation. The remaining 0.12 is a
     # bounded, auditable implementation-progress allowance.
+    foundation_fraction = (0.05 + progress_score) / 0.17
+    if foundation_fraction >= 1.0 - 1e-9:
+        foundation_fraction = 1.0
     return (
         True,
         "public CLI is backed by the compiled Rust runner; " + foundation_detail + "; " + progress_detail,
-        (0.05 + progress_score) / 0.17,
+        foundation_fraction,
     )
 
 
@@ -2566,12 +2666,9 @@ def check_rust_package_root_ownership(candidate: Path) -> tuple[bool, str]:
             "(!j.template || typeof j.template.statement!=='function')) process.exit(2);"
             "const root=j('const value=1;'); if(!root.find(j.Identifier).size()) process.exit(3);"
         )
-        result = subprocess.run(
+        result = run_probe(
             ["node", "-e", probe],
             cwd=package,
-            text=True,
-            capture_output=True,
-            check=False,
             env={**os.environ, "JSCODESHIFT_PACKAGE": str(package), **trace_environment},
         )
         if result.returncode != 0:
@@ -2607,12 +2704,9 @@ def check_rust_package_clean_pack_ownership(candidate: Path) -> tuple[bool, str]
         _remove_non_bridge_sources(package_root)
         packed = work / "packed"
         packed.mkdir()
-        packed_result = subprocess.run(
+        packed_result = run_probe(
             ["npm", "pack", "--ignore-scripts", "--json", "--pack-destination", str(packed)],
             cwd=package_root,
-            text=True,
-            capture_output=True,
-            check=False,
             timeout=180,
         )
         tarballs = sorted(packed.glob("*.tgz"))
@@ -2644,9 +2738,7 @@ def check_rust_package_clean_pack_ownership(candidate: Path) -> tuple[bool, str]
             return False, "clean packed artifact has no CLI bin"
         bin_path = package / next(iter(bins.values()))
         isolated_env = {**os.environ, "NODE_PATH": "", "NO_COLOR": "1"}
-        smoke = subprocess.run(
-            [str(bin_path), "--version"], cwd=work, env=isolated_env, text=True, capture_output=True, check=False
-        )
+        smoke = run_probe([str(bin_path), "--version"], cwd=work, env=isolated_env)
         if smoke.returncode != 0 or "jscodeshift:" not in smoke.stdout:
             return False, "clean packed Rust CLI did not execute"
     return True, "clean packed artifact executes with only the explicit JS bridge"
@@ -2676,12 +2768,9 @@ def check_rust_package_guard_ownership(candidate: Path) -> tuple[bool, str]:
             "if(typeof j!=='function'||!j.template||typeof j.template.statement!=='function') process.exit(2);"
             "if(j('const x=1;').find(j.Identifier).size()!==1) process.exit(3);"
         )
-        result = subprocess.run(
+        result = run_probe(
             ["node", "-e", probe],
             cwd=package,
-            text=True,
-            capture_output=True,
-            check=False,
             env={**os.environ, "JSCODESHIFT_PACKAGE": str(package), **trace_environment},
         )
         if result.returncode != 0:
@@ -2799,8 +2888,21 @@ def check(candidate: Path) -> dict[str, dict[str, object]]:
             outcome = checks[criterion](candidate)
             passed, detail = outcome[:2]
             fraction = float(outcome[2]) if len(outcome) > 2 else (1.0 if passed else 0.0)
+            if fraction >= 1.0 - 1e-9:
+                fraction = 1.0
+            elif fraction <= 1e-9:
+                fraction = 0.0
             status = "pass" if fraction == 1.0 else "partial" if fraction > 0.0 else "fail"
             result[criterion] = {"status": status, "score": fraction, "detail": detail}
+        except ProbeTimeoutError as exc:
+            # A blocked probe is evidence about this criterion only. Preserve
+            # the process diagnostics and continue with independent criteria.
+            result[criterion] = {
+                "status": "blocked",
+                "score": 0.0,
+                "detail": str(exc),
+                "diagnostics": exc.diagnostics(),
+            }
         except (OSError, RuntimeError, subprocess.SubprocessError) as exc:
             result[criterion] = {"status": "blocked", "score": 0.0, "detail": f"verifier setup failed: {exc}"}
     return result

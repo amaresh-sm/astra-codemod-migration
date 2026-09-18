@@ -137,13 +137,13 @@ criteria:
     weight: 0.004
     blocked_policy: zero
 
-  # Foundation and migration progress: 0.17. The first 0.05 proves the
-  # native public entrypoint; the remaining 0.12 rewards independently
+  # Foundation and migration progress: 0.15. The first 0.05 proves the
+  # native public entrypoint; the remaining 0.10 rewards independently
   # evidenced Rust CLI, files, runner, worker, and package implementation.
   - id: rust-runner-entrypoint
     component: migration_foundation
     domain: foundation
-    weight: 0.170
+    weight: 0.150
     blocked_policy: zero
 
   # Independently proven Rust domains: 0.70.
@@ -171,41 +171,41 @@ criteria:
   - id: rust-edge-ast-ownership
     component: rust_ownership
     domain: ast
-    weight: 0.040
+    weight: 0.030
     blocked_policy: zero
 
-  # Collections, builders, templates, and NodePath: 0.18
+  # Collections, builders, templates, and NodePath: 0.16
   - id: rust-core-collections-ownership
     component: rust_ownership
     domain: core
-    weight: 0.045
+    weight: 0.040
     blocked_policy: zero
   - id: rust-core-builders-ownership
     component: rust_ownership
     domain: core
-    weight: 0.045
+    weight: 0.040
     blocked_policy: zero
   - id: rust-core-templates-ownership
     component: rust_ownership
     domain: core
-    weight: 0.045
+    weight: 0.040
     blocked_policy: zero
   - id: rust-core-nodepath-ownership
     component: rust_ownership
     domain: core
-    weight: 0.045
+    weight: 0.040
     blocked_policy: zero
 
-  # Public Rust CLI orchestration and file handling: 0.22
+  # Public Rust CLI orchestration and file handling: 0.14
   - id: rust-legacy-engine-boundary
     component: rust_ownership
     domain: cli
-    weight: 0.120
+    weight: 0.080
     blocked_policy: zero
   - id: rust-edge-cli-ownership
     component: rust_ownership
     domain: files
-    weight: 0.100
+    weight: 0.060
     blocked_policy: zero
 
   # Workers: 0.08
@@ -230,7 +230,10 @@ criteria:
     weight: 0.020
     blocked_policy: zero
 
-  # Package root and a clean packed artifact: 0.06
+  # Package root and a clean packed artifact: 0.19
+  # rust-package-clean-pack-ownership is weighted heavily: it requires a
+  # publishable Rust-native package with no retained JS engine artifacts,
+  # making it the primary discriminator for genuine partial migrations.
   - id: rust-package-root-ownership
     component: rust_ownership
     domain: package
@@ -239,7 +242,7 @@ criteria:
   - id: rust-package-clean-pack-ownership
     component: rust_ownership
     domain: package
-    weight: 0.020
+    weight: 0.150
     blocked_policy: zero
   - id: rust-package-guard-ownership
     component: rust_ownership
