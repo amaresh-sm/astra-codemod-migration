@@ -6,6 +6,7 @@ import argparse
 import json
 import os
 import re
+import re
 import shlex
 import shutil
 import subprocess
@@ -84,9 +85,21 @@ def parse_args() -> argparse.Namespace:
         help="Optional Codex cloud-policy cache copied into the container",
     )
     parser.add_argument("--ca-cert", type=Path, default=None, help="Optional PEM CA bundle for a TLS-inspecting network")
+    parser.add_argument(
+        "--tmpfs-size",
+        default="1g",
+        help="Size of the OpenHands container /tmp tmpfs (for example: 1g or 3g)",
+    )
     parser.add_argument("--timeout-seconds", type=int, default=14_400)
     parser.add_argument("--command", default=None, help="Override the provider CLI command for a custom installation")
     return parser.parse_args()
+
+
+def validate_tmpfs_size(value: str) -> str:
+    """Validate a Docker-compatible tmpfs size before adding it to docker args."""
+    if not re.fullmatch(r"[1-9][0-9]*(?:[bkmgtepiBKMGTEPI](?:b|i)?|[bB])", value):
+        raise SystemExit("--tmpfs-size must be a positive Docker size such as 1g or 3g")
+    return value
 
 
 def ensure_image(args: argparse.Namespace) -> None:
@@ -404,6 +417,7 @@ def task_identifier(task_dir: Path) -> str:
 
 
 def run(args: argparse.Namespace) -> int:
+    args.tmpfs_size = validate_tmpfs_size(args.tmpfs_size)
     task_dir = args.task.resolve()
     task_id = task_identifier(task_dir)
     openhands_env = (
@@ -445,7 +459,7 @@ def run(args: argparse.Namespace) -> int:
             "--env", "YARN_CACHE_FOLDER=/workspace/.yarn-cache",
             # Keep /tmp available for OpenHands internals while moving build
             # scratch and dependency caches to the writable workspace mount.
-            "--tmpfs", "/tmp:rw,noexec,nosuid,nodev,size=1g",
+            "--tmpfs", f"/tmp:rw,noexec,nosuid,nodev,size={args.tmpfs_size}",
         ]
     if args.env_file and args.provider != "openhands":
         docker_args += ["--env-file", str(args.env_file.resolve())]

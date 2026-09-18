@@ -49,7 +49,7 @@ RUN npm install --global --no-audit --no-fund "@anthropic-ai/claude-code@${CLAUD
 # request compatibility, response capture, and standardized telemetry.
 COPY vendor/hackerrank-openhands-gateway /opt/hackerrank-openhands-gateway
 RUN python3.12 -m pip install --no-cache-dir /opt/hackerrank-openhands-gateway \
-    && test "$(python3.12 -c 'import importlib.metadata as m; print(m.version("hackerrank-openhands-gateway"))')" = "0.1.0" \
+    && test "$(python3.12 -c 'import importlib.metadata as m; print(m.version("hackerrank-openhands-gateway"))')" = "0.1.2" \
     && command -v rsync \
     && command -v tmux \
     && command -v hackerrank-openhands

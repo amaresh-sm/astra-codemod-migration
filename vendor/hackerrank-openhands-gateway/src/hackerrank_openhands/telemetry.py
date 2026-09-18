@@ -333,7 +333,7 @@ def collect(
     unknown = sum(record.get("status") == "unknown" for record in trajectory)
     manifest: dict[str, Any] = {
         "schema_version": 1,
-        "harness": {"name": "hackerrank-openhands-gateway", "version": "0.1.0"},
+        "harness": {"name": "hackerrank-openhands-gateway", "version": "0.1.1"},
         "run": {"status": status, "exit_code": exit_code, "error": redact(error, enabled=redact_output) if error else None},
         "model": {"name": model, "reasoning": reasoning, "provider": "hackerrank-gateway"},
         "timing": {

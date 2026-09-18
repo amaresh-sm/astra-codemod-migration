@@ -11,6 +11,7 @@ from astra_harness.generate import (
     openhands_preflight_script,
     openhands_runtime_environment,
     preserve_failure_diagnostics,
+    validate_tmpfs_size,
 )
 
 
@@ -56,6 +57,11 @@ class OpenHandsEnvironmentTests(unittest.TestCase):
             },
         )
 
+    def test_tmpfs_size_accepts_docker_sizes_and_rejects_invalid_values(self) -> None:
+        self.assertEqual(validate_tmpfs_size("3g"), "3g")
+        with self.assertRaises(SystemExit):
+            validate_tmpfs_size("/workspace")
+
     def test_preflight_checks_tools_space_gateway_and_capabilities(self) -> None:
         script = openhands_preflight_script("glm-5.2", "medium")
         for tool in ("cargo", "node", "yarn", "hackerrank-openhands", "rsync", "tmux"):
@@ -69,7 +75,7 @@ class OpenHandsEnvironmentTests(unittest.TestCase):
         self.assertTrue(all(value in OPENHANDS_REASONING_OPTIONS for value in ("medium", "high")))
 
     def test_reads_vendored_gateway_version(self) -> None:
-        self.assertEqual(gateway_package_version(), "0.1.0")
+        self.assertEqual(gateway_package_version(), "0.1.2")
 
     def test_failure_diagnostics_retain_workspace_snapshot_and_raw_output(self) -> None:
         with tempfile.TemporaryDirectory() as raw:

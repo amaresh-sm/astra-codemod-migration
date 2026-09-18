@@ -77,6 +77,10 @@ Event payloads are captured as emitted by OpenHands. When `--redact` is enabled,
 
 `gateway_responses.jsonl` contains the bounded response returned by the Gateway for each LLM transport call, including provider-specific usage, cost, and `latency_ms` fields when available. `telemetry.json` summarizes those request latencies under `timing.llm_requests`. With `--redact`, likely credentials and bearer values are sanitized. Capture is observational: the response is returned to OpenHands unchanged, and capture failures do not fail the run. Responses larger than the capture limit are recorded as metadata with `response_truncated: true`. Gateway response bodies can contain task prompts and model output, so protect this file accordingly.
 
+Each Gateway response record also includes safe request diagnostics: HTTP method, configured URL path, a SHA-256 fingerprint and byte size for the redacted logical payload seen at the LiteLLM boundary, whether the wire body was directly observable, selected framing headers, HTTP status, and provider request ID when exposed by the SDK. Failed calls include a bounded, redacted error body when available. The logical fingerprint is not the raw wire-body hash; this distinction is recorded explicitly so transport investigations do not overclaim what was observed.
+
+For Docker callers, preserve the package output directory even on nonzero exit. The benchmark launcher stores the exact OpenHands event stream, stdout, stderr, Gateway response records, and raw container log separately. Missing optional telemetry does not prevent a failed run from receiving durable `metadata.json` with `run.status: failed`.
+
 ## Gemini compatibility
 
 For Gemini models, the Gateway adapter removes `prompt_cache_key` from both top-level and nested `extra_body` request fields. Other models are left unchanged. The adapter also removes optional message fields rejected by the Gateway portable route.
@@ -95,4 +99,4 @@ repository/
 
 ## Current status
 
-This is version `0.1.0`. Local compatibility and telemetry checks pass. Live OpenHands/Gateway smoke tests were verified with the pinned dependencies and Gateway credentials; future runs require the same credentials to be available in the execution environment.
+This is version `0.1.1`. Local compatibility and telemetry checks pass. Live OpenHands/Gateway smoke tests were verified with the pinned dependencies and Gateway credentials; future runs require the same credentials to be available in the execution environment.

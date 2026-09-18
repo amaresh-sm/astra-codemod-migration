@@ -6,7 +6,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from .harness import REASONING_OPTIONS, run
+from .harness import REASONING_OPTIONS, normalize_gateway_model, run
 from .telemetry import collect
 
 
@@ -26,11 +26,20 @@ def main() -> int:
         argv = argv[1:]
     args = parser.parse_args(argv)
 
-    result = run(args.workspace, args.instruction_file, args.model, args.reasoning, args.output, args.gateway_base_url, args.env_file, args.redact)
+    result = run(
+        args.workspace,
+        args.instruction_file,
+        args.model,
+        args.reasoning,
+        args.output,
+        args.gateway_base_url,
+        args.env_file,
+        args.redact,
+    )
     collect(
         result.events_path,
         args.output / "telemetry.json",
-        model=args.model if "/" in args.model else f"openai/{args.model}",
+        model=normalize_gateway_model(args.model),
         reasoning=args.reasoning,
         started_at=result.started_at,
         completed_at=result.completed_at,
