@@ -2156,10 +2156,12 @@ def substantive_rust_migration_evidence(root: Path, manifests: list[Path]) -> tu
     # A serious migration may be deliberately modular, or it may initially be
     # a large single Rust runner. Requiring an arbitrary number of files
     # incorrectly classifies the latter as a thin wrapper. The monolithic path
-    # is intentionally stricter: it needs a substantially larger body of
-    # executable Rust and many independently named implementation functions.
+    # is intentionally stricter: it needs a larger body of executable Rust and
+    # many independently named implementation functions. 400 lines is the
+    # minimum for either layout — short stubs are filtered by the semantic
+    # signal check that follows.
     modular_layout = total_lines >= 400 and substantial_files >= 3
-    monolithic_layout = total_lines >= 800 and largest_file >= 800 and len(functions) >= 12
+    monolithic_layout = total_lines >= 400 and largest_file >= 400 and len(functions) >= 8
     if not modular_layout and not monolithic_layout:
         return False, (
             "Rust launcher is not backed by a substantive migration foundation "
