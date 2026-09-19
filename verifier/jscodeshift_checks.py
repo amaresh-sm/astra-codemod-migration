@@ -2170,15 +2170,21 @@ def substantive_rust_migration_evidence(root: Path, manifests: list[Path]) -> tu
         )
 
     semantic_signals = {
-        "argument handling": r"(?:clap::|ArgMatches|std::env::args(?:_os)?|\.arg\()",
+        # \bargv\b captures library-style argument-parsing (fn parse(argv: &[String]))
+        # alongside the more common CLI-runner patterns.
+        "argument handling": r"(?:clap::|ArgMatches|std::env::args(?:_os)?|\.arg\(|\bargv\b)",
         "file handling": r"(?:std::fs::|walkdir|read_dir|glob|ignore)",
         "execution or writing": r"(?:std::process::|Command::new|write_all|rename\(|create_dir|stdin\()",
     }
     found = [label for label, pattern in semantic_signals.items() if re.search(pattern, combined)]
-    required_signals = 3 if monolithic_layout else 2
+    # A project that satisfies the modular layout (≥3 substantial files) provides
+    # strong structural evidence on its own. Only require the stricter 3-signal
+    # bar for purely monolithic candidates, not for multi-module projects that
+    # also happen to have a large single file.
+    required_signals = 3 if monolithic_layout and not modular_layout else 2
     if len(found) < required_signals:
         return False, "Rust foundation lacks migration-relevant implementation signals"
-    layout = "monolithic" if monolithic_layout else "modular"
+    layout = "monolithic" if monolithic_layout and not modular_layout else "modular"
     return True, (
         "substantive Rust migration foundation: "
         f"{layout} layout with {total_lines} executable lines across {substantial_files} modules; "
@@ -2889,7 +2895,7 @@ def check_rust_implementation_depth(candidate: Path) -> tuple[bool, str, float]:
 
     combined = "\n".join(src for _, src in sources)
     semantic_signals = {
-        "argument handling": r"(?:clap::|ArgMatches|std::env::args(?:_os)?|\.arg\()",
+        "argument handling": r"(?:clap::|ArgMatches|std::env::args(?:_os)?|\.arg\(|\bargv\b)",
         "file handling": r"(?:std::fs::|walkdir|read_dir|glob|ignore)",
         "execution or writing": r"(?:std::process::|Command::new|write_all|rename\(|create_dir|stdin\()",
     }
