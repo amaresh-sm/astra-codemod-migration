@@ -54,7 +54,7 @@ CRITERIA = (
     "rust-worker-parallel-ownership",
     "rust-worker-failure-ownership",
     "rust-worker-determinism-ownership",
-    "rust-package-root-ownership",
+    "rust-implementation-depth",
     "rust-package-clean-pack-ownership",
     "rust-package-guard-ownership",
     "rust-legacy-engine-boundary",
@@ -102,7 +102,7 @@ SCENARIO_IDS = {
     "rust-worker-parallel-ownership": "jscodeshift.rust-worker-parallel-ownership",
     "rust-worker-failure-ownership": "jscodeshift.rust-worker-failure-ownership",
     "rust-worker-determinism-ownership": "jscodeshift.rust-worker-determinism-ownership",
-    "rust-package-root-ownership": "jscodeshift.rust-package-root-ownership",
+    "rust-implementation-depth": "jscodeshift.rust-implementation-depth",
     "rust-package-clean-pack-ownership": "jscodeshift.rust-package-clean-pack-ownership",
     "rust-package-guard-ownership": "jscodeshift.rust-package-guard-ownership",
     "rust-legacy-engine-boundary": "jscodeshift.rust-legacy-engine-boundary",
@@ -2693,6 +2693,18 @@ def check_rust_package_clean_pack_ownership(candidate: Path) -> tuple[bool, str]
     if bridge_findings:
         return False, "clean package retains a JavaScript engine bridge: " + "; ".join(bridge_findings)
 
+    _root = source_root(candidate)
+    _ignored = {"node_modules", "target", ".git", ".cargo-home"}
+    _manifests = [
+        p for p in _root.rglob("Cargo.toml")
+        if not any(part in _ignored for part in p.relative_to(_root).parts)
+        and len(p.relative_to(_root).parts) <= 3
+    ]
+    if _manifests:
+        _sub, _sub_detail = substantive_rust_migration_evidence(_root, _manifests)
+        if not _sub:
+            return False, "clean-pack requires substantive Rust: " + _sub_detail
+
     with tempfile.TemporaryDirectory(prefix="jscodeshift-clean-pack-ownership-") as raw:
         work = Path(raw)
         staged = work / "candidate"
@@ -2834,6 +2846,60 @@ def check_rust_core_collections_ownership(candidate: Path) -> tuple[bool, str]:
     )
 
 
+def check_rust_implementation_depth(candidate: Path) -> tuple[bool, str, float]:
+    """Static analysis: award fractional credit based on Rust implementation depth.
+
+    Returns a 3-tuple so the harness records a partial score:
+      1.0 — modular or monolithic substantive Rust (full foundation evidence)
+      0.5 — partial Rust ≥100 lines with at least one migration-relevant signal
+      0.0 — trivial stub or no Rust at all
+    """
+    root = source_root(candidate)
+    ignored_parts = {"node_modules", "target", ".git", ".cargo-home"}
+    manifests = [
+        p for p in root.rglob("Cargo.toml")
+        if not any(part in ignored_parts for part in p.relative_to(root).parts)
+        and len(p.relative_to(root).parts) <= 3
+    ]
+    if not manifests:
+        return False, "no Cargo.toml found", 0.0
+
+    sub, detail = substantive_rust_migration_evidence(root, manifests)
+    if sub:
+        return True, detail, 1.0
+
+    sources: list[tuple[int, str]] = []
+    for manifest in manifests:
+        for path in manifest.parent.rglob("*.rs"):
+            relative = path.relative_to(root)
+            if ignored_parts.intersection(relative.parts):
+                continue
+            try:
+                lines = [
+                    line for line in path.read_text(encoding="utf-8").splitlines()
+                    if line.strip() and not line.lstrip().startswith("//")
+                ]
+            except OSError:
+                continue
+            sources.append((len(lines), "\n".join(lines)))
+
+    total_lines = sum(lc for lc, _ in sources)
+    if total_lines < 100:
+        return False, f"trivial Rust: {total_lines} executable lines", 0.0
+
+    combined = "\n".join(src for _, src in sources)
+    semantic_signals = {
+        "argument handling": r"(?:clap::|ArgMatches|std::env::args(?:_os)?|\.arg\()",
+        "file handling": r"(?:std::fs::|walkdir|read_dir|glob|ignore)",
+        "execution or writing": r"(?:std::process::|Command::new|write_all|rename\(|create_dir|stdin\()",
+    }
+    found = [label for label, pattern in semantic_signals.items() if re.search(pattern, combined)]
+    if found:
+        return True, f"partial Rust: {total_lines} lines, signals={', '.join(found)}", 0.5
+
+    return False, f"Rust present ({total_lines} lines) but lacks migration-relevant signals", 0.0
+
+
 def check(candidate: Path) -> dict[str, dict[str, object]]:
     """Run all private criteria and retain concise diagnostic evidence."""
 
@@ -2875,7 +2941,7 @@ def check(candidate: Path) -> dict[str, dict[str, object]]:
         "rust-worker-parallel-ownership": check_rust_worker_parallel_ownership,
         "rust-worker-failure-ownership": check_rust_worker_failure_ownership,
         "rust-worker-determinism-ownership": check_rust_worker_determinism_ownership,
-        "rust-package-root-ownership": check_rust_package_root_ownership,
+        "rust-implementation-depth": check_rust_implementation_depth,
         "rust-package-clean-pack-ownership": check_rust_package_clean_pack_ownership,
         "rust-package-guard-ownership": check_rust_package_guard_ownership,
         "rust-legacy-engine-boundary": check_rust_legacy_engine_boundary,

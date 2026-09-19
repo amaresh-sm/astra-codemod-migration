@@ -12,6 +12,7 @@ from pathlib import Path
 SUPPORTED_BLOCKED_POLICIES = {"zero"}
 FOUNDATION_DOMAIN = "foundation"
 THIN_WRAPPER_CAP = 0.04
+STATIC_MIGRATION_CRITERIA: frozenset[str] = frozenset({"rust-implementation-depth"})
 
 
 class ScoringConfig(list[dict[str, object]]):
@@ -261,7 +262,13 @@ def run(args: argparse.Namespace) -> int:
             "domain passed its independent ownership probe"
         )
     elif not foundation_passed:
-        score = min(observed_wrapper_score, THIN_WRAPPER_CAP)
+        static_bonus = sum(
+            float(outcomes[c]["raw_awarded"])
+            for c in STATIC_MIGRATION_CRITERIA
+            if c in outcomes
+        )
+        wrapper_score = min(observed_wrapper_score, THIN_WRAPPER_CAP)
+        score = wrapper_score + static_bonus
         migration_status = "thin_js_wrapper" if observed_wrapper_score > 0.0 else "no_working_migration"
         score_reason = (
             "Compatibility was observed through a launcher/bridge, but no substantive Rust migration foundation "
@@ -272,9 +279,11 @@ def run(args: argparse.Namespace) -> int:
         for criterion in criteria:
             criterion_id = str(criterion["id"])
             component = str(criterion.get("component", ""))
-            if component in {"operational", "behavior"} and observed_wrapper_score > 0.0:
+            if criterion_id in STATIC_MIGRATION_CRITERIA:
+                awarded = float(outcomes[criterion_id]["raw_awarded"])
+            elif component in {"operational", "behavior"} and observed_wrapper_score > 0.0:
                 raw = float(outcomes[criterion_id]["raw_awarded"])
-                awarded = raw * score / observed_wrapper_score
+                awarded = raw * wrapper_score / observed_wrapper_score
             else:
                 awarded = 0.0
             outcomes[criterion_id]["awarded"] = round(awarded, 10)

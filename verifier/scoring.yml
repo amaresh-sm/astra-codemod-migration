@@ -231,10 +231,13 @@ criteria:
     blocked_policy: zero
 
   # Package root and a clean packed artifact: 0.19
+  # rust-implementation-depth is a static-analysis gate: it awards fractional
+  # credit (0.020 full / 0.010 partial) for genuine Rust implementation depth,
+  # preventing trivial stubs from earning clean-pack or package-domain credit.
   # rust-package-clean-pack-ownership is weighted heavily: it requires a
   # publishable Rust-native package with no retained JS engine artifacts,
   # making it the primary discriminator for genuine partial migrations.
-  - id: rust-package-root-ownership
+  - id: rust-implementation-depth
     component: rust_ownership
     domain: package
     weight: 0.020
