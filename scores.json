@@ -1,0 +1,306 @@
+{
+  "generated": "2026-09-22",
+  "verifier": "v3",
+  "calibration": "x1.04 + 0.028",
+  "target_runs_per_group": 3,
+  "total_candidates": 71,
+  "total_groups": 25,
+  "groups": [
+    {
+      "model": "claude-opus-5",
+      "reasoning": "high",
+      "runs": 3,
+      "status": "complete",
+      "scores": [0.3678, 0.1303, 0.1251],
+      "candidates": [
+        "pi-opus-5-high-20260919-r2-native-repair-30pct",
+        "opus-5-high-dev-20260919-r2",
+        "opus-5-high-dev-20260918"
+      ]
+    },
+    {
+      "model": "claude-opus-5",
+      "reasoning": "medium",
+      "runs": 1,
+      "status": "missing_2",
+      "scores": [0.2724],
+      "candidates": [
+        "opus-5-medium-dev-20260917"
+      ]
+    },
+    {
+      "model": "claude-sonnet-5",
+      "reasoning": "high",
+      "runs": 3,
+      "status": "complete",
+      "scores": [0.3899, 0.0696, 0.0696],
+      "candidates": [
+        "claude-sonnet-5-high-20260916",
+        "sonnet-5-high-dev-20260918-r2",
+        "pi-sonnet-5-high-20260919-r1"
+      ]
+    },
+    {
+      "model": "claude-sonnet-5",
+      "reasoning": "medium",
+      "runs": 2,
+      "status": "missing_1",
+      "scores": [0.1285, 0.0904],
+      "candidates": [
+        "sonnet-5-medium-dev-20260919-r5",
+        "sonnet-5-medium-dev-20260918-r3"
+      ]
+    },
+    {
+      "model": "deepseek-v4-pro",
+      "reasoning": "high",
+      "runs": 3,
+      "status": "complete",
+      "scores": [0.1129, 0.1112, 0.105],
+      "candidates": [
+        "deepseek-v4-pro-high-prod-20260918",
+        "deepseek-v4-pro-high-20260917-r7",
+        "deepseek-v4-pro-high-20260917-r3"
+      ]
+    },
+    {
+      "model": "deepseek-v4-pro",
+      "reasoning": "medium",
+      "runs": 3,
+      "status": "complete",
+      "scores": [0.1285, 0.1147, 0.1112],
+      "candidates": [
+        "deepseek-v4-pro-medium-20260916-r2",
+        "deepseek-v4-pro-medium-prod-20260918",
+        "deepseek-v4-pro-medium-20260916-r3"
+      ]
+    },
+    {
+      "model": "gemini-3.7-flash",
+      "reasoning": "high",
+      "runs": 3,
+      "status": "complete",
+      "scores": [0.1424, 0.1303, 0.1129],
+      "candidates": [
+        "gemini-3-7-flash-high-prod-20260918-q01",
+        "gemini-3-7-flash-high-prod-20260918-r3",
+        "gemini-3-7-flash-prod-dev-20260918"
+      ]
+    },
+    {
+      "model": "gemini-3.7-flash",
+      "reasoning": "medium",
+      "runs": 3,
+      "status": "complete",
+      "scores": [0.1407, 0.1251, 0.028],
+      "candidates": [
+        "gemini-3-7-flash-medium-prod-20260918-r2",
+        "gemini-3-7-flash-medium-prod-20260918-q03",
+        "gemini-3-7-flash-medium-prod-20260918"
+      ]
+    },
+    {
+      "model": "glm-5.2",
+      "reasoning": "high",
+      "runs": 3,
+      "status": "complete",
+      "scores": [0.1528, 0.1268, 0.1268],
+      "candidates": [
+        "1789573954",
+        "glm-5-2-high-prod-20260919-r1",
+        "glm-5-2-high-prod-20260920-r2"
+      ]
+    },
+    {
+      "model": "glm-5.2",
+      "reasoning": "medium",
+      "runs": 3,
+      "status": "complete",
+      "scores": [0.1112, 0.1112, 0.1112],
+      "candidates": [
+        "glm-5-2-medium-prod-20260918",
+        "glm-5-2-medium-prod-20260918-q02",
+        "glm-5-2-medium-prod-20260918-q05"
+      ]
+    },
+    {
+      "model": "gpt-5.6-luna",
+      "reasoning": "high",
+      "runs": 3,
+      "status": "complete",
+      "scores": [0.0835, 0.0835, 0.0821],
+      "candidates": [
+        "luna-high-20260916-r2",
+        "luna-high-dev-20260918",
+        "luna-high-20260916-r4"
+      ]
+    },
+    {
+      "model": "gpt-5.6-luna",
+      "reasoning": "medium",
+      "runs": 3,
+      "status": "complete",
+      "scores": [0.0835, 0.0835, 0.0835],
+      "candidates": [
+        "luna-medium-20260915-r2",
+        "luna-medium-20260916",
+        "luna-medium-prod-dev-20260918"
+      ]
+    },
+    {
+      "model": "gpt-5.6-sol",
+      "reasoning": "high",
+      "runs": 3,
+      "status": "complete",
+      "scores": [0.3258, 0.2687, 0.267],
+      "candidates": [
+        "sol-high-20260916",
+        "sol-high-20260916-r2",
+        "sol-high-prod-20260919-r1"
+      ]
+    },
+    {
+      "model": "gpt-5.6-sol",
+      "reasoning": "medium",
+      "runs": 3,
+      "status": "complete",
+      "scores": [0.2793, 0.2397, 0.1112],
+      "candidates": [
+        "sol-medium-20260917-r4",
+        "sol-medium-20260917-r6",
+        "sol-medium-prod-20260918-r3"
+      ]
+    },
+    {
+      "model": "gpt-5.6-terra",
+      "reasoning": "high",
+      "runs": 3,
+      "status": "complete",
+      "scores": [0.1216, 0.0835, 0.0789],
+      "candidates": [
+        "terra-high-prod-dev-20260918",
+        "terra-high-20260916-r4",
+        "terra-high-20260915-r2"
+      ]
+    },
+    {
+      "model": "gpt-5.6-terra",
+      "reasoning": "medium",
+      "runs": 3,
+      "status": "complete",
+      "scores": [0.0835, 0.0835, 0.0668],
+      "candidates": [
+        "terra-medium-20260916-r3",
+        "terra-medium-dev-20260919-r1",
+        "terra-medium-dev-20260918"
+      ]
+    },
+    {
+      "model": "grok-4.5",
+      "reasoning": "high",
+      "runs": 3,
+      "status": "complete",
+      "scores": [0.2791, 0.2791, 0.2774],
+      "candidates": [
+        "grok-4-5-high-prod-20260918",
+        "grok-4-5-high-prod-20260919-r2",
+        "grok-4-5-high-20260917-r2"
+      ]
+    },
+    {
+      "model": "grok-4.5",
+      "reasoning": "medium",
+      "runs": 3,
+      "status": "complete",
+      "scores": [0.2557, 0.2534, 0.2501],
+      "candidates": [
+        "1789798211",
+        "grok-4-5-medium-20260917",
+        "grok-4-5-medium-prod-20260919"
+      ]
+    },
+    {
+      "model": "grok-4.6",
+      "reasoning": "high",
+      "runs": 2,
+      "status": "missing_1",
+      "scores": [0.1147, 0.1112],
+      "candidates": [
+        "grok-4-6-high-dev-20260918",
+        "grok-4-6-high-dev-20260920-r1"
+      ]
+    },
+    {
+      "model": "grok-4.6",
+      "reasoning": "medium",
+      "runs": 3,
+      "status": "complete",
+      "scores": [0.1476, 0.1476, 0.028],
+      "candidates": [
+        "grok-4-6-medium-20260915",
+        "grok-4-6-medium-20260916-r2",
+        "grok-4-6-medium-dev-20260921"
+      ]
+    },
+    {
+      "model": "kimi-k3",
+      "reasoning": "high",
+      "runs": 3,
+      "status": "complete",
+      "scores": [0.3138, 0.2843, 0.2722],
+      "candidates": [
+        "kimi-k3-high-20260916-r3",
+        "kimi-k3-high-20260916-r6",
+        "kimi-k3-high-20260916-r4"
+      ]
+    },
+    {
+      "model": "kimi-k3",
+      "reasoning": "medium",
+      "runs": 3,
+      "status": "complete",
+      "scores": [0.3034, 0.267, 0.1476],
+      "candidates": [
+        "kimi-k3-medium-20260917-r6",
+        "kimi-k3-medium-20260917-r4",
+        "kimi-k3-medium-20260916-r3"
+      ]
+    },
+    {
+      "model": "minimax-m3",
+      "reasoning": "high",
+      "runs": 3,
+      "status": "complete",
+      "scores": [0.1268, 0.1147, 0.1147],
+      "candidates": [
+        "1789661737",
+        "minimax-m3-high-prod-20260917",
+        "minimax-m3-high-prod-20260919"
+      ]
+    },
+    {
+      "model": "minimax-m3",
+      "reasoning": "medium",
+      "runs": 3,
+      "status": "complete",
+      "scores": [0.1233, 0.1129, 0.1112],
+      "candidates": [
+        "1789798212",
+        "minimax-m3-medium-prod-20260919-r4",
+        "minimax-m3-medium-prod-20260919-r5"
+      ]
+    },
+    {
+      "model": "qwen-3.8",
+      "reasoning": "high",
+      "runs": 3,
+      "status": "complete",
+      "scores": [0.0904, 0.0696, 0.028],
+      "candidates": [
+        "qwen-3-8-high-prod-20260919-q08",
+        "qwen-3-8-high-prod-20260920-r1",
+        "qwen-3-8-high-prod-20260918-q04"
+      ]
+    }
+  ]
+}
