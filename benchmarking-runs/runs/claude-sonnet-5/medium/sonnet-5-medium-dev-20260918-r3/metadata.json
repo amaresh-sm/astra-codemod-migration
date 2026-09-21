@@ -1,0 +1,28 @@
+{
+  "task_id": "migrate-jscodeshift-runner-to-rust",
+  "run_id": "openhands-sonnet-5-medium-dev-20260918-r3",
+  "provider": "openhands",
+  "model": "claude-sonnet-5",
+  "reasoning": "medium",
+  "image": "astra-candidate-generation:latest",
+  "started_at": "2026-09-18T06:55:28.409502+00:00",
+  "status": "completed",
+  "mounts": [
+    "candidate workspace:rw"
+  ],
+  "exit_code": 0,
+  "finished_at": "2026-09-18T07:52:54.138190+00:00",
+  "duration_seconds": 3445.693,
+  "container_cleaned": true,
+  "benchmarking": {
+    "schema_version": 1,
+    "task": "migrate-jscodeshift-runner-to-rust",
+    "run_name": "sonnet-5-medium-dev-20260918-r3",
+    "model": "claude-sonnet-5",
+    "reasoning": "medium",
+    "score": 0.0904,
+    "score_source": "scores.json and newest reports/score.json",
+    "source_candidate": "openhands-sonnet-5-medium-dev-20260918-r3",
+    "exported_at": "2026-09-21T20:26:01.067498+00:00"
+  }
+}

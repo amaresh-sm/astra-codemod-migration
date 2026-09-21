@@ -1,0 +1,485 @@
+{
+  "event_count": 81,
+  "invalid_event_count": 0,
+  "cost_usd": 0,
+  "tool_trajectory": [
+    {
+      "sequence": 1,
+      "event_type": "run_event",
+      "timestamp": "2026-09-18T05:05:06.797615Z"
+    },
+    {
+      "sequence": 2,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:08.921884"
+    },
+    {
+      "sequence": 3,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:08.931466"
+    },
+    {
+      "sequence": 4,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:12.742103",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 5,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:12.743602",
+      "tool": "terminal"
+    },
+    {
+      "sequence": 6,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:12.746333",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 7,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:13.573488",
+      "tool": "terminal"
+    },
+    {
+      "sequence": 8,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:17.368870",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 9,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:17.371953",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 10,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:17.373234",
+      "tool": "terminal"
+    },
+    {
+      "sequence": 11,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:17.381482",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 12,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:17.383500",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 13,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:18.000875",
+      "tool": "terminal"
+    },
+    {
+      "sequence": 14,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:22.535205",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 15,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:22.538798",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 16,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:22.542188",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 17,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:22.543643",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 18,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:22.544903",
+      "tool": "terminal"
+    },
+    {
+      "sequence": 19,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:22.548977",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 20,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:22.551069",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 21,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:22.553339",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 22,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:22.555879",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 23,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:23.178194",
+      "tool": "terminal"
+    },
+    {
+      "sequence": 24,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:27.799279",
+      "tool": "terminal"
+    },
+    {
+      "sequence": 25,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:27.800823",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 26,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:27.801725",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 27,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:27.802509",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 28,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:27.803299",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 29,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:28.427119",
+      "tool": "terminal"
+    },
+    {
+      "sequence": 30,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:28.431344",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 31,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:28.433653",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 32,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:28.435258",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 33,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:28.437335",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 34,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:35.192303",
+      "tool": "terminal"
+    },
+    {
+      "sequence": 35,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:35.832367",
+      "tool": "terminal"
+    },
+    {
+      "sequence": 36,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:38.992271",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 37,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:38.994346",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 38,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:38.995563",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 39,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:38.997947",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 40,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:38.998962",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 41,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:38.999935",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 42,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:48.210004",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 43,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:48.212197",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 44,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:48.213600",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 45,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:48.214675",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 46,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:48.215704",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 47,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:48.216801",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 48,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:48.217641",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 49,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:48.221845",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 50,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:48.224504",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 51,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:48.227157",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 52,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:48.229759",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 53,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:48.232436",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 54,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:48.234738",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 55,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:48.237041",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 56,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:51.678445",
+      "tool": "terminal"
+    },
+    {
+      "sequence": 57,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:52.295118",
+      "tool": "terminal"
+    },
+    {
+      "sequence": 58,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:05:55.797998",
+      "tool": "terminal"
+    },
+    {
+      "sequence": 59,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:06:21.543168",
+      "tool": "terminal"
+    },
+    {
+      "sequence": 60,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:06:26.397499",
+      "tool": "terminal"
+    },
+    {
+      "sequence": 61,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:06:27.040848",
+      "tool": "terminal"
+    },
+    {
+      "sequence": 62,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:06:32.156273",
+      "tool": "terminal"
+    },
+    {
+      "sequence": 63,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:06:32.811022",
+      "tool": "terminal"
+    },
+    {
+      "sequence": 64,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:06:36.939664",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 65,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:06:36.953174",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 66,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:06:40.043130",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 67,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:06:40.061820",
+      "tool": "file_editor"
+    },
+    {
+      "sequence": 68,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:06:43.043720",
+      "tool": "terminal"
+    },
+    {
+      "sequence": 69,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:06:43.690484",
+      "tool": "terminal"
+    },
+    {
+      "sequence": 70,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:06:47.843566",
+      "tool": "terminal"
+    },
+    {
+      "sequence": 71,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:06:48.477380",
+      "tool": "terminal"
+    },
+    {
+      "sequence": 72,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:06:54.451647",
+      "tool": "terminal"
+    },
+    {
+      "sequence": 73,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:06:54.455586",
+      "tool": "terminal"
+    },
+    {
+      "sequence": 74,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:06:54.458110",
+      "tool": "terminal"
+    },
+    {
+      "sequence": 75,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:06:55.087388",
+      "tool": "terminal"
+    },
+    {
+      "sequence": 76,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:06:55.717434",
+      "tool": "terminal"
+    },
+    {
+      "sequence": 77,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:06:56.346989",
+      "tool": "terminal"
+    },
+    {
+      "sequence": 78,
+      "event_type": "openhands_event",
+      "timestamp": "2026-09-18T05:07:01.379167"
+    },
+    {
+      "sequence": 79,
+      "event_type": "openhands_metrics"
+    },
+    {
+      "sequence": 80,
+      "event_type": "workspace_metrics",
+      "status": "available"
+    },
+    {
+      "sequence": 81,
+      "event_type": "run_event",
+      "timestamp": "2026-09-18T05:07:01.585064Z"
+    }
+  ]
+}

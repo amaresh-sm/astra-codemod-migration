@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "harness": {
+    "name": "hackerrank-openhands-gateway",
+    "version": "0.1.0"
+  },
+  "run": {
+    "status": "completed",
+    "exit_code": 0,
+    "error": null
+  },
+  "model": {
+    "name": "openai/deepseek-v4-pro",
+    "reasoning": "medium",
+    "provider": "hackerrank-gateway"
+  },
+  "timing": {
+    "started_at": "2026-09-16T09:37:34.731262Z",
+    "completed_at": "2026-09-16T09:53:43.234072Z",
+    "duration_ms": 968502,
+    "llm_requests": {
+      "count": 81,
+      "with_latency": 81,
+      "successful": 81,
+      "failed": 0,
+      "total_latency_ms": 890123.547,
+      "average_latency_ms": 10989.18,
+      "min_latency_ms": 2430.998,
+      "max_latency_ms": 109568.085
+    }
+  },
+  "usage": {
+    "source": "gateway",
+    "requests": 81,
+    "input_tokens": 4918610,
+    "cached_input_tokens": 4823296,
+    "cache_read_tokens": 4823296,
+    "cache_write_tokens": 0,
+    "output_tokens": 63664,
+    "reasoning_tokens": 37664,
+    "total_tokens": 4982274
+  },
+  "cost": {
+    "gateway": {
+      "amount_usd": 1.19761022,
+      "currency": "USD",
+      "status": "reported",
+      "source": "gateway",
+      "responses_with_cost": 81
+    },
+    "openhands": {
+      "amount_usd": null,
+      "currency": "USD",
+      "status": "unavailable",
+      "source": "openhands"
+    },
+    "custom_estimation": {
+      "amount_usd": 0.295074472,
+      "currency": "USD",
+      "status": "estimated",
+      "source": "custom_pricing_table",
+      "pricing_version": 1,
+      "model": "openai/deepseek-v4-pro",
+      "normalized_model": "deepseek-v4-pro",
+      "requests": 81,
+      "requests_with_usage": 81,
+      "requests_missing_usage": 0,
+      "usage_source": "gateway_usage",
+      "pricing": {
+        "input_usd_per_million": 0.66,
+        "output_usd_per_million": 1.98,
+        "cache_read_usd_per_million": 0.022,
+        "cache_write_usd_per_million": null,
+        "note": "DeepSeek V4 Pro off-peak pricing; peak rates are 2x"
+      }
+    }
+  },
+  "workspace": {
+    "type": "workspace_metrics",
+    "status": "available",
+    "files": {
+      "added": 1562,
+      "modified": 1,
+      "deleted": 0,
+      "renamed": 0,
+      "total_changed": 1563
+    },
+    "lines": {
+      "added": 5659,
+      "deleted": 3014,
+      "changed": 8673
+    },
+    "renames": []
+  },
+  "tools": {
+    "total": 108,
+    "successful": 102,
+    "failed": 6,
+    "cancelled": 0,
+    "rejected": 0,
+    "unknown": 0,
+    "by_tool": {
+      "file_editor": 69,
+      "terminal": 38,
+      "think": 1
+    }
+  },
+  "trace": {
+    "events_path": "events.jsonl",
+    "event_count": 223,
+    "invalid_event_count": 0,
+    "integrity_sha256": "ef07ffb0f8a6ed1bc7a4b9ab3215e295ff51b6f48aeb399abba5ef9e69c099df"
+  },
+  "benchmarking": {
+    "score": 0.1285,
+    "source": "scores.json",
+    "run_name": "deepseek-v4-pro-medium-20260916-r2"
+  }
+}

@@ -1,0 +1,125 @@
+{
+  "schema_version": 1,
+  "harness": {
+    "name": "hackerrank-openhands-gateway",
+    "version": "0.1.0"
+  },
+  "run": {
+    "status": "completed",
+    "exit_code": 0,
+    "error": null
+  },
+  "model": {
+    "name": "openai/grok-4.6",
+    "reasoning": "medium",
+    "provider": "hackerrank-gateway"
+  },
+  "timing": {
+    "started_at": "2026-09-15T17:49:15.525277Z",
+    "completed_at": "2026-09-15T18:26:23.168145Z",
+    "duration_ms": 2227642,
+    "llm_requests": {
+      "count": 81,
+      "with_latency": 81,
+      "successful": 81,
+      "failed": 0,
+      "total_latency_ms": 2112692.126,
+      "average_latency_ms": 26082.619,
+      "min_latency_ms": 5299.047,
+      "max_latency_ms": 166094.865
+    }
+  },
+  "usage": {
+    "source": "gateway",
+    "requests": 81,
+    "input_tokens": 10277274,
+    "cached_input_tokens": 0,
+    "cache_read_tokens": 0,
+    "cache_write_tokens": 0,
+    "output_tokens": 171303,
+    "reasoning_tokens": 0,
+    "total_tokens": 10448577
+  },
+  "cost": {
+    "gateway": {
+      "amount_usd": null,
+      "currency": "USD",
+      "status": "unavailable",
+      "source": "gateway",
+      "responses_with_cost": 0
+    },
+    "openhands": {
+      "amount_usd": null,
+      "currency": "USD",
+      "status": "unavailable",
+      "source": "openhands"
+    },
+    "custom_estimation": {
+      "amount_usd": 21.582366,
+      "currency": "USD",
+      "status": "estimated",
+      "source": "custom_pricing_table",
+      "pricing_version": 1,
+      "model": "openai/grok-4.6",
+      "normalized_model": "grok-4.6",
+      "requests": 81,
+      "requests_with_usage": 81,
+      "requests_missing_usage": 0,
+      "usage_source": "gateway_usage",
+      "pricing": {
+        "input_usd_per_million": 2.0,
+        "output_usd_per_million": 6.0,
+        "cache_read_usd_per_million": 0.5,
+        "cache_write_usd_per_million": null,
+        "note": "xAI API pricing; long context >= 200K tokens",
+        "long_context_threshold_tokens": 200000,
+        "long_context": {
+          "input_usd_per_million": 4.0,
+          "output_usd_per_million": 12.0,
+          "cache_read_usd_per_million": 1.0
+        }
+      }
+    }
+  },
+  "workspace": {
+    "type": "workspace_metrics",
+    "status": "available",
+    "files": {
+      "added": 5052,
+      "modified": 0,
+      "deleted": 0,
+      "renamed": 0,
+      "total_changed": 5052
+    },
+    "lines": {
+      "added": 1775202,
+      "deleted": 0,
+      "changed": 1775202
+    },
+    "renames": []
+  },
+  "tools": {
+    "total": 183,
+    "successful": 175,
+    "failed": 8,
+    "cancelled": 0,
+    "rejected": 0,
+    "unknown": 0,
+    "by_tool": {
+      "terminal": 29,
+      "file_editor": 153,
+      "think": 1
+    }
+  },
+  "trace": {
+    "events_path": "events.jsonl",
+    "event_count": 373,
+    "invalid_event_count": 0,
+    "integrity_sha256": "7e32bed8ca704b2f9ce42483c22e72e5934842312d9c509347ee30cf60e8da32"
+  },
+  "benchmarking": {
+    "score": 0.1476,
+    "source": "scores.json",
+    "run_name": "grok-4-6-medium-20260915"
+  }
+}

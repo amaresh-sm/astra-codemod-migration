@@ -1,0 +1,34 @@
+{
+  "task_id": "migrate-jscodeshift-runner-to-rust",
+  "run_id": "openhands-opus-5-high-dev-20260919-r2",
+  "provider": "openhands",
+  "model": "claude-opus-5",
+  "reasoning": "high",
+  "image": "astra-candidate-generation:latest",
+  "started_at": "2026-09-18T21:42:09.369164+00:00",
+  "status": "timed_out",
+  "mounts": [
+    "candidate workspace:rw"
+  ],
+  "exit_code": 124,
+  "failure_diagnostics": {
+    "directory": "failure-diagnostics",
+    "final_workspace_snapshot": "failure-diagnostics/final-workspace-snapshot.json",
+    "container_state": "logs/container-state.json",
+    "docker_log": "logs/docker.log"
+  },
+  "finished_at": "2026-09-19T03:42:14.263761+00:00",
+  "duration_seconds": 21604.749,
+  "container_cleaned": true,
+  "benchmarking": {
+    "schema_version": 1,
+    "task": "migrate-jscodeshift-runner-to-rust",
+    "run_name": "opus-5-high-dev-20260919-r2",
+    "model": "claude-opus-5",
+    "reasoning": "high",
+    "score": 0.1303,
+    "score_source": "scores.json and newest reports/score.json",
+    "source_candidate": "openhands-opus-5-high-dev-20260919-r2",
+    "exported_at": "2026-09-21T20:26:01.067498+00:00"
+  }
+}

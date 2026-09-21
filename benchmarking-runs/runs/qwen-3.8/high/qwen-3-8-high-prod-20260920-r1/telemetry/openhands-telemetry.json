@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "tokens": {
+    "input": null,
+    "output": null,
+    "cached_input": null,
+    "total": null,
+    "source": "unavailable"
+  },
+  "tool_calls": {
+    "total": null,
+    "by_type": {
+      "read": null,
+      "shell": null,
+      "edit": null,
+      "write": null,
+      "other": null
+    },
+    "source": "unavailable"
+  },
+  "solution_size": {
+    "workspace_source_files": 3369,
+    "workspace_source_lines": 1575912,
+    "workspace_test_files": 611,
+    "workspace_test_lines": 159385,
+    "agent_changed_files": 6411,
+    "agent_changed_source_files": 3368,
+    "agent_changed_source_lines": 1575900
+  },
+  "duration_seconds": 21604.628,
+  "started_at": "2026-09-19T18:39:03.968472+00:00",
+  "finished_at": "2026-09-20T00:39:08.692605+00:00",
+  "benchmarking": {
+    "score": 0.0696,
+    "source": "scores.json",
+    "run_name": "qwen-3-8-high-prod-20260920-r1"
+  }
+}

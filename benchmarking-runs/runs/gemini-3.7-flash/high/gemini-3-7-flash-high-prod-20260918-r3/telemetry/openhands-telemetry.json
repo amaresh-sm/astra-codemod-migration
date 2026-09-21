@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "harness": {
+    "name": "hackerrank-openhands-gateway",
+    "version": "0.1.1"
+  },
+  "run": {
+    "status": "failed",
+    "exit_code": 1,
+    "error": {
+      "type": "ConversationRunError",
+      "message": "Conversation run failed for id=725290dc-3ab0-4763-9bcc-34dfe0d7fcc5: litellm.BadRequestError: OpenAIException - Function call is missing a thought_signature in functionCall parts. This is required for tools to work correctly, and missing thought_signature may lead to degraded model performance. Additional data, function call `default_api:file_editor` , position 60. Please refer to https://ai.google.dev/gemini-api/docs/thought-signatures for more details."
+    }
+  },
+  "model": {
+    "name": "openai/gemini-3.7-flash",
+    "reasoning": "high",
+    "provider": "hackerrank-gateway"
+  },
+  "timing": {
+    "started_at": "2026-09-18T06:55:47.385443Z",
+    "completed_at": "2026-09-18T07:31:14.174634Z",
+    "duration_ms": 2126789,
+    "llm_requests": {
+      "count": 581,
+      "with_latency": 581,
+      "successful": 580,
+      "failed": 1,
+      "total_latency_ms": 1892309.051,
+      "average_latency_ms": 3256.986,
+      "min_latency_ms": 477.741,
+      "max_latency_ms": 27853.979
+    }
+  },
+  "usage": {
+    "source": "gateway",
+    "requests": 580,
+    "input_tokens": 23395580,
+    "cached_input_tokens": 18491502,
+    "cache_read_tokens": 18491502,
+    "cache_write_tokens": 0,
+    "output_tokens": 98652,
+    "reasoning_tokens": 0,
+    "total_tokens": 23581044
+  },
+  "cost": {
+    "gateway": {
+      "amount_usd": 0.01953075,
+      "currency": "USD",
+      "status": "reported",
+      "source": "gateway",
+      "responses_with_cost": 1
+    },
+    "openhands": {
+      "amount_usd": null,
+      "currency": "USD",
+      "status": "unavailable",
+      "source": "openhands"
+    },
+    "custom_estimation": {
+      "amount_usd": 3.10471605,
+      "currency": "USD",
+      "status": "estimated",
+      "source": "custom_pricing_table",
+      "pricing_version": 1,
+      "model": "openai/gemini-3.7-flash",
+      "normalized_model": "gemini-3.7-flash",
+      "requests": 580,
+      "requests_with_usage": 580,
+      "requests_missing_usage": 0,
+      "usage_source": "gateway_usage",
+      "pricing": {
+        "input_usd_per_million": 0.3,
+        "output_usd_per_million": 2.5,
+        "cache_read_usd_per_million": 0.075,
+        "cache_write_usd_per_million": null,
+        "note": "~Gemini Flash public tier"
+      }
+    }
+  },
+  "workspace": {
+    "type": "workspace_metrics",
+    "status": "available",
+    "files": {
+      "added": 4781,
+      "modified": 7,
+      "deleted": 0,
+      "renamed": 0,
+      "total_changed": 4788
+    },
+    "lines": {
+      "added": 706034,
+      "deleted": 146,
+      "changed": 706180
+    },
+    "renames": []
+  },
+  "tools": {
+    "total": 556,
+    "successful": 543,
+    "failed": 13,
+    "cancelled": 0,
+    "rejected": 0,
+    "unknown": 0,
+    "by_tool": {
+      "terminal": 199,
+      "file_editor": 351,
+      "think": 6
+    }
+  },
+  "trace": {
+    "events_path": "events.jsonl",
+    "event_count": 1143,
+    "invalid_event_count": 0,
+    "integrity_sha256": "7b191583c3f3b2e65c6dba757655fb9d6ecea3a67f52b7def98aefabb8b7e2b2"
+  },
+  "benchmarking": {
+    "score": 0.1303,
+    "source": "scores.json",
+    "run_name": "gemini-3-7-flash-high-prod-20260918-r3"
+  }
+}

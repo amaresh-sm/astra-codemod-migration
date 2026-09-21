@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "harness": {
+    "name": "hackerrank-openhands-gateway",
+    "version": "0.1.0"
+  },
+  "run": {
+    "status": "completed",
+    "exit_code": 0,
+    "error": null
+  },
+  "model": {
+    "name": "openai/gpt-5.6-sol",
+    "reasoning": "medium",
+    "provider": "hackerrank-gateway"
+  },
+  "timing": {
+    "started_at": "2026-09-16T20:29:34.806334Z",
+    "completed_at": "2026-09-16T20:41:26.750526Z",
+    "duration_ms": 711944,
+    "llm_requests": {
+      "count": 0,
+      "with_latency": 0,
+      "successful": 0,
+      "failed": 0,
+      "total_latency_ms": 0.0,
+      "average_latency_ms": null,
+      "min_latency_ms": null,
+      "max_latency_ms": null
+    }
+  },
+  "usage": {
+    "source": "openhands",
+    "input_tokens": 1921882,
+    "cached_input_tokens": 1856647,
+    "cache_read_tokens": 1856647,
+    "cache_write_tokens": 0,
+    "output_tokens": 32665,
+    "reasoning_tokens": 8916,
+    "total_tokens": 1954547
+  },
+  "cost": {
+    "gateway": {
+      "amount_usd": null,
+      "currency": "USD",
+      "status": "unavailable",
+      "source": "gateway",
+      "responses_with_cost": 0
+    },
+    "openhands": {
+      "amount_usd": 1.7220018000000004,
+      "currency": "USD",
+      "status": "reported",
+      "source": "openhands"
+    },
+    "custom_estimation": {
+      "amount_usd": 0.640274625,
+      "currency": "USD",
+      "status": "estimated",
+      "source": "custom_pricing_table",
+      "pricing_version": 1,
+      "model": "openai/gpt-5.6-sol",
+      "normalized_model": "gpt-5.6-sol",
+      "requests": 1,
+      "requests_with_usage": 1,
+      "requests_missing_usage": 0,
+      "usage_source": "openhands_usage",
+      "pricing": {
+        "input_usd_per_million": 1.25,
+        "output_usd_per_million": 10.0,
+        "cache_read_usd_per_million": 0.125,
+        "cache_write_usd_per_million": null,
+        "note": "~GPT-5 public tier"
+      }
+    }
+  },
+  "workspace": {
+    "type": "workspace_metrics",
+    "status": "available",
+    "files": {
+      "added": 733,
+      "modified": 23,
+      "deleted": 4,
+      "renamed": 0,
+      "total_changed": 760
+    },
+    "lines": {
+      "added": 2870,
+      "deleted": 3039,
+      "changed": 5909
+    },
+    "renames": []
+  },
+  "tools": {
+    "total": 80,
+    "successful": 76,
+    "failed": 4,
+    "cancelled": 0,
+    "rejected": 0,
+    "unknown": 0,
+    "by_tool": {
+      "terminal": 27,
+      "file_editor": 52,
+      "finish": 1
+    }
+  },
+  "trace": {
+    "events_path": "events.jsonl",
+    "event_count": 166,
+    "invalid_event_count": 0,
+    "integrity_sha256": "34b4c8638534e6f32d9885e586e262d1664974738020f4ef52aedd07d872df81"
+  },
+  "benchmarking": {
+    "score": 0.2793,
+    "source": "scores.json",
+    "run_name": "sol-medium-20260917-r4"
+  }
+}

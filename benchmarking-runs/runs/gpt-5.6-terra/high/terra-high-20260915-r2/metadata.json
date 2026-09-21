@@ -1,0 +1,28 @@
+{
+  "task_id": "migrate-jscodeshift-runner-to-rust",
+  "run_id": "openhands-terra-high-20260915-r2",
+  "provider": "openhands",
+  "model": "gpt-5.6-terra",
+  "reasoning": "high",
+  "image": "astra-candidate-generation:latest",
+  "started_at": "2026-09-15T17:49:14.251020+00:00",
+  "status": "completed",
+  "mounts": [
+    "candidate workspace:rw"
+  ],
+  "exit_code": 0,
+  "finished_at": "2026-09-15T17:56:21.624521+00:00",
+  "duration_seconds": 427.368,
+  "container_cleaned": true,
+  "benchmarking": {
+    "schema_version": 1,
+    "task": "migrate-jscodeshift-runner-to-rust",
+    "run_name": "terra-high-20260915-r2",
+    "model": "gpt-5.6-terra",
+    "reasoning": "high",
+    "score": 0.0789,
+    "score_source": "scores.json and newest reports/score.json",
+    "source_candidate": "openhands-terra-high-20260915-r2",
+    "exported_at": "2026-09-21T20:26:01.067498+00:00"
+  }
+}

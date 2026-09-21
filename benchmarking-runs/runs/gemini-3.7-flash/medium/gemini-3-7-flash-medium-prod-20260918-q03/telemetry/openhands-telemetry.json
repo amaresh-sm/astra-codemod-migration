@@ -1,0 +1,188 @@
+{
+  "schema_version": 1,
+  "harness": {
+    "name": "hackerrank-openhands-gateway",
+    "version": "0.1.1"
+  },
+  "run": {
+    "status": "completed",
+    "exit_code": 0,
+    "error": null
+  },
+  "model": {
+    "name": "openai/gemini-3.7-flash",
+    "reasoning": "medium",
+    "provider": "hackerrank-gateway"
+  },
+  "timing": {
+    "started_at": "2026-09-18T22:29:20.565889Z",
+    "completed_at": "2026-09-18T22:48:42.755448Z",
+    "duration_ms": 1162189,
+    "llm_requests": {
+      "count": 446,
+      "with_latency": 446,
+      "successful": 446,
+      "failed": 0,
+      "total_latency_ms": 979251.045,
+      "average_latency_ms": 2195.63,
+      "min_latency_ms": 926.091,
+      "max_latency_ms": 28460.089
+    }
+  },
+  "usage": {
+    "source": "gateway",
+    "requests": 446,
+    "input_tokens": 16910862,
+    "cached_input_tokens": 13594653,
+    "cache_read_tokens": 13594653,
+    "cache_write_tokens": 0,
+    "output_tokens": 50329,
+    "reasoning_tokens": 0,
+    "total_tokens": 17035832
+  },
+  "cost": {
+    "gateway": {
+      "amount_usd": null,
+      "currency": "USD",
+      "status": "unavailable",
+      "source": "gateway",
+      "responses_with_cost": 0
+    },
+    "openhands": {
+      "amount_usd": null,
+      "currency": "USD",
+      "status": "unavailable",
+      "source": "openhands"
+    },
+    "custom_estimation": {
+      "amount_usd": 2.140284175,
+      "currency": "USD",
+      "status": "estimated",
+      "source": "custom_pricing_table",
+      "pricing_version": 1,
+      "model": "openai/gemini-3.7-flash",
+      "normalized_model": "gemini-3.7-flash",
+      "requests": 446,
+      "requests_with_usage": 446,
+      "requests_missing_usage": 0,
+      "usage_source": "gateway_usage",
+      "pricing": {
+        "input_usd_per_million": 0.3,
+        "output_usd_per_million": 2.5,
+        "cache_read_usd_per_million": 0.075,
+        "cache_write_usd_per_million": null,
+        "note": "~Gemini Flash public tier"
+      }
+    }
+  },
+  "workspace": {
+    "type": "workspace_metrics",
+    "status": "available",
+    "files": {
+      "added": 4252,
+      "modified": 2,
+      "deleted": 0,
+      "renamed": 17,
+      "total_changed": 4271
+    },
+    "lines": {
+      "added": 1080776,
+      "deleted": 3,
+      "changed": 1080779
+    },
+    "renames": [
+      {
+        "from": "codebase/src/Collection.js",
+        "to": "codebase/src_js/Collection.js"
+      },
+      {
+        "from": "codebase/src/Runner.js",
+        "to": "codebase/src_js/Runner.js"
+      },
+      {
+        "from": "codebase/src/Worker.js",
+        "to": "codebase/src_js/Worker.js"
+      },
+      {
+        "from": "codebase/src/argsParser.js",
+        "to": "codebase/src_js/argsParser.js"
+      },
+      {
+        "from": "codebase/src/collections/ImportDeclaration.js",
+        "to": "codebase/src_js/collections/ImportDeclaration.js"
+      },
+      {
+        "from": "codebase/src/collections/JSXElement.js",
+        "to": "codebase/src_js/collections/JSXElement.js"
+      },
+      {
+        "from": "codebase/src/collections/Node.js",
+        "to": "codebase/src_js/collections/Node.js"
+      },
+      {
+        "from": "codebase/src/collections/VariableDeclarator.js",
+        "to": "codebase/src_js/collections/VariableDeclarator.js"
+      },
+      {
+        "from": "codebase/src/collections/index.js",
+        "to": "codebase/src_js/collections/index.js"
+      },
+      {
+        "from": "codebase/src/core.js",
+        "to": "codebase/src_js/core.js"
+      },
+      {
+        "from": "codebase/src/getParser.js",
+        "to": "codebase/src_js/getParser.js"
+      },
+      {
+        "from": "codebase/src/ignoreFiles.js",
+        "to": "codebase/src_js/ignoreFiles.js"
+      },
+      {
+        "from": "codebase/src/matchNode.js",
+        "to": "codebase/src_js/matchNode.js"
+      },
+      {
+        "from": "codebase/src/template.js",
+        "to": "codebase/src_js/template.js"
+      },
+      {
+        "from": "codebase/src/utils/intersection.js",
+        "to": "codebase/src_js/utils/intersection.js"
+      },
+      {
+        "from": "codebase/src/utils/once.js",
+        "to": "codebase/src_js/utils/once.js"
+      },
+      {
+        "from": "codebase/src/utils/union.js",
+        "to": "codebase/src_js/utils/union.js"
+      }
+    ]
+  },
+  "tools": {
+    "total": 427,
+    "successful": 423,
+    "failed": 4,
+    "cancelled": 0,
+    "rejected": 0,
+    "unknown": 0,
+    "by_tool": {
+      "terminal": 161,
+      "file_editor": 265,
+      "finish": 1
+    }
+  },
+  "trace": {
+    "events_path": "events.jsonl",
+    "event_count": 879,
+    "invalid_event_count": 0,
+    "integrity_sha256": "84fd0936459bf2586fbc77391a6225deb8f75628c757e6a835621276ba30774c"
+  },
+  "benchmarking": {
+    "score": 0.1251,
+    "source": "scores.json",
+    "run_name": "gemini-3-7-flash-medium-prod-20260918-q03"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "harness": {
+    "name": "hackerrank-openhands-gateway"
+  },
+  "run": {
+    "id": "grok-4-5-high-20260917-r2",
+    "status": "captured_without_telemetry"
+  },
+  "model": {
+    "name": "grok-4.5",
+    "reasoning": "high"
+  },
+  "benchmarking": {
+    "score": 0.2774,
+    "source": "scores.json",
+    "run_name": "grok-4-5-high-20260917-r2"
+  }
+}

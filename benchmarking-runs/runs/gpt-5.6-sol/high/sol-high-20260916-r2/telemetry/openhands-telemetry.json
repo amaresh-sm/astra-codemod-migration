@@ -1,0 +1,168 @@
+{
+  "schema_version": 1,
+  "harness": {
+    "name": "hackerrank-openhands-gateway",
+    "version": "0.1.0"
+  },
+  "run": {
+    "status": "completed",
+    "exit_code": 0,
+    "error": null
+  },
+  "model": {
+    "name": "openai/gpt-5.6-sol",
+    "reasoning": "high",
+    "provider": "hackerrank-gateway"
+  },
+  "timing": {
+    "started_at": "2026-09-16T10:22:57.005853Z",
+    "completed_at": "2026-09-16T10:45:07.415826Z",
+    "duration_ms": 1330409,
+    "llm_requests": {
+      "count": 0,
+      "with_latency": 0,
+      "successful": 0,
+      "failed": 0,
+      "total_latency_ms": 0.0,
+      "average_latency_ms": null,
+      "min_latency_ms": null,
+      "max_latency_ms": null
+    }
+  },
+  "usage": {
+    "source": "openhands",
+    "input_tokens": 4622325,
+    "cached_input_tokens": 4511827,
+    "cache_read_tokens": 4511827,
+    "cache_write_tokens": 0,
+    "output_tokens": 54344,
+    "reasoning_tokens": 21221,
+    "total_tokens": 4676669
+  },
+  "cost": {
+    "gateway": {
+      "amount_usd": null,
+      "currency": "USD",
+      "status": "unavailable",
+      "source": "gateway",
+      "responses_with_cost": 0
+    },
+    "openhands": {
+      "amount_usd": 3.4439027999999996,
+      "currency": "USD",
+      "status": "reported",
+      "source": "openhands"
+    },
+    "custom_estimation": {
+      "amount_usd": 1.245540875,
+      "currency": "USD",
+      "status": "estimated",
+      "source": "custom_pricing_table",
+      "pricing_version": 1,
+      "model": "openai/gpt-5.6-sol",
+      "normalized_model": "gpt-5.6-sol",
+      "requests": 1,
+      "requests_with_usage": 1,
+      "requests_missing_usage": 0,
+      "usage_source": "openhands_usage",
+      "pricing": {
+        "input_usd_per_million": 1.25,
+        "output_usd_per_million": 10.0,
+        "cache_read_usd_per_million": 0.125,
+        "cache_write_usd_per_million": null,
+        "note": "~GPT-5 public tier"
+      }
+    }
+  },
+  "workspace": {
+    "type": "workspace_metrics",
+    "status": "available",
+    "files": {
+      "added": 361,
+      "modified": 10,
+      "deleted": 6,
+      "renamed": 12,
+      "total_changed": 389
+    },
+    "lines": {
+      "added": 2240,
+      "deleted": 1343,
+      "changed": 3583
+    },
+    "renames": [
+      {
+        "from": "codebase/src/Collection.js",
+        "to": "codebase/bridge/api/Collection.js"
+      },
+      {
+        "from": "codebase/src/collections/ImportDeclaration.js",
+        "to": "codebase/bridge/api/collections/ImportDeclaration.js"
+      },
+      {
+        "from": "codebase/src/collections/JSXElement.js",
+        "to": "codebase/bridge/api/collections/JSXElement.js"
+      },
+      {
+        "from": "codebase/src/collections/Node.js",
+        "to": "codebase/bridge/api/collections/Node.js"
+      },
+      {
+        "from": "codebase/src/collections/VariableDeclarator.js",
+        "to": "codebase/bridge/api/collections/VariableDeclarator.js"
+      },
+      {
+        "from": "codebase/src/collections/index.js",
+        "to": "codebase/bridge/api/collections/index.js"
+      },
+      {
+        "from": "codebase/src/core.js",
+        "to": "codebase/bridge/api/core.js"
+      },
+      {
+        "from": "codebase/src/matchNode.js",
+        "to": "codebase/bridge/api/matchNode.js"
+      },
+      {
+        "from": "codebase/src/template.js",
+        "to": "codebase/bridge/api/template.js"
+      },
+      {
+        "from": "codebase/src/utils/intersection.js",
+        "to": "codebase/bridge/api/utils/intersection.js"
+      },
+      {
+        "from": "codebase/src/utils/once.js",
+        "to": "codebase/bridge/api/utils/once.js"
+      },
+      {
+        "from": "codebase/src/utils/union.js",
+        "to": "codebase/bridge/api/utils/union.js"
+      }
+    ]
+  },
+  "tools": {
+    "total": 118,
+    "successful": 114,
+    "failed": 4,
+    "cancelled": 0,
+    "rejected": 0,
+    "unknown": 0,
+    "by_tool": {
+      "file_editor": 73,
+      "terminal": 43,
+      "think": 1,
+      "finish": 1
+    }
+  },
+  "trace": {
+    "events_path": "events.jsonl",
+    "event_count": 242,
+    "invalid_event_count": 0,
+    "integrity_sha256": "0082ca48c0dcc23cf16c869f694dc689115640d5a023db30ea98b16eea7abebb"
+  },
+  "benchmarking": {
+    "score": 0.2687,
+    "source": "scores.json",
+    "run_name": "sol-high-20260916-r2"
+  }
+}

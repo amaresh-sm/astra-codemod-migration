@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "tokens": {
+    "input": null,
+    "output": null,
+    "cached_input": null,
+    "total": null,
+    "source": "unavailable"
+  },
+  "tool_calls": {
+    "total": null,
+    "by_type": {
+      "read": null,
+      "shell": null,
+      "edit": null,
+      "write": null,
+      "other": null
+    },
+    "source": "unavailable"
+  },
+  "solution_size": {
+    "workspace_source_files": 926,
+    "workspace_source_lines": 474564,
+    "workspace_test_files": 260,
+    "workspace_test_lines": 58281,
+    "agent_changed_files": 5836,
+    "agent_changed_source_files": 925,
+    "agent_changed_source_lines": 474552
+  },
+  "duration_seconds": 21604.749,
+  "started_at": "2026-09-18T21:42:09.369164+00:00",
+  "finished_at": "2026-09-19T03:42:14.263761+00:00",
+  "benchmarking": {
+    "score": 0.1303,
+    "source": "scores.json",
+    "run_name": "opus-5-high-dev-20260919-r2"
+  }
+}

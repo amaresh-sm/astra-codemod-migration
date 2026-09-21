@@ -1,0 +1,34 @@
+{
+  "task_id": "migrate-jscodeshift-runner-to-rust",
+  "run_id": "openhands-qwen-3-8-high-prod-20260918-q04",
+  "provider": "openhands",
+  "model": "qwen-3.8",
+  "reasoning": "high",
+  "image": "astra-candidate-generation:latest",
+  "started_at": "2026-09-18T22:48:52.732921+00:00",
+  "status": "timed_out",
+  "mounts": [
+    "candidate workspace:rw"
+  ],
+  "exit_code": 124,
+  "failure_diagnostics": {
+    "directory": "failure-diagnostics",
+    "final_workspace_snapshot": "failure-diagnostics/final-workspace-snapshot.json",
+    "container_state": "logs/container-state.json",
+    "docker_log": "logs/docker.log"
+  },
+  "finished_at": "2026-09-19T04:48:56.463397+00:00",
+  "duration_seconds": 21603.504,
+  "container_cleaned": true,
+  "benchmarking": {
+    "schema_version": 1,
+    "task": "migrate-jscodeshift-runner-to-rust",
+    "run_name": "qwen-3-8-high-prod-20260918-q04",
+    "model": "qwen-3.8",
+    "reasoning": "high",
+    "score": 0.028,
+    "score_source": "scores.json and newest reports/score.json",
+    "source_candidate": "openhands-qwen-3-8-high-prod-20260918-q04",
+    "exported_at": "2026-09-21T20:26:01.067498+00:00"
+  }
+}

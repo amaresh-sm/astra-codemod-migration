@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "tokens": {
+    "input": null,
+    "output": 2028,
+    "cached_input": null,
+    "total": null,
+    "source": "agent-log"
+  },
+  "tool_calls": {
+    "total": null,
+    "by_type": {
+      "read": null,
+      "shell": null,
+      "edit": null,
+      "write": null,
+      "other": null
+    },
+    "source": "unavailable"
+  },
+  "solution_size": {
+    "workspace_source_files": 2425,
+    "workspace_source_lines": 1501847,
+    "workspace_test_files": 249,
+    "workspace_test_lines": 53234,
+    "agent_changed_files": 5277,
+    "agent_changed_source_files": 2424,
+    "agent_changed_source_lines": 1501835
+  },
+  "duration_seconds": 21605.234,
+  "started_at": "2026-09-19T00:58:45.500645+00:00",
+  "finished_at": "2026-09-19T06:58:50.831798+00:00",
+  "benchmarking": {
+    "score": 0.0904,
+    "source": "scores.json",
+    "run_name": "qwen-3-8-high-prod-20260919-q08"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "task_id": "migrate-jscodeshift-runner-to-rust",
+  "run_id": "openhands-sol-high-prod-20260919-r1",
+  "provider": "openhands",
+  "model": "gpt-5.6-sol",
+  "reasoning": "high",
+  "image": "astra-candidate-generation:latest",
+  "started_at": "2026-09-19T17:41:23.755126+00:00",
+  "status": "completed",
+  "mounts": [
+    "candidate workspace:rw"
+  ],
+  "exit_code": 0,
+  "finished_at": "2026-09-19T18:37:52.440655+00:00",
+  "duration_seconds": 3388.661,
+  "container_cleaned": true,
+  "benchmarking": {
+    "schema_version": 1,
+    "task": "migrate-jscodeshift-runner-to-rust",
+    "run_name": "sol-high-prod-20260919-r1",
+    "model": "gpt-5.6-sol",
+    "reasoning": "high",
+    "score": 0.267,
+    "score_source": "scores.json and newest reports/score.json",
+    "source_candidate": "openhands-sol-high-prod-20260919-r1",
+    "exported_at": "2026-09-21T20:26:01.067498+00:00"
+  }
+}

@@ -1,0 +1,120 @@
+{
+  "schema_version": 1,
+  "harness": {
+    "name": "hackerrank-openhands-gateway",
+    "version": "0.1.1"
+  },
+  "run": {
+    "status": "completed",
+    "exit_code": 0,
+    "error": null
+  },
+  "model": {
+    "name": "openai/glm-5.2",
+    "reasoning": "medium",
+    "provider": "hackerrank-gateway"
+  },
+  "timing": {
+    "started_at": "2026-09-18T22:27:49.757413Z",
+    "completed_at": "2026-09-18T22:53:00.632214Z",
+    "duration_ms": 1510874,
+    "llm_requests": {
+      "count": 410,
+      "with_latency": 410,
+      "successful": 410,
+      "failed": 0,
+      "total_latency_ms": 1095485.177,
+      "average_latency_ms": 2671.915,
+      "min_latency_ms": 499.243,
+      "max_latency_ms": 80258.208
+    }
+  },
+  "usage": {
+    "source": "gateway",
+    "requests": 410,
+    "input_tokens": 9118365,
+    "cached_input_tokens": 8686912,
+    "cache_read_tokens": 8686912,
+    "cache_write_tokens": 0,
+    "output_tokens": 132640,
+    "reasoning_tokens": 50925,
+    "total_tokens": 9251005
+  },
+  "cost": {
+    "gateway": {
+      "amount_usd": 3.4462473200000003,
+      "currency": "USD",
+      "status": "reported",
+      "source": "gateway",
+      "responses_with_cost": 410
+    },
+    "openhands": {
+      "amount_usd": null,
+      "currency": "USD",
+      "status": "unavailable",
+      "source": "openhands"
+    },
+    "custom_estimation": {
+      "amount_usd": 3.44624732,
+      "currency": "USD",
+      "status": "estimated",
+      "source": "custom_pricing_table",
+      "pricing_version": 1,
+      "model": "openai/glm-5.2",
+      "normalized_model": "glm-5.2",
+      "requests": 410,
+      "requests_with_usage": 410,
+      "requests_missing_usage": 0,
+      "usage_source": "gateway_usage",
+      "pricing": {
+        "input_usd_per_million": 1.4,
+        "output_usd_per_million": 4.4,
+        "cache_read_usd_per_million": 0.26,
+        "cache_write_usd_per_million": null,
+        "note": "Z.AI GLM-5.2 public API pricing"
+      }
+    }
+  },
+  "workspace": {
+    "type": "workspace_metrics",
+    "status": "available",
+    "files": {
+      "added": 23882,
+      "modified": 0,
+      "deleted": 0,
+      "renamed": 0,
+      "total_changed": 23882
+    },
+    "lines": {
+      "added": 6834373,
+      "deleted": 0,
+      "changed": 6834373
+    },
+    "renames": []
+  },
+  "tools": {
+    "total": 393,
+    "successful": 377,
+    "failed": 16,
+    "cancelled": 0,
+    "rejected": 0,
+    "unknown": 0,
+    "by_tool": {
+      "terminal": 321,
+      "think": 7,
+      "file_editor": 64,
+      "finish": 1
+    }
+  },
+  "trace": {
+    "events_path": "events.jsonl",
+    "event_count": 809,
+    "invalid_event_count": 0,
+    "integrity_sha256": "109eb0d1b0a8e9950f46a4f1b1e20847a8698c018e530484362598b61422a968"
+  },
+  "benchmarking": {
+    "score": 0.1112,
+    "source": "scores.json",
+    "run_name": "glm-5-2-medium-prod-20260918-q02"
+  }
+}

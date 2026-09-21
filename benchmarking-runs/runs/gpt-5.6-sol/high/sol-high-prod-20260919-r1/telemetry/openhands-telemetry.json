@@ -1,0 +1,120 @@
+{
+  "schema_version": 1,
+  "harness": {
+    "name": "hackerrank-openhands-gateway",
+    "version": "0.1.1"
+  },
+  "run": {
+    "status": "completed",
+    "exit_code": 0,
+    "error": null
+  },
+  "model": {
+    "name": "openai/gpt-5.6-sol",
+    "reasoning": "high",
+    "provider": "hackerrank-gateway"
+  },
+  "timing": {
+    "started_at": "2026-09-19T17:44:10.503366Z",
+    "completed_at": "2026-09-19T18:37:50.629550Z",
+    "duration_ms": 3220126,
+    "llm_requests": {
+      "count": 286,
+      "with_latency": 286,
+      "successful": 286,
+      "failed": 0,
+      "total_latency_ms": 2614281.964,
+      "average_latency_ms": 9140.846,
+      "min_latency_ms": 2059.956,
+      "max_latency_ms": 100086.73
+    }
+  },
+  "usage": {
+    "source": "gateway",
+    "requests": 286,
+    "input_tokens": 9101692,
+    "cached_input_tokens": 9100834,
+    "cache_read_tokens": 8529809,
+    "cache_write_tokens": 571025,
+    "output_tokens": 143788,
+    "reasoning_tokens": 54640,
+    "total_tokens": 9245480
+  },
+  "cost": {
+    "gateway": {
+      "amount_usd": null,
+      "currency": "USD",
+      "status": "unavailable",
+      "source": "gateway",
+      "responses_with_cost": 0
+    },
+    "openhands": {
+      "amount_usd": 9.146240600000002,
+      "currency": "USD",
+      "status": "reported",
+      "source": "openhands"
+    },
+    "custom_estimation": {
+      "amount_usd": 3.218959875,
+      "currency": "USD",
+      "status": "estimated",
+      "source": "custom_pricing_table",
+      "pricing_version": 1,
+      "model": "openai/gpt-5.6-sol",
+      "normalized_model": "gpt-5.6-sol",
+      "requests": 286,
+      "requests_with_usage": 286,
+      "requests_missing_usage": 0,
+      "usage_source": "gateway_usage",
+      "pricing": {
+        "input_usd_per_million": 1.25,
+        "output_usd_per_million": 10.0,
+        "cache_read_usd_per_million": 0.125,
+        "cache_write_usd_per_million": null,
+        "note": "~GPT-5 public tier"
+      }
+    }
+  },
+  "workspace": {
+    "type": "workspace_metrics",
+    "status": "available",
+    "files": {
+      "added": 2134,
+      "modified": 28,
+      "deleted": 0,
+      "renamed": 0,
+      "total_changed": 2162
+    },
+    "lines": {
+      "added": 215019,
+      "deleted": 3037,
+      "changed": 218056
+    },
+    "renames": []
+  },
+  "tools": {
+    "total": 319,
+    "successful": 300,
+    "failed": 19,
+    "cancelled": 0,
+    "rejected": 0,
+    "unknown": 0,
+    "by_tool": {
+      "file_editor": 148,
+      "terminal": 168,
+      "think": 2,
+      "finish": 1
+    }
+  },
+  "trace": {
+    "events_path": "events.jsonl",
+    "event_count": 657,
+    "invalid_event_count": 0,
+    "integrity_sha256": "4ce08f1f72e3631888c8bb4c66cbf973aac393f1079f931e51bda948c5fc4bf2"
+  },
+  "benchmarking": {
+    "score": 0.267,
+    "source": "scores.json",
+    "run_name": "sol-high-prod-20260919-r1"
+  }
+}

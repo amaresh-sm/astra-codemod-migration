@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "harness": {
+    "name": "hackerrank-openhands-gateway",
+    "version": "0.1.0"
+  },
+  "run": {
+    "status": "completed",
+    "exit_code": 0,
+    "error": null
+  },
+  "model": {
+    "name": "openai/deepseek-v4-pro",
+    "reasoning": "high",
+    "provider": "hackerrank-gateway"
+  },
+  "timing": {
+    "started_at": "2026-09-17T10:04:06.608983Z",
+    "completed_at": "2026-09-17T10:28:09.945498Z",
+    "duration_ms": 1443336,
+    "llm_requests": {
+      "count": 0,
+      "with_latency": 0,
+      "successful": 0,
+      "failed": 0,
+      "total_latency_ms": 0.0,
+      "average_latency_ms": null,
+      "min_latency_ms": null,
+      "max_latency_ms": null
+    }
+  },
+  "usage": {
+    "source": "openhands",
+    "input_tokens": 8559148,
+    "cached_input_tokens": 8328704,
+    "cache_read_tokens": 8328704,
+    "cache_write_tokens": 0,
+    "output_tokens": 75203,
+    "reasoning_tokens": 35703,
+    "total_tokens": 8634351
+  },
+  "cost": {
+    "gateway": {
+      "amount_usd": null,
+      "currency": "USD",
+      "status": "unavailable",
+      "source": "gateway",
+      "responses_with_cost": 0
+    },
+    "openhands": {
+      "amount_usd": null,
+      "currency": "USD",
+      "status": "unavailable",
+      "source": "openhands"
+    },
+    "custom_estimation": {
+      "amount_usd": 0.484226468,
+      "currency": "USD",
+      "status": "estimated",
+      "source": "custom_pricing_table",
+      "pricing_version": 1,
+      "model": "openai/deepseek-v4-pro",
+      "normalized_model": "deepseek-v4-pro",
+      "requests": 1,
+      "requests_with_usage": 1,
+      "requests_missing_usage": 0,
+      "usage_source": "openhands_usage",
+      "pricing": {
+        "input_usd_per_million": 0.66,
+        "output_usd_per_million": 1.98,
+        "cache_read_usd_per_million": 0.022,
+        "cache_write_usd_per_million": null,
+        "note": "DeepSeek V4 Pro off-peak pricing; peak rates are 2x"
+      }
+    }
+  },
+  "workspace": {
+    "type": "workspace_metrics",
+    "status": "available",
+    "files": {
+      "added": 6606,
+      "modified": 1,
+      "deleted": 0,
+      "renamed": 0,
+      "total_changed": 6607
+    },
+    "lines": {
+      "added": 1984493,
+      "deleted": 3014,
+      "changed": 1987507
+    },
+    "renames": []
+  },
+  "tools": {
+    "total": 149,
+    "successful": 144,
+    "failed": 5,
+    "cancelled": 0,
+    "rejected": 0,
+    "unknown": 0,
+    "by_tool": {
+      "file_editor": 84,
+      "terminal": 63,
+      "think": 2
+    }
+  },
+  "trace": {
+    "events_path": "events.jsonl",
+    "event_count": 309,
+    "invalid_event_count": 0,
+    "integrity_sha256": "789a05421bb48db1c1006ed50ce72fec166175ed6fafa0ebb6849fd134f2c078"
+  },
+  "benchmarking": {
+    "score": 0.1112,
+    "source": "scores.json",
+    "run_name": "deepseek-v4-pro-high-20260917-r7"
+  }
+}

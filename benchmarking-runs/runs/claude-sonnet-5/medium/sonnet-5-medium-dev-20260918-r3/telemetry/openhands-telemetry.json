@@ -1,0 +1,197 @@
+{
+  "schema_version": 1,
+  "harness": {
+    "name": "hackerrank-openhands-gateway",
+    "version": "0.1.1"
+  },
+  "run": {
+    "status": "completed",
+    "exit_code": 0,
+    "error": null
+  },
+  "model": {
+    "name": "openai/claude-sonnet-5",
+    "reasoning": "medium",
+    "provider": "hackerrank-gateway"
+  },
+  "timing": {
+    "started_at": "2026-09-18T06:55:48.053884Z",
+    "completed_at": "2026-09-18T07:52:52.372872Z",
+    "duration_ms": 3424318,
+    "llm_requests": {
+      "count": 325,
+      "with_latency": 325,
+      "successful": 325,
+      "failed": 0,
+      "total_latency_ms": 3160721.376,
+      "average_latency_ms": 9725.297,
+      "min_latency_ms": 2646.402,
+      "max_latency_ms": 99242.749
+    }
+  },
+  "usage": {
+    "source": "gateway",
+    "requests": 325,
+    "input_tokens": 13078038,
+    "cached_input_tokens": 0,
+    "cache_read_tokens": 0,
+    "cache_write_tokens": 0,
+    "output_tokens": 229013,
+    "reasoning_tokens": 113332,
+    "total_tokens": 13307051
+  },
+  "cost": {
+    "gateway": {
+      "amount_usd": null,
+      "currency": "USD",
+      "status": "unavailable",
+      "source": "gateway",
+      "responses_with_cost": 0
+    },
+    "openhands": {
+      "amount_usd": null,
+      "currency": "USD",
+      "status": "unavailable",
+      "source": "openhands"
+    },
+    "custom_estimation": {
+      "amount_usd": 42.669309,
+      "currency": "USD",
+      "status": "estimated",
+      "source": "custom_pricing_table",
+      "pricing_version": 1,
+      "model": "openai/claude-sonnet-5",
+      "normalized_model": "claude-sonnet-5",
+      "requests": 325,
+      "requests_with_usage": 325,
+      "requests_missing_usage": 0,
+      "usage_source": "gateway_usage",
+      "pricing": {
+        "input_usd_per_million": 3.0,
+        "output_usd_per_million": 15.0,
+        "cache_read_usd_per_million": 0.3,
+        "cache_write_usd_per_million": null,
+        "note": "~Claude Sonnet public tier"
+      }
+    }
+  },
+  "workspace": {
+    "type": "workspace_metrics",
+    "status": "available",
+    "files": {
+      "added": 4711,
+      "modified": 3,
+      "deleted": 5,
+      "renamed": 19,
+      "total_changed": 4738
+    },
+    "lines": {
+      "added": 1154027,
+      "deleted": 1482,
+      "changed": 1155509
+    },
+    "renames": [
+      {
+        "from": "codebase/src/Collection.js",
+        "to": "codebase/bridge/Collection.js"
+      },
+      {
+        "from": "codebase/src/collections/ImportDeclaration.js",
+        "to": "codebase/bridge/collections/ImportDeclaration.js"
+      },
+      {
+        "from": "codebase/src/collections/JSXElement.js",
+        "to": "codebase/bridge/collections/JSXElement.js"
+      },
+      {
+        "from": "codebase/src/collections/Node.js",
+        "to": "codebase/bridge/collections/Node.js"
+      },
+      {
+        "from": "codebase/src/collections/VariableDeclarator.js",
+        "to": "codebase/bridge/collections/VariableDeclarator.js"
+      },
+      {
+        "from": "codebase/src/collections/index.js",
+        "to": "codebase/bridge/collections/index.js"
+      },
+      {
+        "from": "codebase/src/core.js",
+        "to": "codebase/bridge/core.js"
+      },
+      {
+        "from": "codebase/src/matchNode.js",
+        "to": "codebase/bridge/matchNode.js"
+      },
+      {
+        "from": "codebase/parser/babel5Compat.js",
+        "to": "codebase/bridge/parser/babel5Compat.js"
+      },
+      {
+        "from": "codebase/parser/babylon.js",
+        "to": "codebase/bridge/parser/babylon.js"
+      },
+      {
+        "from": "codebase/parser/flow.js",
+        "to": "codebase/bridge/parser/flow.js"
+      },
+      {
+        "from": "codebase/parser/ts.js",
+        "to": "codebase/bridge/parser/ts.js"
+      },
+      {
+        "from": "codebase/parser/tsOptions.js",
+        "to": "codebase/bridge/parser/tsOptions.js"
+      },
+      {
+        "from": "codebase/parser/tsx.js",
+        "to": "codebase/bridge/parser/tsx.js"
+      },
+      {
+        "from": "codebase/utils/requirePackage.js",
+        "to": "codebase/bridge/requirePackage.js"
+      },
+      {
+        "from": "codebase/src/template.js",
+        "to": "codebase/bridge/template.js"
+      },
+      {
+        "from": "codebase/src/utils/intersection.js",
+        "to": "codebase/bridge/utils/intersection.js"
+      },
+      {
+        "from": "codebase/src/utils/once.js",
+        "to": "codebase/bridge/utils/once.js"
+      },
+      {
+        "from": "codebase/src/utils/union.js",
+        "to": "codebase/bridge/utils/union.js"
+      }
+    ]
+  },
+  "tools": {
+    "total": 312,
+    "successful": 301,
+    "failed": 11,
+    "cancelled": 0,
+    "rejected": 0,
+    "unknown": 0,
+    "by_tool": {
+      "terminal": 256,
+      "file_editor": 44,
+      "think": 11,
+      "finish": 1
+    }
+  },
+  "trace": {
+    "events_path": "events.jsonl",
+    "event_count": 643,
+    "invalid_event_count": 0,
+    "integrity_sha256": "5a496fd0c013c6efca0655ccdbc51a1cc0e4b1bf89af86a4ca3fa7dd546ebdb1"
+  },
+  "benchmarking": {
+    "score": 0.0904,
+    "source": "scores.json",
+    "run_name": "sonnet-5-medium-dev-20260918-r3"
+  }
+}

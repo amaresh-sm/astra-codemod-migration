@@ -1,0 +1,28 @@
+{
+  "task_id": "migrate-jscodeshift-runner-to-rust",
+  "run_id": "openhands-kimi-k3-medium-20260916-r3",
+  "provider": "openhands",
+  "model": "kimi-k3",
+  "reasoning": "medium",
+  "image": "astra-candidate-generation:latest",
+  "started_at": "2026-09-16T18:13:43.277177+00:00",
+  "status": "completed",
+  "mounts": [
+    "candidate workspace:rw"
+  ],
+  "exit_code": 0,
+  "finished_at": "2026-09-16T18:30:31.992656+00:00",
+  "duration_seconds": 1008.697,
+  "container_cleaned": true,
+  "benchmarking": {
+    "schema_version": 1,
+    "task": "migrate-jscodeshift-runner-to-rust",
+    "run_name": "kimi-k3-medium-20260916-r3",
+    "model": "kimi-k3",
+    "reasoning": "medium",
+    "score": 0.1476,
+    "score_source": "scores.json and newest reports/score.json",
+    "source_candidate": "openhands-kimi-k3-medium-20260916-r3",
+    "exported_at": "2026-09-21T20:26:01.067498+00:00"
+  }
+}

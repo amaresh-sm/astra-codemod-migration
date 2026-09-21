@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "harness": {
+    "name": "hackerrank-openhands-gateway"
+  },
+  "run": {
+    "id": "claude-sonnet-5-high-20260916",
+    "status": "captured_without_telemetry"
+  },
+  "model": {
+    "name": "claude-sonnet-5",
+    "reasoning": "high"
+  },
+  "benchmarking": {
+    "score": 0.3899,
+    "source": "scores.json",
+    "run_name": "claude-sonnet-5-high-20260916"
+  }
+}

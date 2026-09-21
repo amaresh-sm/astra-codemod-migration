@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "harness": {
+    "name": "hackerrank-openhands-gateway",
+    "version": "0.1.1"
+  },
+  "run": {
+    "status": "completed",
+    "exit_code": 0,
+    "error": null
+  },
+  "model": {
+    "name": "openai/gpt-5.6-terra",
+    "reasoning": "high",
+    "provider": "hackerrank-gateway"
+  },
+  "timing": {
+    "started_at": "2026-09-18T05:05:12.873726Z",
+    "completed_at": "2026-09-18T05:13:52.285883Z",
+    "duration_ms": 519412,
+    "llm_requests": {
+      "count": 51,
+      "with_latency": 51,
+      "successful": 51,
+      "failed": 0,
+      "total_latency_ms": 350059.167,
+      "average_latency_ms": 6863.905,
+      "min_latency_ms": 2038.048,
+      "max_latency_ms": 55726.401
+    }
+  },
+  "usage": {
+    "source": "gateway",
+    "requests": 51,
+    "input_tokens": 1436553,
+    "cached_input_tokens": 0,
+    "cache_read_tokens": 0,
+    "cache_write_tokens": 0,
+    "output_tokens": 30957,
+    "reasoning_tokens": 0,
+    "total_tokens": 1467510
+  },
+  "cost": {
+    "gateway": {
+      "amount_usd": null,
+      "currency": "USD",
+      "status": "unavailable",
+      "source": "gateway",
+      "responses_with_cost": 0
+    },
+    "openhands": {
+      "amount_usd": 0.9112767,
+      "currency": "USD",
+      "status": "reported",
+      "source": "openhands"
+    },
+    "custom_estimation": {
+      "amount_usd": 2.10526125,
+      "currency": "USD",
+      "status": "estimated",
+      "source": "custom_pricing_table",
+      "pricing_version": 1,
+      "model": "openai/gpt-5.6-terra",
+      "normalized_model": "gpt-5.6-terra",
+      "requests": 51,
+      "requests_with_usage": 51,
+      "requests_missing_usage": 0,
+      "usage_source": "gateway_usage",
+      "pricing": {
+        "input_usd_per_million": 1.25,
+        "output_usd_per_million": 10.0,
+        "cache_read_usd_per_million": 0.125,
+        "cache_write_usd_per_million": null,
+        "note": "~GPT-5 public tier"
+      }
+    }
+  },
+  "workspace": {
+    "type": "workspace_metrics",
+    "status": "available",
+    "files": {
+      "added": 85,
+      "modified": 2,
+      "deleted": 0,
+      "renamed": 0,
+      "total_changed": 87
+    },
+    "lines": {
+      "added": 715,
+      "deleted": 178,
+      "changed": 893
+    },
+    "renames": []
+  },
+  "tools": {
+    "total": 65,
+    "successful": 62,
+    "failed": 3,
+    "cancelled": 0,
+    "rejected": 0,
+    "unknown": 0,
+    "by_tool": {
+      "terminal": 38,
+      "file_editor": 26,
+      "think": 1
+    }
+  },
+  "trace": {
+    "events_path": "events.jsonl",
+    "event_count": 139,
+    "invalid_event_count": 0,
+    "integrity_sha256": "f462a7028b138831dbff3439b623f73cf3f952d56f933c0521cc84fca90b8024"
+  },
+  "benchmarking": {
+    "score": 0.1216,
+    "source": "scores.json",
+    "run_name": "terra-high-prod-dev-20260918"
+  }
+}

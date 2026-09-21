@@ -3,6 +3,11 @@ runs/
 candidates/
 benchmarking-candidates/
 
+# Retain exported benchmark metadata/evidence while keeping live run artifacts ignored.
+!benchmarking-runs/
+!benchmarking-runs/runs/
+!benchmarking-runs/runs/**
+
 dist/
 target/
 

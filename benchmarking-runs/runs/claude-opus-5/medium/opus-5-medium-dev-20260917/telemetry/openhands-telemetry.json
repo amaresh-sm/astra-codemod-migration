@@ -1,0 +1,120 @@
+{
+  "schema_version": 1,
+  "harness": {
+    "name": "hackerrank-openhands-gateway",
+    "version": "0.1.1"
+  },
+  "run": {
+    "status": "completed",
+    "exit_code": 0,
+    "error": null
+  },
+  "model": {
+    "name": "openai/claude-opus-5",
+    "reasoning": "medium",
+    "provider": "hackerrank-gateway"
+  },
+  "timing": {
+    "started_at": "2026-09-17T17:55:45.537495Z",
+    "completed_at": "2026-09-17T19:25:17.666751Z",
+    "duration_ms": 5372129,
+    "llm_requests": {
+      "count": 272,
+      "with_latency": 272,
+      "successful": 272,
+      "failed": 0,
+      "total_latency_ms": 4531305.302,
+      "average_latency_ms": 16659.211,
+      "min_latency_ms": 2677.783,
+      "max_latency_ms": 175682.799
+    }
+  },
+  "usage": {
+    "source": "gateway",
+    "requests": 272,
+    "input_tokens": 25321211,
+    "cached_input_tokens": 0,
+    "cache_read_tokens": 0,
+    "cache_write_tokens": 0,
+    "output_tokens": 287985,
+    "reasoning_tokens": 154067,
+    "total_tokens": 25609196
+  },
+  "cost": {
+    "gateway": {
+      "amount_usd": null,
+      "currency": "USD",
+      "status": "unavailable",
+      "source": "gateway",
+      "responses_with_cost": 0
+    },
+    "openhands": {
+      "amount_usd": null,
+      "currency": "USD",
+      "status": "unavailable",
+      "source": "openhands"
+    },
+    "custom_estimation": {
+      "amount_usd": 401.41704,
+      "currency": "USD",
+      "status": "estimated",
+      "source": "custom_pricing_table",
+      "pricing_version": 1,
+      "model": "openai/claude-opus-5",
+      "normalized_model": "claude-opus-5",
+      "requests": 272,
+      "requests_with_usage": 272,
+      "requests_missing_usage": 0,
+      "usage_source": "gateway_usage",
+      "pricing": {
+        "input_usd_per_million": 15.0,
+        "output_usd_per_million": 75.0,
+        "cache_read_usd_per_million": 1.5,
+        "cache_write_usd_per_million": null,
+        "note": "~Claude Opus public tier"
+      }
+    }
+  },
+  "workspace": {
+    "type": "workspace_metrics",
+    "status": "available",
+    "files": {
+      "added": 7387,
+      "modified": 22,
+      "deleted": 3,
+      "renamed": 0,
+      "total_changed": 7412
+    },
+    "lines": {
+      "added": 1789601,
+      "deleted": 2868,
+      "changed": 1792469
+    },
+    "renames": []
+  },
+  "tools": {
+    "total": 269,
+    "successful": 255,
+    "failed": 14,
+    "cancelled": 0,
+    "rejected": 0,
+    "unknown": 0,
+    "by_tool": {
+      "terminal": 196,
+      "think": 2,
+      "file_editor": 70,
+      "finish": 1
+    }
+  },
+  "trace": {
+    "events_path": "events.jsonl",
+    "event_count": 547,
+    "invalid_event_count": 0,
+    "integrity_sha256": "0b945b5a649d497f6c17be24c7d14ff82581ac41ea3c4102071a05e0ea27ea37"
+  },
+  "benchmarking": {
+    "score": 0.2724,
+    "source": "scores.json",
+    "run_name": "opus-5-medium-dev-20260917"
+  }
+}

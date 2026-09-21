@@ -1,0 +1,6 @@
+Benchmark scoring evidence
+source_candidate=pi-opus-5-high-20260919-r2-native-repair-30pct
+registry_score=0.3678000000
+score_report=rescore-v2-20260919/reports/score.json
+
+verification_directory=rescore-v2-20260919

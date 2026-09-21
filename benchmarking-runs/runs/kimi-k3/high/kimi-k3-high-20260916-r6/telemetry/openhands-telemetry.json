@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "harness": {
+    "name": "hackerrank-openhands-gateway",
+    "version": "0.1.0"
+  },
+  "run": {
+    "status": "completed",
+    "exit_code": 0,
+    "error": null
+  },
+  "model": {
+    "name": "openai/kimi-k3",
+    "reasoning": "high",
+    "provider": "hackerrank-gateway"
+  },
+  "timing": {
+    "started_at": "2026-09-16T18:13:49.014030Z",
+    "completed_at": "2026-09-16T18:49:35.604873Z",
+    "duration_ms": 2146590,
+    "llm_requests": {
+      "count": 0,
+      "with_latency": 0,
+      "successful": 0,
+      "failed": 0,
+      "total_latency_ms": 0.0,
+      "average_latency_ms": null,
+      "min_latency_ms": null,
+      "max_latency_ms": null
+    }
+  },
+  "usage": {
+    "source": "openhands",
+    "input_tokens": 7083846,
+    "cached_input_tokens": 6993377,
+    "cache_read_tokens": 6993377,
+    "cache_write_tokens": 0,
+    "output_tokens": 78324,
+    "reasoning_tokens": 37505,
+    "total_tokens": 7162170
+  },
+  "cost": {
+    "gateway": {
+      "amount_usd": null,
+      "currency": "USD",
+      "status": "unavailable",
+      "source": "gateway",
+      "responses_with_cost": 0
+    },
+    "openhands": {
+      "amount_usd": null,
+      "currency": "USD",
+      "status": "unavailable",
+      "source": "openhands"
+    },
+    "custom_estimation": {
+      "amount_usd": 3.5442801,
+      "currency": "USD",
+      "status": "estimated",
+      "source": "custom_pricing_table",
+      "pricing_version": 1,
+      "model": "openai/kimi-k3",
+      "normalized_model": "kimi-k3",
+      "requests": 1,
+      "requests_with_usage": 1,
+      "requests_missing_usage": 0,
+      "usage_source": "openhands_usage",
+      "pricing": {
+        "input_usd_per_million": 3.0,
+        "output_usd_per_million": 15.0,
+        "cache_read_usd_per_million": 0.3,
+        "cache_write_usd_per_million": null,
+        "note": "~Moonshot Kimi K3 public API pricing"
+      }
+    }
+  },
+  "workspace": {
+    "type": "workspace_metrics",
+    "status": "available",
+    "files": {
+      "added": 554,
+      "modified": 3,
+      "deleted": 4,
+      "renamed": 0,
+      "total_changed": 561
+    },
+    "lines": {
+      "added": 6770,
+      "deleted": 1618,
+      "changed": 8388
+    },
+    "renames": []
+  },
+  "tools": {
+    "total": 107,
+    "successful": 103,
+    "failed": 4,
+    "cancelled": 0,
+    "rejected": 0,
+    "unknown": 0,
+    "by_tool": {
+      "terminal": 74,
+      "file_editor": 32,
+      "finish": 1
+    }
+  },
+  "trace": {
+    "events_path": "events.jsonl",
+    "event_count": 220,
+    "invalid_event_count": 0,
+    "integrity_sha256": "c22690a1da885482fe93d706bcb00f95fdaf367d26dd6c0b0240d0c231433b25"
+  },
+  "benchmarking": {
+    "score": 0.2843,
+    "source": "scores.json",
+    "run_name": "kimi-k3-high-20260916-r6"
+  }
+}

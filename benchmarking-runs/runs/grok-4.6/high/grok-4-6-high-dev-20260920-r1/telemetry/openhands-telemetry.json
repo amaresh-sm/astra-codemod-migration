@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "tokens": {
+    "input": 120,
+    "output": 46,
+    "cached_input": null,
+    "total": 107,
+    "source": "agent-log"
+  },
+  "tool_calls": {
+    "total": null,
+    "by_type": {
+      "read": null,
+      "shell": null,
+      "edit": null,
+      "write": null,
+      "other": null
+    },
+    "source": "unavailable"
+  },
+  "solution_size": {
+    "workspace_source_files": 546,
+    "workspace_source_lines": 322917,
+    "workspace_test_files": 143,
+    "workspace_test_lines": 28052,
+    "agent_changed_files": 892,
+    "agent_changed_source_files": 545,
+    "agent_changed_source_lines": 322905
+  },
+  "duration_seconds": 21604.339,
+  "started_at": "2026-09-19T19:56:10.657875+00:00",
+  "finished_at": "2026-09-20T01:56:15.117759+00:00",
+  "benchmarking": {
+    "score": 0.1112,
+    "source": "scores.json",
+    "run_name": "grok-4-6-high-dev-20260920-r1"
+  }
+}

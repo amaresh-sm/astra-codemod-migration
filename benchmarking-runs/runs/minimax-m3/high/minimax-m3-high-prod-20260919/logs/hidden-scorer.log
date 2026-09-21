@@ -1,0 +1,6 @@
+Benchmark scoring evidence
+source_candidate=openhands-minimax-m3-high-prod-20260919
+registry_score=0.1147000000
+score_report=rescore-v2-20260919/reports/score.json
+
+verification_directory=rescore-v2-20260919

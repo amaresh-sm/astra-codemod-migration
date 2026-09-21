@@ -1,0 +1,13 @@
+{
+  "benchmarking": {
+    "schema_version": 1,
+    "task": "migrate-jscodeshift-runner-to-rust",
+    "run_name": "pi-opus-5-high-20260919-r2-native-repair-30pct",
+    "model": "claude-opus-5",
+    "reasoning": "high",
+    "score": 0.3678,
+    "score_source": "scores.json and newest reports/score.json",
+    "source_candidate": "pi-opus-5-high-20260919-r2-native-repair-30pct",
+    "exported_at": "2026-09-21T20:26:01.067498+00:00"
+  }
+}

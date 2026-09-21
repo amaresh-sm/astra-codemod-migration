@@ -1,0 +1,287 @@
+{
+  "schema_version": 1,
+  "harness": {
+    "name": "hackerrank-openhands-gateway",
+    "version": "0.1.0"
+  },
+  "run": {
+    "status": "completed",
+    "exit_code": 0,
+    "error": null
+  },
+  "model": {
+    "name": "openai/kimi-k3",
+    "reasoning": "high",
+    "provider": "hackerrank-gateway"
+  },
+  "timing": {
+    "started_at": "2026-09-16T11:00:42.790848Z",
+    "completed_at": "2026-09-16T11:40:46.678525Z",
+    "duration_ms": 2403887,
+    "llm_requests": {
+      "count": 0,
+      "with_latency": 0,
+      "successful": 0,
+      "failed": 0,
+      "total_latency_ms": 0.0,
+      "average_latency_ms": null,
+      "min_latency_ms": null,
+      "max_latency_ms": null
+    }
+  },
+  "usage": {
+    "source": "openhands",
+    "input_tokens": 17716493,
+    "cached_input_tokens": 17711526,
+    "cache_read_tokens": 17711526,
+    "cache_write_tokens": 0,
+    "output_tokens": 118287,
+    "reasoning_tokens": 54554,
+    "total_tokens": 17834780
+  },
+  "cost": {
+    "gateway": {
+      "amount_usd": null,
+      "currency": "USD",
+      "status": "unavailable",
+      "source": "gateway",
+      "responses_with_cost": 0
+    },
+    "openhands": {
+      "amount_usd": null,
+      "currency": "USD",
+      "status": "unavailable",
+      "source": "openhands"
+    },
+    "custom_estimation": {
+      "amount_usd": 7.1026638,
+      "currency": "USD",
+      "status": "estimated",
+      "source": "custom_pricing_table",
+      "pricing_version": 1,
+      "model": "openai/kimi-k3",
+      "normalized_model": "kimi-k3",
+      "requests": 1,
+      "requests_with_usage": 1,
+      "requests_missing_usage": 0,
+      "usage_source": "openhands_usage",
+      "pricing": {
+        "input_usd_per_million": 3.0,
+        "output_usd_per_million": 15.0,
+        "cache_read_usd_per_million": 0.3,
+        "cache_write_usd_per_million": null,
+        "note": "~Moonshot Kimi K3 public API pricing"
+      }
+    }
+  },
+  "workspace": {
+    "type": "workspace_metrics",
+    "status": "available",
+    "files": {
+      "added": 552,
+      "modified": 0,
+      "deleted": 8,
+      "renamed": 42,
+      "total_changed": 602
+    },
+    "lines": {
+      "added": 5493,
+      "deleted": 1158,
+      "changed": 6651
+    },
+    "renames": [
+      {
+        "from": "codebase/.changeset/README.md",
+        "to": ".changeset/README.md"
+      },
+      {
+        "from": "codebase/.changeset/config.json",
+        "to": ".changeset/config.json"
+      },
+      {
+        "from": "codebase/.editorconfig",
+        "to": ".editorconfig"
+      },
+      {
+        "from": "codebase/.eslintignore",
+        "to": ".eslintignore"
+      },
+      {
+        "from": "codebase/.eslintrc",
+        "to": ".eslintrc"
+      },
+      {
+        "from": "codebase/.gitattributes",
+        "to": ".gitattributes"
+      },
+      {
+        "from": "codebase/.github/workflows/cr.yml",
+        "to": ".github/workflows/cr.yml"
+      },
+      {
+        "from": "codebase/.github/workflows/pull_request.yml",
+        "to": ".github/workflows/pull_request.yml"
+      },
+      {
+        "from": "codebase/.github/workflows/push.yml",
+        "to": ".github/workflows/push.yml"
+      },
+      {
+        "from": "codebase/.github/workflows/test.yml",
+        "to": ".github/workflows/test.yml"
+      },
+      {
+        "from": "codebase/.node-version",
+        "to": ".node-version"
+      },
+      {
+        "from": "codebase/.npmignore",
+        "to": ".npmignore"
+      },
+      {
+        "from": "codebase/CHANGELOG.md",
+        "to": "CHANGELOG.md"
+      },
+      {
+        "from": "codebase/CODE_OF_CONDUCT.md",
+        "to": "CODE_OF_CONDUCT.md"
+      },
+      {
+        "from": "codebase/CONTRIBUTING.md",
+        "to": "CONTRIBUTING.md"
+      },
+      {
+        "from": "codebase/LICENSE",
+        "to": "LICENSE"
+      },
+      {
+        "from": "codebase/README.md",
+        "to": "README.md"
+      },
+      {
+        "from": "codebase/UPSTREAM.md",
+        "to": "UPSTREAM.md"
+      },
+      {
+        "from": "codebase/index.js",
+        "to": "index.js"
+      },
+      {
+        "from": "codebase/parser/babel5Compat.js",
+        "to": "parser/babel5Compat.js"
+      },
+      {
+        "from": "codebase/parser/babylon.js",
+        "to": "parser/babylon.js"
+      },
+      {
+        "from": "codebase/parser/flow.js",
+        "to": "parser/flow.js"
+      },
+      {
+        "from": "codebase/parser/ts.js",
+        "to": "parser/ts.js"
+      },
+      {
+        "from": "codebase/parser/tsOptions.js",
+        "to": "parser/tsOptions.js"
+      },
+      {
+        "from": "codebase/parser/tsx.js",
+        "to": "parser/tsx.js"
+      },
+      {
+        "from": "codebase/recipes/retain-first-comment.md",
+        "to": "recipes/retain-first-comment.md"
+      },
+      {
+        "from": "codebase/sample/reverse-identifiers.js",
+        "to": "sample/reverse-identifiers.js"
+      },
+      {
+        "from": "codebase/src/Collection.js",
+        "to": "src/Collection.js"
+      },
+      {
+        "from": "codebase/src/collections/ImportDeclaration.js",
+        "to": "src/collections/ImportDeclaration.js"
+      },
+      {
+        "from": "codebase/src/collections/JSXElement.js",
+        "to": "src/collections/JSXElement.js"
+      },
+      {
+        "from": "codebase/src/collections/Node.js",
+        "to": "src/collections/Node.js"
+      },
+      {
+        "from": "codebase/src/collections/VariableDeclarator.js",
+        "to": "src/collections/VariableDeclarator.js"
+      },
+      {
+        "from": "codebase/src/collections/index.js",
+        "to": "src/collections/index.js"
+      },
+      {
+        "from": "codebase/src/core.js",
+        "to": "src/core.js"
+      },
+      {
+        "from": "codebase/src/getParser.js",
+        "to": "src/getParser.js"
+      },
+      {
+        "from": "codebase/src/matchNode.js",
+        "to": "src/matchNode.js"
+      },
+      {
+        "from": "codebase/src/template.js",
+        "to": "src/template.js"
+      },
+      {
+        "from": "codebase/src/utils/intersection.js",
+        "to": "src/utils/intersection.js"
+      },
+      {
+        "from": "codebase/src/utils/once.js",
+        "to": "src/utils/once.js"
+      },
+      {
+        "from": "codebase/src/utils/union.js",
+        "to": "src/utils/union.js"
+      },
+      {
+        "from": "codebase/utils/requirePackage.js",
+        "to": "utils/requirePackage.js"
+      },
+      {
+        "from": "codebase/yarn.lock",
+        "to": "yarn.lock"
+      }
+    ]
+  },
+  "tools": {
+    "total": 164,
+    "successful": 156,
+    "failed": 8,
+    "cancelled": 0,
+    "rejected": 0,
+    "unknown": 0,
+    "by_tool": {
+      "terminal": 102,
+      "file_editor": 61,
+      "finish": 1
+    }
+  },
+  "trace": {
+    "events_path": "events.jsonl",
+    "event_count": 334,
+    "invalid_event_count": 0,
+    "integrity_sha256": "d8ea5747fc65718ca13276308f935bea9a7d309cdb45823dad95fb420f2f4ff1"
+  },
+  "benchmarking": {
+    "score": 0.2722,
+    "source": "scores.json",
+    "run_name": "kimi-k3-high-20260916-r4"
+  }
+}

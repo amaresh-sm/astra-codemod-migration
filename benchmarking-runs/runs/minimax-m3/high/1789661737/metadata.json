@@ -1,0 +1,28 @@
+{
+  "task_id": "migrate-jscodeshift-runner-to-rust",
+  "run_id": "openhands-1789661737",
+  "provider": "openhands",
+  "model": "minimax-m3",
+  "reasoning": "high",
+  "image": "astra-candidate-generation:latest",
+  "started_at": "2026-09-17T16:15:37.254144+00:00",
+  "status": "completed",
+  "mounts": [
+    "candidate workspace:rw"
+  ],
+  "exit_code": 0,
+  "finished_at": "2026-09-17T17:34:02.755673+00:00",
+  "duration_seconds": 4705.412,
+  "container_cleaned": true,
+  "benchmarking": {
+    "schema_version": 1,
+    "task": "migrate-jscodeshift-runner-to-rust",
+    "run_name": "1789661737",
+    "model": "minimax-m3",
+    "reasoning": "high",
+    "score": 0.1268,
+    "score_source": "scores.json and newest reports/score.json",
+    "source_candidate": "openhands-1789661737",
+    "exported_at": "2026-09-21T20:26:01.067498+00:00"
+  }
+}

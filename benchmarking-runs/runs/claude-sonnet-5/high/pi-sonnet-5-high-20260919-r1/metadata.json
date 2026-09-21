@@ -1,0 +1,13 @@
+{
+  "benchmarking": {
+    "schema_version": 1,
+    "task": "migrate-jscodeshift-runner-to-rust",
+    "run_name": "pi-sonnet-5-high-20260919-r1",
+    "model": "claude-sonnet-5",
+    "reasoning": "high",
+    "score": 0.0696,
+    "score_source": "scores.json and newest reports/score.json",
+    "source_candidate": "pi-sonnet-5-high-20260919-r1",
+    "exported_at": "2026-09-21T20:26:01.067498+00:00"
+  }
+}

@@ -1,0 +1,6 @@
+Benchmark scoring evidence
+source_candidate=openhands-grok-4-6-medium-20260915
+registry_score=0.1476000000
+score_report=rescore-v2-20260919/reports/score.json
+
+verification_directory=rescore-v2-20260919

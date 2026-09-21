@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "tokens": {
+    "input": null,
+    "output": null,
+    "cached_input": null,
+    "total": null,
+    "source": "unavailable"
+  },
+  "tool_calls": {
+    "total": null,
+    "by_type": {
+      "read": null,
+      "shell": null,
+      "edit": null,
+      "write": null,
+      "other": null
+    },
+    "source": "unavailable"
+  },
+  "solution_size": {
+    "workspace_source_files": 1,
+    "workspace_source_lines": 12,
+    "workspace_test_files": 0,
+    "workspace_test_lines": 0,
+    "agent_changed_files": 0,
+    "agent_changed_source_files": 0,
+    "agent_changed_source_lines": 0
+  },
+  "duration_seconds": 0.24,
+  "started_at": "2026-09-18T16:34:50.360218+00:00",
+  "finished_at": "2026-09-18T16:34:50.600364+00:00",
+  "benchmarking": {
+    "score": 0.028,
+    "source": "scores.json",
+    "run_name": "gemini-3-7-flash-medium-prod-20260918"
+  }
+}

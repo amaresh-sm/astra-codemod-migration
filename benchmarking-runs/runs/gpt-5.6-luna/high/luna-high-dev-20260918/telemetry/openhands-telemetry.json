@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "harness": {
+    "name": "hackerrank-openhands-gateway",
+    "version": "0.1.1"
+  },
+  "run": {
+    "status": "completed",
+    "exit_code": 0,
+    "error": null
+  },
+  "model": {
+    "name": "openai/gpt-5.6-luna",
+    "reasoning": "high",
+    "provider": "hackerrank-gateway"
+  },
+  "timing": {
+    "started_at": "2026-09-18T05:34:12.883746Z",
+    "completed_at": "2026-09-18T05:39:04.044297Z",
+    "duration_ms": 291160,
+    "llm_requests": {
+      "count": 35,
+      "with_latency": 35,
+      "successful": 35,
+      "failed": 0,
+      "total_latency_ms": 251624.896,
+      "average_latency_ms": 7189.283,
+      "min_latency_ms": 2978.14,
+      "max_latency_ms": 22703.598
+    }
+  },
+  "usage": {
+    "source": "gateway",
+    "requests": 35,
+    "input_tokens": 696709,
+    "cached_input_tokens": 0,
+    "cache_read_tokens": 0,
+    "cache_write_tokens": 0,
+    "output_tokens": 16729,
+    "reasoning_tokens": 0,
+    "total_tokens": 713438
+  },
+  "cost": {
+    "gateway": {
+      "amount_usd": null,
+      "currency": "USD",
+      "status": "unavailable",
+      "source": "gateway",
+      "responses_with_cost": 0
+    },
+    "openhands": {
+      "amount_usd": 0.050733699999999986,
+      "currency": "USD",
+      "status": "reported",
+      "source": "openhands"
+    },
+    "custom_estimation": {
+      "amount_usd": 1.03817625,
+      "currency": "USD",
+      "status": "estimated",
+      "source": "custom_pricing_table",
+      "pricing_version": 1,
+      "model": "openai/gpt-5.6-luna",
+      "normalized_model": "gpt-5.6-luna",
+      "requests": 35,
+      "requests_with_usage": 35,
+      "requests_missing_usage": 0,
+      "usage_source": "gateway_usage",
+      "pricing": {
+        "input_usd_per_million": 1.25,
+        "output_usd_per_million": 10.0,
+        "cache_read_usd_per_million": 0.125,
+        "cache_write_usd_per_million": null,
+        "note": "~GPT-5 public tier"
+      }
+    }
+  },
+  "workspace": {
+    "type": "workspace_metrics",
+    "status": "available",
+    "files": {
+      "added": 623,
+      "modified": 1,
+      "deleted": 0,
+      "renamed": 0,
+      "total_changed": 624
+    },
+    "lines": {
+      "added": 200,
+      "deleted": 0,
+      "changed": 200
+    },
+    "renames": []
+  },
+  "tools": {
+    "total": 72,
+    "successful": 69,
+    "failed": 3,
+    "cancelled": 0,
+    "rejected": 0,
+    "unknown": 0,
+    "by_tool": {
+      "file_editor": 42,
+      "terminal": 29,
+      "think": 1
+    }
+  },
+  "trace": {
+    "events_path": "events.jsonl",
+    "event_count": 153,
+    "invalid_event_count": 0,
+    "integrity_sha256": "684730657e475ed5228d6944541c36fad429c96a650d0da47c74a198fb995a18"
+  },
+  "benchmarking": {
+    "score": 0.0835,
+    "source": "scores.json",
+    "run_name": "luna-high-dev-20260918"
+  }
+}

@@ -1,0 +1,6 @@
+Benchmark scoring evidence
+source_candidate=openhands-gemini-3-7-flash-medium-prod-20260918-r2
+registry_score=0.1407000000
+score_report=rescore-v2-20260919/reports/score.json
+
+verification_directory=rescore-v2-20260919

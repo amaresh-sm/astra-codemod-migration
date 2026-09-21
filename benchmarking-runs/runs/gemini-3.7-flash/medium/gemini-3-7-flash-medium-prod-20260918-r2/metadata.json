@@ -1,0 +1,28 @@
+{
+  "task_id": "migrate-jscodeshift-runner-to-rust",
+  "run_id": "openhands-gemini-3-7-flash-medium-prod-20260918-r2",
+  "provider": "openhands",
+  "model": "gemini-3.7-flash",
+  "reasoning": "medium",
+  "image": "astra-candidate-generation:latest",
+  "started_at": "2026-09-18T16:35:20.379590+00:00",
+  "status": "completed",
+  "mounts": [
+    "candidate workspace:rw"
+  ],
+  "exit_code": 0,
+  "finished_at": "2026-09-18T16:51:04.815812+00:00",
+  "duration_seconds": 944.418,
+  "container_cleaned": true,
+  "benchmarking": {
+    "schema_version": 1,
+    "task": "migrate-jscodeshift-runner-to-rust",
+    "run_name": "gemini-3-7-flash-medium-prod-20260918-r2",
+    "model": "gemini-3.7-flash",
+    "reasoning": "medium",
+    "score": 0.1407,
+    "score_source": "scores.json and newest reports/score.json",
+    "source_candidate": "openhands-gemini-3-7-flash-medium-prod-20260918-r2",
+    "exported_at": "2026-09-21T20:26:01.067498+00:00"
+  }
+}

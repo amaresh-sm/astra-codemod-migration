@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "harness": {
+    "name": "hackerrank-openhands-gateway",
+    "version": "0.1.1"
+  },
+  "run": {
+    "status": "completed",
+    "exit_code": 0,
+    "error": null
+  },
+  "model": {
+    "name": "openai/deepseek-v4-pro",
+    "reasoning": "medium",
+    "provider": "hackerrank-gateway"
+  },
+  "timing": {
+    "started_at": "2026-09-18T06:55:47.385406Z",
+    "completed_at": "2026-09-18T08:15:54.835665Z",
+    "duration_ms": 4807450,
+    "llm_requests": {
+      "count": 289,
+      "with_latency": 289,
+      "successful": 289,
+      "failed": 0,
+      "total_latency_ms": 4592781.87,
+      "average_latency_ms": 15891.979,
+      "min_latency_ms": 2003.075,
+      "max_latency_ms": 313444.662
+    }
+  },
+  "usage": {
+    "source": "gateway",
+    "requests": 289,
+    "input_tokens": 8544651,
+    "cached_input_tokens": 5765120,
+    "cache_read_tokens": 5765120,
+    "cache_write_tokens": 0,
+    "output_tokens": 255698,
+    "reasoning_tokens": 180858,
+    "total_tokens": 8800349
+  },
+  "cost": {
+    "gateway": {
+      "amount_usd": 7.210646750000004,
+      "currency": "USD",
+      "status": "reported",
+      "source": "gateway",
+      "responses_with_cost": 289
+    },
+    "openhands": {
+      "amount_usd": null,
+      "currency": "USD",
+      "status": "unavailable",
+      "source": "openhands"
+    },
+    "custom_estimation": {
+      "amount_usd": 2.46760514,
+      "currency": "USD",
+      "status": "estimated",
+      "source": "custom_pricing_table",
+      "pricing_version": 1,
+      "model": "openai/deepseek-v4-pro",
+      "normalized_model": "deepseek-v4-pro",
+      "requests": 289,
+      "requests_with_usage": 289,
+      "requests_missing_usage": 0,
+      "usage_source": "gateway_usage",
+      "pricing": {
+        "input_usd_per_million": 0.66,
+        "output_usd_per_million": 1.98,
+        "cache_read_usd_per_million": 0.022,
+        "cache_write_usd_per_million": null,
+        "note": "DeepSeek V4 Pro off-peak pricing; peak rates are 2x"
+      }
+    }
+  },
+  "workspace": {
+    "type": "workspace_metrics",
+    "status": "available",
+    "files": {
+      "added": 6046,
+      "modified": 1,
+      "deleted": 0,
+      "renamed": 0,
+      "total_changed": 6047
+    },
+    "lines": {
+      "added": 1473360,
+      "deleted": 565,
+      "changed": 1473925
+    },
+    "renames": []
+  },
+  "tools": {
+    "total": 474,
+    "successful": 465,
+    "failed": 9,
+    "cancelled": 0,
+    "rejected": 0,
+    "unknown": 0,
+    "by_tool": {
+      "file_editor": 347,
+      "think": 4,
+      "terminal": 123
+    }
+  },
+  "trace": {
+    "events_path": "events.jsonl",
+    "event_count": 977,
+    "invalid_event_count": 0,
+    "integrity_sha256": "96f9175f597fe0bc24905003b6a0661f6a272b0fe93b153051ddc969b33dcade"
+  },
+  "benchmarking": {
+    "score": 0.1147,
+    "source": "scores.json",
+    "run_name": "deepseek-v4-pro-medium-prod-20260918"
+  }
+}

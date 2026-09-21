@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "harness": {
+    "name": "hackerrank-openhands-gateway"
+  },
+  "run": {
+    "id": "pi-opus-5-high-20260919-r2-native-repair-30pct",
+    "status": "captured_without_telemetry"
+  },
+  "model": {
+    "name": "claude-opus-5",
+    "reasoning": "high"
+  },
+  "benchmarking": {
+    "score": 0.3678,
+    "source": "scores.json",
+    "run_name": "pi-opus-5-high-20260919-r2-native-repair-30pct"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "task_id": "migrate-jscodeshift-runner-to-rust",
+  "run_id": "openhands-grok-4-6-medium-dev-20260921",
+  "provider": "openhands",
+  "model": "grok-4.6",
+  "reasoning": "medium",
+  "image": "astra-candidate-generation:latest",
+  "started_at": "2026-09-20T21:22:28.965011+00:00",
+  "status": "failed",
+  "mounts": [
+    "candidate workspace:rw"
+  ],
+  "error": "Command '['docker', 'build', '--tag', 'astra-candidate-generation:latest', '--label', 'astra.gateway-package-digest=ff1afc21e099dacab9d6b6011bcbab4d63772496d733969c311815d7afe8fa3d', '--file', '/Users/amaresh/Desktop/repositories/astra-codemod-migration/environment/candidate-generation/Dockerfile', '/Users/amaresh/Desktop/repositories/astra-codemod-migration']' returned non-zero exit status 1.",
+  "exit_code": 127,
+  "failure_diagnostics": {
+    "directory": "failure-diagnostics",
+    "final_workspace_snapshot": "failure-diagnostics/final-workspace-snapshot.json",
+    "container_state": "logs/container-state.json",
+    "docker_log": "logs/docker.log"
+  },
+  "finished_at": "2026-09-20T21:22:29.265797+00:00",
+  "duration_seconds": 0.3,
+  "container_cleaned": true,
+  "benchmarking": {
+    "schema_version": 1,
+    "task": "migrate-jscodeshift-runner-to-rust",
+    "run_name": "grok-4-6-medium-dev-20260921",
+    "model": "grok-4.6",
+    "reasoning": "medium",
+    "score": 0.028,
+    "score_source": "scores.json and newest reports/score.json",
+    "source_candidate": "openhands-grok-4-6-medium-dev-20260921",
+    "exported_at": "2026-09-21T20:26:01.067498+00:00"
+  }
+}

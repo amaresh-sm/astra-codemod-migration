@@ -1,0 +1,28 @@
+{
+  "task_id": "migrate-jscodeshift-runner-to-rust",
+  "run_id": "openhands-deepseek-v4-pro-medium-20260916-r2",
+  "provider": "openhands",
+  "model": "deepseek-v4-pro",
+  "reasoning": "medium",
+  "image": "astra-candidate-generation:latest",
+  "started_at": "2026-09-16T09:37:33.897968+00:00",
+  "status": "completed",
+  "mounts": [
+    "candidate workspace:rw"
+  ],
+  "exit_code": 0,
+  "finished_at": "2026-09-16T09:53:47.860507+00:00",
+  "duration_seconds": 973.956,
+  "container_cleaned": true,
+  "benchmarking": {
+    "schema_version": 1,
+    "task": "migrate-jscodeshift-runner-to-rust",
+    "run_name": "deepseek-v4-pro-medium-20260916-r2",
+    "model": "deepseek-v4-pro",
+    "reasoning": "medium",
+    "score": 0.1285,
+    "score_source": "scores.json and newest reports/score.json",
+    "source_candidate": "openhands-deepseek-v4-pro-medium-20260916-r2",
+    "exported_at": "2026-09-21T20:26:01.067498+00:00"
+  }
+}

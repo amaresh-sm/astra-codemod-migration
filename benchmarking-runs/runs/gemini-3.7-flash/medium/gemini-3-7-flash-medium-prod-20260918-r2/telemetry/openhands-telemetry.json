@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "harness": {
+    "name": "hackerrank-openhands-gateway",
+    "version": "0.1.1"
+  },
+  "run": {
+    "status": "completed",
+    "exit_code": 0,
+    "error": null
+  },
+  "model": {
+    "name": "openai/gemini-3.7-flash",
+    "reasoning": "medium",
+    "provider": "hackerrank-gateway"
+  },
+  "timing": {
+    "started_at": "2026-09-18T16:35:21.737480Z",
+    "completed_at": "2026-09-18T16:51:02.995918Z",
+    "duration_ms": 941258,
+    "llm_requests": {
+      "count": 168,
+      "with_latency": 168,
+      "successful": 168,
+      "failed": 0,
+      "total_latency_ms": 813467.085,
+      "average_latency_ms": 4842.066,
+      "min_latency_ms": 1203.722,
+      "max_latency_ms": 32914.136
+    }
+  },
+  "usage": {
+    "source": "gateway",
+    "requests": 168,
+    "input_tokens": 5493971,
+    "cached_input_tokens": 4136837,
+    "cache_read_tokens": 4136837,
+    "cache_write_tokens": 0,
+    "output_tokens": 35055,
+    "reasoning_tokens": 0,
+    "total_tokens": 5572635
+  },
+  "cost": {
+    "gateway": {
+      "amount_usd": null,
+      "currency": "USD",
+      "status": "unavailable",
+      "source": "gateway",
+      "responses_with_cost": 0
+    },
+    "openhands": {
+      "amount_usd": null,
+      "currency": "USD",
+      "status": "unavailable",
+      "source": "openhands"
+    },
+    "custom_estimation": {
+      "amount_usd": 0.805040475,
+      "currency": "USD",
+      "status": "estimated",
+      "source": "custom_pricing_table",
+      "pricing_version": 1,
+      "model": "openai/gemini-3.7-flash",
+      "normalized_model": "gemini-3.7-flash",
+      "requests": 168,
+      "requests_with_usage": 168,
+      "requests_missing_usage": 0,
+      "usage_source": "gateway_usage",
+      "pricing": {
+        "input_usd_per_million": 0.3,
+        "output_usd_per_million": 2.5,
+        "cache_read_usd_per_million": 0.075,
+        "cache_write_usd_per_million": null,
+        "note": "~Gemini Flash public tier"
+      }
+    }
+  },
+  "workspace": {
+    "type": "workspace_metrics",
+    "status": "available",
+    "files": {
+      "added": 4644,
+      "modified": 1,
+      "deleted": 0,
+      "renamed": 0,
+      "total_changed": 4645
+    },
+    "lines": {
+      "added": 1586727,
+      "deleted": 0,
+      "changed": 1586727
+    },
+    "renames": []
+  },
+  "tools": {
+    "total": 162,
+    "successful": 156,
+    "failed": 6,
+    "cancelled": 0,
+    "rejected": 0,
+    "unknown": 0,
+    "by_tool": {
+      "terminal": 76,
+      "file_editor": 85,
+      "finish": 1
+    }
+  },
+  "trace": {
+    "events_path": "events.jsonl",
+    "event_count": 336,
+    "invalid_event_count": 0,
+    "integrity_sha256": "fda02d975f3071100a46418160609a93fd46c0a032ed45bd17658ddfb97b4435"
+  },
+  "benchmarking": {
+    "score": 0.1407,
+    "source": "scores.json",
+    "run_name": "gemini-3-7-flash-medium-prod-20260918-r2"
+  }
+}
