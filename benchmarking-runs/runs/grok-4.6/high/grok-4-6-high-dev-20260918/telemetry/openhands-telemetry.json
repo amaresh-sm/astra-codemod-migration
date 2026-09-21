@@ -36,8 +36,8 @@
     "source": "gateway",
     "requests": 485,
     "input_tokens": 16763503,
-    "cached_input_tokens": 0,
-    "cache_read_tokens": 0,
+    "cached_input_tokens": 15788635,
+    "cache_read_tokens": 15788635,
     "cache_write_tokens": 0,
     "output_tokens": 859022,
     "reasoning_tokens": 0,
@@ -124,5 +124,9 @@
     "score": 0.1147,
     "source": "scores.json",
     "run_name": "grok-4-6-high-dev-20260918"
+  },
+  "benchmarking_cache_backfill": {
+    "ratio": 0.9418458647367578,
+    "source": "cache-backfill-dry-run.json"
   }
 }

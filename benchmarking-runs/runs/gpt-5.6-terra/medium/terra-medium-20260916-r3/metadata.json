@@ -24,5 +24,11 @@
     "score_source": "scores.json and newest reports/score.json",
     "source_candidate": "openhands-terra-medium-20260916-r3",
     "exported_at": "2026-09-21T20:26:01.067498+00:00"
+  },
+  "benchmarking_cache_backfill": {
+    "input_tokens": 447631,
+    "cached_tokens": 420286,
+    "ratio": 0.9389122028259178,
+    "source": "cache-backfill-dry-run.json"
   }
 }

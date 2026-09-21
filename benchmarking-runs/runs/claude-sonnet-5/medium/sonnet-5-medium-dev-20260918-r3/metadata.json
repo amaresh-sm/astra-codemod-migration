@@ -24,5 +24,12 @@
     "score_source": "scores.json and newest reports/score.json",
     "source_candidate": "openhands-sonnet-5-medium-dev-20260918-r3",
     "exported_at": "2026-09-21T20:26:01.067498+00:00"
+  },
+  "benchmarking_cache_backfill": {
+    "input_tokens": 13078038,
+    "cached_tokens": 12317496,
+    "ratio": 0.9418458647367578,
+    "ratio_source": "provider-level median fallback (hackerrank-gateway)",
+    "source": "cache-backfill-dry-run.json"
   }
 }

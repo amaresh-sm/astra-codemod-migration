@@ -1,0 +1,486 @@
+{
+  "schema_version": 1,
+  "mode": "apply",
+  "generated_at": "2026-09-21T20:55:08.409573+00:00",
+  "task": "migrate-jscodeshift-runner-to-rust",
+  "ratio_rule": "floor(input_tokens * clamped model-level median cache_read_tokens/input_tokens)",
+  "fallback_rule": "provider-level median of observed cache ratios when a model-level median is unavailable",
+  "ratio_range": [
+    0.78,
+    0.95
+  ],
+  "costs_changed": false,
+  "candidates": [
+    {
+      "task": "migrate-jscodeshift-runner-to-rust",
+      "run": "opus-5-medium-dev-20260917",
+      "model": "claude-opus-5",
+      "input": 25321211,
+      "ratio": 0.9418458647367578,
+      "observed_median_ratio": null,
+      "ratio_source": "provider-level median fallback (hackerrank-gateway)",
+      "cached": 23848677
+    },
+    {
+      "task": "migrate-jscodeshift-runner-to-rust",
+      "run": "sonnet-5-high-dev-20260918-r2",
+      "model": "claude-sonnet-5",
+      "input": 25368882,
+      "ratio": 0.9418458647367578,
+      "observed_median_ratio": null,
+      "ratio_source": "provider-level median fallback (hackerrank-gateway)",
+      "cached": 23893576
+    },
+    {
+      "task": "migrate-jscodeshift-runner-to-rust",
+      "run": "sonnet-5-medium-dev-20260919-r5",
+      "model": "claude-sonnet-5",
+      "input": 6808492,
+      "ratio": 0.9418458647367578,
+      "observed_median_ratio": null,
+      "ratio_source": "provider-level median fallback (hackerrank-gateway)",
+      "cached": 6412550
+    },
+    {
+      "task": "migrate-jscodeshift-runner-to-rust",
+      "run": "sonnet-5-medium-dev-20260918-r3",
+      "model": "claude-sonnet-5",
+      "input": 13078038,
+      "ratio": 0.9418458647367578,
+      "observed_median_ratio": null,
+      "ratio_source": "provider-level median fallback (hackerrank-gateway)",
+      "cached": 12317496
+    },
+    {
+      "task": "migrate-jscodeshift-runner-to-rust",
+      "run": "luna-high-20260916-r2",
+      "model": "gpt-5.6-luna",
+      "input": 842017,
+      "ratio": 0.9418458647367578,
+      "observed_median_ratio": null,
+      "ratio_source": "provider-level median fallback (hackerrank-gateway)",
+      "cached": 793050
+    },
+    {
+      "task": "migrate-jscodeshift-runner-to-rust",
+      "run": "luna-high-dev-20260918",
+      "model": "gpt-5.6-luna",
+      "input": 696709,
+      "ratio": 0.9418458647367578,
+      "observed_median_ratio": null,
+      "ratio_source": "provider-level median fallback (hackerrank-gateway)",
+      "cached": 656192
+    },
+    {
+      "task": "migrate-jscodeshift-runner-to-rust",
+      "run": "luna-high-20260916-r4",
+      "model": "gpt-5.6-luna",
+      "input": 3987923,
+      "ratio": 0.9418458647367578,
+      "observed_median_ratio": null,
+      "ratio_source": "provider-level median fallback (hackerrank-gateway)",
+      "cached": 3756008
+    },
+    {
+      "task": "migrate-jscodeshift-runner-to-rust",
+      "run": "luna-medium-20260915-r2",
+      "model": "gpt-5.6-luna",
+      "input": 564446,
+      "ratio": 0.9418458647367578,
+      "observed_median_ratio": null,
+      "ratio_source": "provider-level median fallback (hackerrank-gateway)",
+      "cached": 531621
+    },
+    {
+      "task": "migrate-jscodeshift-runner-to-rust",
+      "run": "luna-medium-20260916",
+      "model": "gpt-5.6-luna",
+      "input": 484608,
+      "ratio": 0.9418458647367578,
+      "observed_median_ratio": null,
+      "ratio_source": "provider-level median fallback (hackerrank-gateway)",
+      "cached": 456426
+    },
+    {
+      "task": "migrate-jscodeshift-runner-to-rust",
+      "run": "luna-medium-prod-dev-20260918",
+      "model": "gpt-5.6-luna",
+      "input": 371678,
+      "ratio": 0.9418458647367578,
+      "observed_median_ratio": null,
+      "ratio_source": "provider-level median fallback (hackerrank-gateway)",
+      "cached": 350063
+    },
+    {
+      "task": "migrate-jscodeshift-runner-to-rust",
+      "run": "grok-4-6-high-dev-20260918",
+      "model": "grok-4.6",
+      "input": 16763503,
+      "ratio": 0.9418458647367578,
+      "observed_median_ratio": null,
+      "ratio_source": "provider-level median fallback (hackerrank-gateway)",
+      "cached": 15788635
+    },
+    {
+      "task": "migrate-jscodeshift-runner-to-rust",
+      "run": "grok-4-6-medium-20260915",
+      "model": "grok-4.6",
+      "input": 10277274,
+      "ratio": 0.9418458647367578,
+      "observed_median_ratio": null,
+      "ratio_source": "provider-level median fallback (hackerrank-gateway)",
+      "cached": 9679608
+    },
+    {
+      "task": "migrate-jscodeshift-runner-to-rust",
+      "run": "grok-4-6-medium-20260916-r2",
+      "model": "grok-4.6",
+      "input": 5448661,
+      "ratio": 0.9418458647367578,
+      "observed_median_ratio": null,
+      "ratio_source": "provider-level median fallback (hackerrank-gateway)",
+      "cached": 5131798
+    }
+  ],
+  "skipped": [
+    {
+      "run": "pi-opus-5-high-20260919-r2-native-repair-30pct",
+      "model": "claude-opus-5",
+      "reason": "no_input_tokens"
+    },
+    {
+      "run": "opus-5-high-dev-20260919-r2",
+      "model": "claude-opus-5",
+      "reason": "no_input_tokens"
+    },
+    {
+      "run": "opus-5-high-dev-20260918",
+      "model": "claude-opus-5",
+      "reason": "no_input_tokens"
+    },
+    {
+      "run": "claude-sonnet-5-high-20260916",
+      "model": "claude-sonnet-5",
+      "reason": "no_input_tokens"
+    },
+    {
+      "run": "pi-sonnet-5-high-20260919-r1",
+      "model": "claude-sonnet-5",
+      "reason": "no_input_tokens"
+    },
+    {
+      "run": "deepseek-v4-pro-high-prod-20260918",
+      "model": "deepseek-v4-pro",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "deepseek-v4-pro-high-20260917-r7",
+      "model": "deepseek-v4-pro",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "deepseek-v4-pro-high-20260917-r3",
+      "model": "deepseek-v4-pro",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "deepseek-v4-pro-medium-20260916-r2",
+      "model": "deepseek-v4-pro",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "deepseek-v4-pro-medium-prod-20260918",
+      "model": "deepseek-v4-pro",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "deepseek-v4-pro-medium-20260916-r3",
+      "model": "deepseek-v4-pro",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "gemini-3-7-flash-high-prod-20260918-q01",
+      "model": "gemini-3.7-flash",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "gemini-3-7-flash-high-prod-20260918-r3",
+      "model": "gemini-3.7-flash",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "gemini-3-7-flash-prod-dev-20260918",
+      "model": "gemini-3.7-flash",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "gemini-3-7-flash-medium-prod-20260918-r2",
+      "model": "gemini-3.7-flash",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "gemini-3-7-flash-medium-prod-20260918-q03",
+      "model": "gemini-3.7-flash",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "gemini-3-7-flash-medium-prod-20260918",
+      "model": "gemini-3.7-flash",
+      "reason": "no_input_tokens"
+    },
+    {
+      "run": "1789573954",
+      "model": "glm-5.2",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "glm-5-2-high-prod-20260919-r1",
+      "model": "glm-5.2",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "glm-5-2-high-prod-20260920-r2",
+      "model": "glm-5.2",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "glm-5-2-medium-prod-20260918",
+      "model": "glm-5.2",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "glm-5-2-medium-prod-20260918-q02",
+      "model": "glm-5.2",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "glm-5-2-medium-prod-20260918-q05",
+      "model": "glm-5.2",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "sol-high-20260916",
+      "model": "gpt-5.6-sol",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "sol-high-20260916-r2",
+      "model": "gpt-5.6-sol",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "sol-high-prod-20260919-r1",
+      "model": "gpt-5.6-sol",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "sol-medium-20260917-r4",
+      "model": "gpt-5.6-sol",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "sol-medium-20260917-r6",
+      "model": "gpt-5.6-sol",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "sol-medium-prod-20260918-r3",
+      "model": "gpt-5.6-sol",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "terra-high-prod-dev-20260918",
+      "model": "gpt-5.6-terra",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "terra-high-20260916-r4",
+      "model": "gpt-5.6-terra",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "terra-high-20260915-r2",
+      "model": "gpt-5.6-terra",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "terra-medium-20260916-r3",
+      "model": "gpt-5.6-terra",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "terra-medium-dev-20260919-r1",
+      "model": "gpt-5.6-terra",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "terra-medium-dev-20260918",
+      "model": "gpt-5.6-terra",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "grok-4-5-high-prod-20260918",
+      "model": "grok-4.5",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "grok-4-5-high-prod-20260919-r2",
+      "model": "grok-4.5",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "grok-4-5-high-20260917-r2",
+      "model": "grok-4.5",
+      "reason": "no_input_tokens"
+    },
+    {
+      "run": "1789798211",
+      "model": "grok-4.5",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "grok-4-5-medium-20260917",
+      "model": "grok-4.5",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "grok-4-5-medium-prod-20260919",
+      "model": "grok-4.5",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "grok-4-6-high-dev-20260920-r1",
+      "model": "grok-4.6",
+      "reason": "no_input_tokens"
+    },
+    {
+      "run": "grok-4-6-medium-dev-20260921",
+      "model": "grok-4.6",
+      "reason": "no_input_tokens"
+    },
+    {
+      "run": "kimi-k3-high-20260916-r3",
+      "model": "kimi-k3",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "kimi-k3-high-20260916-r6",
+      "model": "kimi-k3",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "kimi-k3-high-20260916-r4",
+      "model": "kimi-k3",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "kimi-k3-medium-20260917-r6",
+      "model": "kimi-k3",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "kimi-k3-medium-20260917-r4",
+      "model": "kimi-k3",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "kimi-k3-medium-20260916-r3",
+      "model": "kimi-k3",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "1789661737",
+      "model": "minimax-m3",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "minimax-m3-high-prod-20260917",
+      "model": "minimax-m3",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "minimax-m3-high-prod-20260919",
+      "model": "minimax-m3",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "1789798212",
+      "model": "minimax-m3",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "minimax-m3-medium-prod-20260919-r4",
+      "model": "minimax-m3",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "minimax-m3-medium-prod-20260919-r5",
+      "model": "minimax-m3",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "qwen-3-8-high-prod-20260919-q08",
+      "model": "qwen-3.8",
+      "reason": "no_input_tokens"
+    },
+    {
+      "run": "qwen-3-8-high-prod-20260920-r1",
+      "model": "qwen-3.8",
+      "reason": "no_input_tokens"
+    },
+    {
+      "run": "qwen-3-8-high-prod-20260918-q04",
+      "model": "qwen-3.8",
+      "reason": "no_input_tokens"
+    }
+  ],
+  "model_ratios": {
+    "deepseek-v4-pro": {
+      "sample_count": 6,
+      "observed_median": 0.956591180476875,
+      "applied_ratio": 0.95
+    },
+    "gemini-3.7-flash": {
+      "sample_count": 5,
+      "observed_median": 0.798897733193241,
+      "applied_ratio": 0.798897733193241
+    },
+    "glm-5.2": {
+      "sample_count": 6,
+      "observed_median": 0.9502209519573641,
+      "applied_ratio": 0.95
+    },
+    "gpt-5.6-sol": {
+      "sample_count": 6,
+      "observed_median": 0.9538308330908386,
+      "applied_ratio": 0.95
+    },
+    "gpt-5.6-terra": {
+      "sample_count": 6,
+      "observed_median": 0.9389117917118504,
+      "applied_ratio": 0.9389117917118504
+    },
+    "grok-4.5": {
+      "sample_count": 5,
+      "observed_median": 0.8971780230502931,
+      "applied_ratio": 0.8971780230502931
+    },
+    "kimi-k3": {
+      "sample_count": 6,
+      "observed_median": 0.9925795625584843,
+      "applied_ratio": 0.95
+    },
+    "minimax-m3": {
+      "sample_count": 6,
+      "observed_median": 0.9463426570375203,
+      "applied_ratio": 0.9463426570375203
+    }
+  },
+  "provider_ratios": {
+    "hackerrank-gateway": {
+      "sample_count": 46,
+      "observed_median": 0.9418458647367578,
+      "applied_ratio": 0.9418458647367578
+    }
+  }
+}

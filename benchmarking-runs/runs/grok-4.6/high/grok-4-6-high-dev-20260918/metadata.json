@@ -30,5 +30,12 @@
     "score_source": "scores.json and newest reports/score.json",
     "source_candidate": "openhands-grok-4-6-high-dev-20260918",
     "exported_at": "2026-09-21T20:26:01.067498+00:00"
+  },
+  "benchmarking_cache_backfill": {
+    "input_tokens": 16763503,
+    "cached_tokens": 15788635,
+    "ratio": 0.9418458647367578,
+    "ratio_source": "provider-level median fallback (hackerrank-gateway)",
+    "source": "cache-backfill-dry-run.json"
   }
 }
