@@ -1,0 +1,504 @@
+{
+  "schema_version": 1,
+  "source": "scores.json",
+  "generated_at": "2026-09-21T20:26:01.067498+00:00",
+  "runs": [
+    {
+      "model": "claude-opus-5",
+      "reasoning": "high",
+      "run_name": "pi-opus-5-high-20260919-r2-native-repair-30pct",
+      "source": "pi-opus-5-high-20260919-r2-native-repair-30pct",
+      "score": 0.3678
+    },
+    {
+      "model": "claude-opus-5",
+      "reasoning": "high",
+      "run_name": "opus-5-high-dev-20260919-r2",
+      "source": "openhands-opus-5-high-dev-20260919-r2",
+      "score": 0.1303
+    },
+    {
+      "model": "claude-opus-5",
+      "reasoning": "high",
+      "run_name": "opus-5-high-dev-20260918",
+      "source": "openhands-opus-5-high-dev-20260918",
+      "score": 0.1251
+    },
+    {
+      "model": "claude-opus-5",
+      "reasoning": "medium",
+      "run_name": "opus-5-medium-dev-20260917",
+      "source": "openhands-opus-5-medium-dev-20260917",
+      "score": 0.2724
+    },
+    {
+      "model": "claude-sonnet-5",
+      "reasoning": "high",
+      "run_name": "claude-sonnet-5-high-20260916",
+      "source": "openhands-claude-sonnet-5-high-20260916",
+      "score": 0.3899
+    },
+    {
+      "model": "claude-sonnet-5",
+      "reasoning": "high",
+      "run_name": "sonnet-5-high-dev-20260918-r2",
+      "source": "openhands-sonnet-5-high-dev-20260918-r2",
+      "score": 0.0696
+    },
+    {
+      "model": "claude-sonnet-5",
+      "reasoning": "high",
+      "run_name": "pi-sonnet-5-high-20260919-r1",
+      "source": "pi-sonnet-5-high-20260919-r1",
+      "score": 0.0696
+    },
+    {
+      "model": "claude-sonnet-5",
+      "reasoning": "medium",
+      "run_name": "sonnet-5-medium-dev-20260919-r5",
+      "source": "openhands-sonnet-5-medium-dev-20260919-r5",
+      "score": 0.1285
+    },
+    {
+      "model": "claude-sonnet-5",
+      "reasoning": "medium",
+      "run_name": "sonnet-5-medium-dev-20260918-r3",
+      "source": "openhands-sonnet-5-medium-dev-20260918-r3",
+      "score": 0.0904
+    },
+    {
+      "model": "deepseek-v4-pro",
+      "reasoning": "high",
+      "run_name": "deepseek-v4-pro-high-prod-20260918",
+      "source": "openhands-deepseek-v4-pro-high-prod-20260918",
+      "score": 0.1129
+    },
+    {
+      "model": "deepseek-v4-pro",
+      "reasoning": "high",
+      "run_name": "deepseek-v4-pro-high-20260917-r7",
+      "source": "openhands-deepseek-v4-pro-high-20260917-r7",
+      "score": 0.1112
+    },
+    {
+      "model": "deepseek-v4-pro",
+      "reasoning": "high",
+      "run_name": "deepseek-v4-pro-high-20260917-r3",
+      "source": "openhands-deepseek-v4-pro-high-20260917-r3",
+      "score": 0.105
+    },
+    {
+      "model": "deepseek-v4-pro",
+      "reasoning": "medium",
+      "run_name": "deepseek-v4-pro-medium-20260916-r2",
+      "source": "openhands-deepseek-v4-pro-medium-20260916-r2",
+      "score": 0.1285
+    },
+    {
+      "model": "deepseek-v4-pro",
+      "reasoning": "medium",
+      "run_name": "deepseek-v4-pro-medium-prod-20260918",
+      "source": "openhands-deepseek-v4-pro-medium-prod-20260918",
+      "score": 0.1147
+    },
+    {
+      "model": "deepseek-v4-pro",
+      "reasoning": "medium",
+      "run_name": "deepseek-v4-pro-medium-20260916-r3",
+      "source": "openhands-deepseek-v4-pro-medium-20260916-r3",
+      "score": 0.1112
+    },
+    {
+      "model": "gemini-3.7-flash",
+      "reasoning": "high",
+      "run_name": "gemini-3-7-flash-high-prod-20260918-q01",
+      "source": "openhands-gemini-3-7-flash-high-prod-20260918-q01",
+      "score": 0.1424
+    },
+    {
+      "model": "gemini-3.7-flash",
+      "reasoning": "high",
+      "run_name": "gemini-3-7-flash-high-prod-20260918-r3",
+      "source": "openhands-gemini-3-7-flash-high-prod-20260918-r3",
+      "score": 0.1303
+    },
+    {
+      "model": "gemini-3.7-flash",
+      "reasoning": "high",
+      "run_name": "gemini-3-7-flash-prod-dev-20260918",
+      "source": "openhands-gemini-3-7-flash-prod-dev-20260918",
+      "score": 0.1129
+    },
+    {
+      "model": "gemini-3.7-flash",
+      "reasoning": "medium",
+      "run_name": "gemini-3-7-flash-medium-prod-20260918-r2",
+      "source": "openhands-gemini-3-7-flash-medium-prod-20260918-r2",
+      "score": 0.1407
+    },
+    {
+      "model": "gemini-3.7-flash",
+      "reasoning": "medium",
+      "run_name": "gemini-3-7-flash-medium-prod-20260918-q03",
+      "source": "openhands-gemini-3-7-flash-medium-prod-20260918-q03",
+      "score": 0.1251
+    },
+    {
+      "model": "gemini-3.7-flash",
+      "reasoning": "medium",
+      "run_name": "gemini-3-7-flash-medium-prod-20260918",
+      "source": "openhands-gemini-3-7-flash-medium-prod-20260918",
+      "score": 0.028
+    },
+    {
+      "model": "glm-5.2",
+      "reasoning": "high",
+      "run_name": "1789573954",
+      "source": "openhands-1789573954",
+      "score": 0.1528
+    },
+    {
+      "model": "glm-5.2",
+      "reasoning": "high",
+      "run_name": "glm-5-2-high-prod-20260919-r1",
+      "source": "openhands-glm-5-2-high-prod-20260919-r1",
+      "score": 0.1268
+    },
+    {
+      "model": "glm-5.2",
+      "reasoning": "high",
+      "run_name": "glm-5-2-high-prod-20260920-r2",
+      "source": "openhands-glm-5-2-high-prod-20260920-r2",
+      "score": 0.1268
+    },
+    {
+      "model": "glm-5.2",
+      "reasoning": "medium",
+      "run_name": "glm-5-2-medium-prod-20260918",
+      "source": "openhands-glm-5-2-medium-prod-20260918",
+      "score": 0.1112
+    },
+    {
+      "model": "glm-5.2",
+      "reasoning": "medium",
+      "run_name": "glm-5-2-medium-prod-20260918-q02",
+      "source": "openhands-glm-5-2-medium-prod-20260918-q02",
+      "score": 0.1112
+    },
+    {
+      "model": "glm-5.2",
+      "reasoning": "medium",
+      "run_name": "glm-5-2-medium-prod-20260918-q05",
+      "source": "openhands-glm-5-2-medium-prod-20260918-q05",
+      "score": 0.1112
+    },
+    {
+      "model": "gpt-5.6-luna",
+      "reasoning": "high",
+      "run_name": "luna-high-20260916-r2",
+      "source": "openhands-luna-high-20260916-r2",
+      "score": 0.0835
+    },
+    {
+      "model": "gpt-5.6-luna",
+      "reasoning": "high",
+      "run_name": "luna-high-dev-20260918",
+      "source": "openhands-luna-high-dev-20260918",
+      "score": 0.0835
+    },
+    {
+      "model": "gpt-5.6-luna",
+      "reasoning": "high",
+      "run_name": "luna-high-20260916-r4",
+      "source": "openhands-luna-high-20260916-r4",
+      "score": 0.0821
+    },
+    {
+      "model": "gpt-5.6-luna",
+      "reasoning": "medium",
+      "run_name": "luna-medium-20260915-r2",
+      "source": "openhands-luna-medium-20260915-r2",
+      "score": 0.0835
+    },
+    {
+      "model": "gpt-5.6-luna",
+      "reasoning": "medium",
+      "run_name": "luna-medium-20260916",
+      "source": "openhands-luna-medium-20260916",
+      "score": 0.0835
+    },
+    {
+      "model": "gpt-5.6-luna",
+      "reasoning": "medium",
+      "run_name": "luna-medium-prod-dev-20260918",
+      "source": "openhands-luna-medium-prod-dev-20260918",
+      "score": 0.0835
+    },
+    {
+      "model": "gpt-5.6-sol",
+      "reasoning": "high",
+      "run_name": "sol-high-20260916",
+      "source": "openhands-sol-high-20260916",
+      "score": 0.3258
+    },
+    {
+      "model": "gpt-5.6-sol",
+      "reasoning": "high",
+      "run_name": "sol-high-20260916-r2",
+      "source": "openhands-sol-high-20260916-r2",
+      "score": 0.2687
+    },
+    {
+      "model": "gpt-5.6-sol",
+      "reasoning": "high",
+      "run_name": "sol-high-prod-20260919-r1",
+      "source": "openhands-sol-high-prod-20260919-r1",
+      "score": 0.267
+    },
+    {
+      "model": "gpt-5.6-sol",
+      "reasoning": "medium",
+      "run_name": "sol-medium-20260917-r4",
+      "source": "openhands-sol-medium-20260917-r4",
+      "score": 0.2793
+    },
+    {
+      "model": "gpt-5.6-sol",
+      "reasoning": "medium",
+      "run_name": "sol-medium-20260917-r6",
+      "source": "openhands-sol-medium-20260917-r6",
+      "score": 0.2397
+    },
+    {
+      "model": "gpt-5.6-sol",
+      "reasoning": "medium",
+      "run_name": "sol-medium-prod-20260918-r3",
+      "source": "openhands-sol-medium-prod-20260918-r3",
+      "score": 0.1112
+    },
+    {
+      "model": "gpt-5.6-terra",
+      "reasoning": "high",
+      "run_name": "terra-high-prod-dev-20260918",
+      "source": "openhands-terra-high-prod-dev-20260918",
+      "score": 0.1216
+    },
+    {
+      "model": "gpt-5.6-terra",
+      "reasoning": "high",
+      "run_name": "terra-high-20260916-r4",
+      "source": "openhands-terra-high-20260916-r4",
+      "score": 0.0835
+    },
+    {
+      "model": "gpt-5.6-terra",
+      "reasoning": "high",
+      "run_name": "terra-high-20260915-r2",
+      "source": "openhands-terra-high-20260915-r2",
+      "score": 0.0789
+    },
+    {
+      "model": "gpt-5.6-terra",
+      "reasoning": "medium",
+      "run_name": "terra-medium-20260916-r3",
+      "source": "openhands-terra-medium-20260916-r3",
+      "score": 0.0835
+    },
+    {
+      "model": "gpt-5.6-terra",
+      "reasoning": "medium",
+      "run_name": "terra-medium-dev-20260919-r1",
+      "source": "openhands-terra-medium-dev-20260919-r1",
+      "score": 0.0835
+    },
+    {
+      "model": "gpt-5.6-terra",
+      "reasoning": "medium",
+      "run_name": "terra-medium-dev-20260918",
+      "source": "openhands-terra-medium-dev-20260918",
+      "score": 0.0668
+    },
+    {
+      "model": "grok-4.5",
+      "reasoning": "high",
+      "run_name": "grok-4-5-high-prod-20260918",
+      "source": "openhands-grok-4-5-high-prod-20260918",
+      "score": 0.2791
+    },
+    {
+      "model": "grok-4.5",
+      "reasoning": "high",
+      "run_name": "grok-4-5-high-prod-20260919-r2",
+      "source": "openhands-grok-4-5-high-prod-20260919-r2",
+      "score": 0.2791
+    },
+    {
+      "model": "grok-4.5",
+      "reasoning": "high",
+      "run_name": "grok-4-5-high-20260917-r2",
+      "source": "openhands-grok-4-5-high-20260917-r2",
+      "score": 0.2774
+    },
+    {
+      "model": "grok-4.5",
+      "reasoning": "medium",
+      "run_name": "1789798211",
+      "source": "openhands-1789798211",
+      "score": 0.2557
+    },
+    {
+      "model": "grok-4.5",
+      "reasoning": "medium",
+      "run_name": "grok-4-5-medium-20260917",
+      "source": "openhands-grok-4-5-medium-20260917",
+      "score": 0.2534
+    },
+    {
+      "model": "grok-4.5",
+      "reasoning": "medium",
+      "run_name": "grok-4-5-medium-prod-20260919",
+      "source": "openhands-grok-4-5-medium-prod-20260919",
+      "score": 0.2501
+    },
+    {
+      "model": "grok-4.6",
+      "reasoning": "high",
+      "run_name": "grok-4-6-high-dev-20260918",
+      "source": "openhands-grok-4-6-high-dev-20260918",
+      "score": 0.1147
+    },
+    {
+      "model": "grok-4.6",
+      "reasoning": "high",
+      "run_name": "grok-4-6-high-dev-20260920-r1",
+      "source": "openhands-grok-4-6-high-dev-20260920-r1",
+      "score": 0.1112
+    },
+    {
+      "model": "grok-4.6",
+      "reasoning": "medium",
+      "run_name": "grok-4-6-medium-20260915",
+      "source": "openhands-grok-4-6-medium-20260915",
+      "score": 0.1476
+    },
+    {
+      "model": "grok-4.6",
+      "reasoning": "medium",
+      "run_name": "grok-4-6-medium-20260916-r2",
+      "source": "openhands-grok-4-6-medium-20260916-r2",
+      "score": 0.1476
+    },
+    {
+      "model": "grok-4.6",
+      "reasoning": "medium",
+      "run_name": "grok-4-6-medium-dev-20260921",
+      "source": "openhands-grok-4-6-medium-dev-20260921",
+      "score": 0.028
+    },
+    {
+      "model": "kimi-k3",
+      "reasoning": "high",
+      "run_name": "kimi-k3-high-20260916-r3",
+      "source": "openhands-kimi-k3-high-20260916-r3",
+      "score": 0.3138
+    },
+    {
+      "model": "kimi-k3",
+      "reasoning": "high",
+      "run_name": "kimi-k3-high-20260916-r6",
+      "source": "openhands-kimi-k3-high-20260916-r6",
+      "score": 0.2843
+    },
+    {
+      "model": "kimi-k3",
+      "reasoning": "high",
+      "run_name": "kimi-k3-high-20260916-r4",
+      "source": "openhands-kimi-k3-high-20260916-r4",
+      "score": 0.2722
+    },
+    {
+      "model": "kimi-k3",
+      "reasoning": "medium",
+      "run_name": "kimi-k3-medium-20260917-r6",
+      "source": "openhands-kimi-k3-medium-20260917-r6",
+      "score": 0.3034
+    },
+    {
+      "model": "kimi-k3",
+      "reasoning": "medium",
+      "run_name": "kimi-k3-medium-20260917-r4",
+      "source": "openhands-kimi-k3-medium-20260917-r4",
+      "score": 0.267
+    },
+    {
+      "model": "kimi-k3",
+      "reasoning": "medium",
+      "run_name": "kimi-k3-medium-20260916-r3",
+      "source": "openhands-kimi-k3-medium-20260916-r3",
+      "score": 0.1476
+    },
+    {
+      "model": "minimax-m3",
+      "reasoning": "high",
+      "run_name": "1789661737",
+      "source": "openhands-1789661737",
+      "score": 0.1268
+    },
+    {
+      "model": "minimax-m3",
+      "reasoning": "high",
+      "run_name": "minimax-m3-high-prod-20260917",
+      "source": "openhands-minimax-m3-high-prod-20260917",
+      "score": 0.1147
+    },
+    {
+      "model": "minimax-m3",
+      "reasoning": "high",
+      "run_name": "minimax-m3-high-prod-20260919",
+      "source": "openhands-minimax-m3-high-prod-20260919",
+      "score": 0.1147
+    },
+    {
+      "model": "minimax-m3",
+      "reasoning": "medium",
+      "run_name": "1789798212",
+      "source": "openhands-1789798212",
+      "score": 0.1233
+    },
+    {
+      "model": "minimax-m3",
+      "reasoning": "medium",
+      "run_name": "minimax-m3-medium-prod-20260919-r4",
+      "source": "openhands-minimax-m3-medium-prod-20260919-r4",
+      "score": 0.1129
+    },
+    {
+      "model": "minimax-m3",
+      "reasoning": "medium",
+      "run_name": "minimax-m3-medium-prod-20260919-r5",
+      "source": "openhands-minimax-m3-medium-prod-20260919-r5",
+      "score": 0.1112
+    },
+    {
+      "model": "qwen-3.8",
+      "reasoning": "high",
+      "run_name": "qwen-3-8-high-prod-20260919-q08",
+      "source": "openhands-qwen-3-8-high-prod-20260919-q08",
+      "score": 0.0904
+    },
+    {
+      "model": "qwen-3.8",
+      "reasoning": "high",
+      "run_name": "qwen-3-8-high-prod-20260920-r1",
+      "source": "openhands-qwen-3-8-high-prod-20260920-r1",
+      "score": 0.0696
+    },
+    {
+      "model": "qwen-3.8",
+      "reasoning": "high",
+      "run_name": "qwen-3-8-high-prod-20260918-q04",
+      "source": "openhands-qwen-3-8-high-prod-20260918-q04",
+      "score": 0.028
+    }
+  ]
+}
