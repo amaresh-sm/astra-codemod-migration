@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import html
 import json
+import os
 from pathlib import Path
 
 
@@ -44,6 +45,21 @@ CANDIDATES = (
         "model_key": "grok-4-6-medium",
     },
     {
+        "label": "Grok 4.6 medium r2",
+        "candidate_id": "openhands-grok-4-6-medium-dev-20260921-r2",
+        "model_key": "grok-4-6-medium-dev-20260921-r2",
+    },
+    {
+        "label": "Grok 4.6 high",
+        "candidate_id": "openhands-grok-4-6-high-dev-20260920-r1",
+        "model_key": "openhands-grok-4-6-high-dev-20260920-r1",
+    },
+    {
+        "label": "Grok 4.6 high r2",
+        "candidate_id": "openhands-grok-4-6-high-dev-20260918",
+        "model_key": "openhands-grok-4-6-high-dev-20260918",
+    },
+    {
         "label": "Grok 4.5 medium",
         "candidate_id": "openhands-grok-4-5-medium-20260909-r2",
         "model_key": "grok-4-5-medium",
@@ -52,6 +68,21 @@ CANDIDATES = (
         "label": "DeepSeek v4 Pro medium",
         "candidate_id": "openhands-deepseek-v4-pro-medium-20260909-r2",
         "model_key": "deepseek-v4-pro-medium",
+    },
+    {
+        "label": "Claude Opus 5 high",
+        "candidate_id": "pi-opus-5-high-20260919-r2-native-repair-30pct",
+        "model_key": "pi-opus-5-high-20260919-r2-native-repair-30pct",
+    },
+    {
+        "label": "Qwen 3.8 high q08",
+        "candidate_id": "openhands-qwen-3-8-high-prod-20260919-q08",
+        "model_key": "openhands-qwen-3-8-high-prod-20260919-q08",
+    },
+    {
+        "label": "Qwen 3.8 high r1",
+        "candidate_id": "openhands-qwen-3-8-high-prod-20260920-r1",
+        "model_key": "openhands-qwen-3-8-high-prod-20260920-r1",
     },
 )
 
@@ -75,14 +106,40 @@ def read_json(path: Path) -> dict:
 
 def candidate_path(candidate_id: str) -> Path | None:
     for root in CANDIDATE_ROOTS:
-        matches = list(root.rglob(candidate_id + "/candidate"))
-        if matches:
-            return matches[0]
+        direct = root / candidate_id / "candidate"
+        if direct.is_dir():
+            return direct
+        if not root.is_dir():
+            continue
+        for directory, directories, _ in os.walk(root):
+            directories[:] = [
+                name
+                for name in directories
+                if name not in {"candidate", "node_modules", ".git", "target", ".cargo", ".cargo-target"}
+            ]
+            current = Path(directory)
+            if current.name == candidate_id:
+                candidate = current / "candidate"
+                if candidate.is_dir():
+                    return candidate
     return None
 
 
 def latest_score_path(model_key: str) -> Path | None:
-    matches = [path for root in RUN_ROOTS for path in root.rglob("score.json") if model_key in str(path)]
+    matches = []
+    # Candidate workspaces can contain large dependency/build trees. Score
+    # reports live beside those workspaces, so prune the bulky trees while
+    # walking the artifact roots.
+    ignored_dirs = {"candidate", "node_modules", ".git", "target", ".cargo", ".cargo-target", "logs"}
+    for root in RUN_ROOTS:
+        if not root.is_dir():
+            continue
+        for directory, directories, filenames in os.walk(root):
+            directories[:] = [name for name in directories if name not in ignored_dirs]
+            if "score.json" in filenames:
+                path = Path(directory) / "score.json"
+                if model_key in str(path):
+                    matches.append(path)
     return max(matches, key=lambda path: path.stat().st_mtime, default=None)
 
 

@@ -108,6 +108,15 @@ def redact(value: Any, *, enabled: bool | None = None) -> Any:
         "completion_tokens",
         "prompt_tokens_details",
         "completion_tokens_details",
+        # Responses API equivalents of prompt_tokens_details/completion_tokens_details
+        # above; without these, the whole nested usage-detail object (cached_tokens,
+        # reasoning_tokens, etc.) gets wholesale-redacted for every Responses-API model.
+        "input_tokens_details",
+        "output_tokens_details",
+        # Token-count *limits* from request params, not values that could ever hold
+        # a credential.
+        "max_completion_tokens",
+        "max_output_tokens",
         "cached_tokens",
         "cache_write_tokens",
         "cache_creation_tokens",
@@ -509,6 +518,35 @@ def _is_transient_invalid_body_error(error: Exception) -> bool:
     return "invalid_body" in body or "request body must be valid json" in body
 
 
+# "all candidate providers failed" is the Gateway's own load balancer reporting that
+# every backend candidate it tried for this model was unavailable at that moment --
+# a capacity/availability blip on the Gateway side, not a malformed request. A 2s
+# retry (as above, for invalid_body) is not nearly enough time for backend capacity
+# to recover, so this gets 3 retries (4 attempts total) with an escalating delay
+# instead: 120s, then 240s, then 360s -- giving backend capacity progressively more
+# time to recover rather than hammering it again at a fixed interval.
+_BAD_GATEWAY_MAX_ATTEMPTS = 4
+_BAD_GATEWAY_RETRY_DELAY_STEP_SECONDS = 120.0
+
+
+def _is_transient_bad_gateway_error(error: Exception) -> bool:
+    """Return whether this is the Gateway reporting every backend candidate failed."""
+    if "all candidate providers failed" in str(error).lower():
+        return True
+    if _response_status(error) != 502:
+        return False
+    return "all candidate providers failed" in (_error_body(error) or "").lower()
+
+
+def _transient_retry_delay(error: Exception, attempt: int) -> float | None:
+    """Return the delay before retrying this attempt, or None if it should not retry."""
+    if attempt < _INVALID_BODY_MAX_ATTEMPTS and _is_transient_invalid_body_error(error):
+        return _INVALID_BODY_RETRY_DELAY_SECONDS
+    if attempt < _BAD_GATEWAY_MAX_ATTEMPTS and _is_transient_bad_gateway_error(error):
+        return attempt * _BAD_GATEWAY_RETRY_DELAY_STEP_SECONDS
+    return None
+
+
 class StuckRequestError(RuntimeError):
     """Raised instead of making a call that has already failed identically too many
     times, so a request that will not succeed stops burning the rest of the run's
@@ -682,9 +720,21 @@ def _is_gemini_model(llm: Any) -> bool:
 
 def _field_value(value: Any, field: str) -> Any:
     """Read a field from either a mapping or a LiteLLM model object."""
-    if isinstance(value, dict):
+    if isinstance(value, Mapping):
         return value.get(field)
-    return getattr(value, field, None)
+    attribute = getattr(value, field, None)
+    if attribute is not None:
+        return attribute
+    model_extra = getattr(value, "model_extra", None)
+    if isinstance(model_extra, Mapping):
+        return model_extra.get(field)
+    getter = getattr(value, "get", None)
+    if callable(getter):
+        try:
+            return getter(field)
+        except (AttributeError, KeyError, TypeError):
+            return None
+    return None
 
 
 def _thought_signature(tool_call: Any) -> str | None:
@@ -699,39 +749,105 @@ def _thought_signature(tool_call: Any) -> str | None:
     return signature if isinstance(signature, str) and signature else None
 
 
+def _tool_call_fingerprint(tool_call: Any) -> str | None:
+    """Return a stable identity for a tool call when OpenHands rewrites its ID."""
+    function = _field_value(tool_call, "function")
+    name = _field_value(function, "name")
+    arguments = _field_value(function, "arguments")
+    if not isinstance(name, str) or not name:
+        return None
+    if isinstance(arguments, str):
+        try:
+            arguments = json.dumps(json.loads(arguments), sort_keys=True, separators=(",", ":"))
+        except json.JSONDecodeError:
+            pass
+    elif isinstance(arguments, Mapping):
+        arguments = json.dumps(dict(arguments), sort_keys=True, separators=(",", ":"))
+    else:
+        arguments = "" if arguments is None else str(arguments)
+    return f"{name}\x1f{arguments}"
+
+
+def _signature_maps(llm: Any) -> tuple[dict[str, str], dict[str, list[str]]]:
+    """Return bounded signature caches keyed by provider ID and call fingerprint."""
+    by_id = getattr(llm, "_astra_gemini_thought_signatures", None)
+    if not isinstance(by_id, dict):
+        by_id = {}
+        setattr(llm, "_astra_gemini_thought_signatures", by_id)
+    by_fingerprint = getattr(llm, "_astra_gemini_thought_signatures_by_fingerprint", None)
+    if not isinstance(by_fingerprint, dict):
+        by_fingerprint = {}
+        setattr(llm, "_astra_gemini_thought_signatures_by_fingerprint", by_fingerprint)
+    return by_id, by_fingerprint
+
+
+def _fingerprint_signature(signatures: dict[str, list[str]], tool_call: Any) -> str | None:
+    """Return a signature only when a remapped call has one unambiguous match."""
+    fingerprint = _tool_call_fingerprint(tool_call)
+    candidates = signatures.get(fingerprint) if fingerprint else None
+    if not isinstance(candidates, list) or not candidates:
+        return None
+    distinct = list(dict.fromkeys(candidate for candidate in candidates if isinstance(candidate, str) and candidate))
+    return distinct[0] if len(distinct) == 1 else None
+
+
 def _remember_gemini_signatures(llm: Any, response: Any) -> None:
     """Cache provider metadata needed to replay Gemini tool-call turns."""
     if not _is_gemini_model(llm):
         return
-    signatures = getattr(llm, "_astra_gemini_thought_signatures", None)
-    if not isinstance(signatures, dict):
-        signatures = {}
-        setattr(llm, "_astra_gemini_thought_signatures", signatures)
+    signatures, fingerprint_signatures = _signature_maps(llm)
 
-    for choice in getattr(response, "choices", None) or []:
+    for choice in _field_value(response, "choices") or []:
         message = _field_value(choice, "message")
         for tool_call in _field_value(message, "tool_calls") or []:
             call_id = _field_value(tool_call, "id")
             signature = _thought_signature(tool_call)
             if call_id and signature:
+                # OpenHands can reuse an ID after compacting history. Refresh the
+                # insertion order as well as the value so a recently seen call is
+                # not evicted immediately from the bounded cache.
+                signatures.pop(str(call_id), None)
                 signatures[str(call_id)] = signature
+            fingerprint = _tool_call_fingerprint(tool_call)
+            if fingerprint and signature:
+                candidates = list(fingerprint_signatures.pop(fingerprint, []))
+                candidates.append(signature)
+                fingerprint_signatures[fingerprint] = candidates
+                if len(candidates) > 8:
+                    del candidates[:-8]
 
-    # Bound this per-LLM cache because tool-call IDs are unique across a run.
+    # Bound both per-LLM caches while retaining the most recently observed calls.
     if len(signatures) > 256:
         for call_id in list(signatures)[:-256]:
             del signatures[call_id]
+    if len(fingerprint_signatures) > 256:
+        for fingerprint in list(fingerprint_signatures)[:-256]:
+            del fingerprint_signatures[fingerprint]
 
 
 def _restore_gemini_signatures(llm: Any, messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Restore Gemini signatures that OpenHands omits when serializing history."""
+    """Restore or safely prune Gemini tool history before replaying it upstream.
+
+    Gemini rejects an entire request if one historical function call lacks the
+    provider-issued thought signature. OpenHands usually preserves tool-call IDs,
+    but may rewrite or reuse them while compacting history. We therefore recover
+    by ID first, then by an unambiguous function/arguments fingerprint. A call
+    still lacking a signature cannot safely be replayed, so its assistant turn
+    and matching tool result are omitted instead of allowing it to abort a run.
+    """
     if not _is_gemini_model(llm):
         return messages
-    signatures = getattr(llm, "_astra_gemini_thought_signatures", None)
-    if not isinstance(signatures, dict) or not signatures:
-        return messages
+    signatures, fingerprint_signatures = _signature_maps(llm)
 
     restored_messages: list[dict[str, Any]] = []
+    pending_pruned_tool_call_ids: list[str] = []
+    pruned_count = 0
     for message in messages:
+        if isinstance(message, dict) and message.get("role") == "tool":
+            tool_call_id = message.get("tool_call_id")
+            if tool_call_id is not None and str(tool_call_id) in pending_pruned_tool_call_ids:
+                pending_pruned_tool_call_ids.remove(str(tool_call_id))
+                continue
         if not isinstance(message, dict) or not isinstance(message.get("tool_calls"), list):
             restored_messages.append(message)
             continue
@@ -744,6 +860,8 @@ def _restore_gemini_signatures(llm: Any, messages: list[dict[str, Any]]) -> list
                 continue
             call_id = tool_call.get("id")
             signature = signatures.get(str(call_id)) if call_id else None
+            if not signature:
+                signature = _fingerprint_signature(fingerprint_signatures, tool_call)
             if signature and not _thought_signature(tool_call):
                 extra_content = tool_call.get("extra_content")
                 extra_content = dict(extra_content) if isinstance(extra_content, dict) else {}
@@ -755,15 +873,31 @@ def _restore_gemini_signatures(llm: Any, messages: list[dict[str, Any]]) -> list
                 restored_call["extra_content"] = extra_content
                 restored_calls.append(restored_call)
                 message_changed = True
+            elif not _thought_signature(tool_call):
+                if call_id:
+                    pending_pruned_tool_call_ids.append(str(call_id))
+                pruned_count += 1
+                message_changed = True
             else:
                 restored_calls.append(tool_call)
 
-        if message_changed:
+        if restored_calls:
             restored_message = dict(message)
             restored_message["tool_calls"] = restored_calls
             restored_messages.append(restored_message)
-        else:
+        elif message.get("content") not in (None, ""):
+            restored_message = dict(message)
+            restored_message.pop("tool_calls", None)
+            restored_messages.append(restored_message)
+        elif not message_changed:
             restored_messages.append(message)
+
+    if pruned_count:
+        warnings.warn(
+            f"Pruned {pruned_count} Gemini tool call(s) with unavailable thought signatures from replay history",
+            RuntimeWarning,
+            stacklevel=2,
+        )
     return restored_messages
 
 
@@ -799,14 +933,16 @@ def install_gateway_fix(base_url: str) -> None:
             )
             _capture_gateway_response(self, error=error, latency_ms=0.0, messages=messages, request_kwargs=kwargs, request_validation=request_validation)
             raise error
-        for attempt in range(1, _INVALID_BODY_MAX_ATTEMPTS + 1):
+        max_attempts = max(_INVALID_BODY_MAX_ATTEMPTS, _BAD_GATEWAY_MAX_ATTEMPTS)
+        for attempt in range(1, max_attempts + 1):
             started = time.perf_counter()
             try:
                 response = original_sync(self, messages=messages, **kwargs)
             except Exception as exc:
                 _capture_gateway_response(self, error=exc, latency_ms=(time.perf_counter() - started) * 1000, messages=messages, request_kwargs=kwargs, request_validation=request_validation)
-                if attempt < _INVALID_BODY_MAX_ATTEMPTS and _is_transient_invalid_body_error(exc):
-                    time.sleep(_INVALID_BODY_RETRY_DELAY_SECONDS)
+                delay = _transient_retry_delay(exc, attempt)
+                if delay is not None:
+                    time.sleep(delay)
                     continue
                 _record_repeat_outcome(self, fingerprint, failed=True)
                 raise
@@ -833,14 +969,16 @@ def install_gateway_fix(base_url: str) -> None:
             )
             _capture_gateway_response(self, error=error, latency_ms=0.0, messages=messages, request_kwargs=kwargs, request_validation=request_validation)
             raise error
-        for attempt in range(1, _INVALID_BODY_MAX_ATTEMPTS + 1):
+        max_attempts = max(_INVALID_BODY_MAX_ATTEMPTS, _BAD_GATEWAY_MAX_ATTEMPTS)
+        for attempt in range(1, max_attempts + 1):
             started = time.perf_counter()
             try:
                 response = await original_async(self, messages=messages, **kwargs)
             except Exception as exc:
                 _capture_gateway_response(self, error=exc, latency_ms=(time.perf_counter() - started) * 1000, messages=messages, request_kwargs=kwargs, request_validation=request_validation)
-                if attempt < _INVALID_BODY_MAX_ATTEMPTS and _is_transient_invalid_body_error(exc):
-                    await asyncio.sleep(_INVALID_BODY_RETRY_DELAY_SECONDS)
+                delay = _transient_retry_delay(exc, attempt)
+                if delay is not None:
+                    await asyncio.sleep(delay)
                     continue
                 _record_repeat_outcome(self, fingerprint, failed=True)
                 raise
@@ -912,8 +1050,11 @@ def run(
     gateway_base_url: str | None = None,
     env_file: Path | None = None,
     redact_output: bool = False,
+    max_iterations: int = 3200,
 ) -> RunResult:
     """Run one OpenHands coding session and write JSONL event records."""
+    if max_iterations < 1:
+        raise ValueError("max_iterations must be at least 1")
     output_dir.mkdir(parents=True, exist_ok=True)
     events_path = output_dir / "events.jsonl"
     gateway_responses_path = output_dir / "gateway_responses.jsonl"
@@ -960,6 +1101,7 @@ def run(
             workspace_snapshot_error = f"{exc.__class__.__name__}: {exc}"
 
         from openhands.sdk import Agent, Conversation, Event, LLM
+        from openhands.sdk.context.agent_context import AgentContext
         from openhands.sdk.context.condenser import LLMSummarizingCondenser
         from openhands.sdk.tool import Tool
         from openhands.tools.file_editor import FileEditorTool
@@ -1029,9 +1171,19 @@ def run(
             # ceiling that a normal task rarely approaches, so it is not a real bound
             # in practice; 80 forces every model's history to actually stay small on a
             # predictable cadence, independent of any one model's token limit.
-            condenser = LLMSummarizingCondenser(llm=llm, max_size=80)
-            agent = Agent(llm=llm, tools=[Tool(name=TerminalTool.name), Tool(name=FileEditorTool.name)], condenser=condenser)
-            conversation = Conversation(agent=agent, callbacks=[callback], workspace=str(workspace))
+            condenser = LLMSummarizingCondenser(llm=llm, keep_first=25, max_size=120)
+            agent = Agent(
+                llm=llm,
+                tools=[Tool(name=TerminalTool.name), Tool(name=FileEditorTool.name)],
+                condenser=condenser,
+                agent_context=AgentContext(load_project_skills=True),
+            )
+            conversation = Conversation(
+                agent=agent,
+                callbacks=[callback],
+                workspace=str(workspace),
+                max_iteration_per_run=max_iterations,
+            )
             with capture_gateway_responses(gateway_responses_path):
                 conversation.send_message(instruction)
                 conversation.run()

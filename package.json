@@ -6,6 +6,7 @@
     "package": "python3 scripts/package_task.py",
     "build:images": "python3 scripts/build_images.py",
     "generate": "python3 -m astra_harness.generate",
+    "schedule:generate": "python3 -m astra_harness.scheduler",
     "verify": "python3 -m astra_harness.verify",
     "score": "python3 -m astra_harness.score",
     "benchmark": "python3 -m astra_harness.benchmark",

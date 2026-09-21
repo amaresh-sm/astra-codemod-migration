@@ -28,6 +28,22 @@ Generated candidates and their run artifacts are stored under
 `benchmarking-candidates/<run-id>/` by default. Use `--runs-root` only when a different artifact
 root is intentional. The task ID is retained in `metadata.json`; it is not duplicated in the path.
 
+To queue multiple OpenHands runs without exceeding the global live-container limit, use the
+ordered queue in `config/candidate-generation-queue.json`:
+
+```bash
+npm run schedule:generate -- --task tasks
+```
+
+The scheduler counts live Docker generation containers for this task, so stale `metadata.json`
+files do not consume slots. It leaves already-running jobs alone, persists state in the ignored
+`benchmarking-candidates/.generation-scheduler-state.json`, and starts the next queued job only
+when the live count is below `max_concurrency` (currently 4). Queue jobs use the `.dev.env` or
+`.prod.env` file selected by each job and the same 6-hour/3-GB generation settings as the direct
+OpenHands command. Every 15 minutes it checks for 20-minute inactivity, snapshots the available
+candidate and container log, records whether lifecycle files were present, and removes only the
+stale container. Use `--once` for a single scheduling pass.
+
 The adapter selects the provider's native CLI flags. The container receives only `instruction.md`
 and `public/`; credentials are injected at runtime. OpenHands reads the private `.env` from
 `../hackerrank-openhands-gateway/.env` by default; `--openhands-env-file` overrides that location.

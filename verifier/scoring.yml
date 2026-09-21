@@ -234,6 +234,9 @@ criteria:
   # rust-implementation-depth is a static-analysis gate: it awards fractional
   # credit (0.020 full / 0.010 partial) for genuine Rust implementation depth,
   # preventing trivial stubs from earning clean-pack or package-domain credit.
+  # rust-feature-completeness and rust-wiring-attempt are additional static
+  # criteria in STATIC_MIGRATION_CRITERIA, providing finer graduation for
+  # thin-wrapper candidates before the foundation threshold is reached.
   # rust-package-clean-pack-ownership is weighted heavily: it requires a
   # publishable Rust-native package with no retained JS engine artifacts,
   # making it the primary discriminator for genuine partial migrations.
@@ -242,13 +245,43 @@ criteria:
     domain: package
     weight: 0.020
     blocked_policy: zero
+  - id: rust-feature-completeness
+    component: rust_ownership
+    domain: package
+    weight: 0.020
+    blocked_policy: zero
+  - id: rust-wiring-attempt
+    component: rust_ownership
+    domain: package
+    weight: 0.010
+    blocked_policy: zero
+  - id: rust-jscodeshift-facade
+    component: rust_ownership
+    domain: package
+    weight: 0.015
+    blocked_policy: zero
+  - id: rust-ast-traversal
+    component: rust_ownership
+    domain: package
+    weight: 0.015
+    blocked_policy: zero
+  - id: rust-collections-module
+    component: rust_ownership
+    domain: package
+    weight: 0.010
+    blocked_policy: zero
+  - id: rust-test-density
+    component: rust_ownership
+    domain: package
+    weight: 0.005
+    blocked_policy: zero
   - id: rust-package-clean-pack-ownership
     component: rust_ownership
     domain: package
-    weight: 0.150
+    weight: 0.085
     blocked_policy: zero
   - id: rust-package-guard-ownership
     component: rust_ownership
     domain: package
-    weight: 0.020
+    weight: 0.010
     blocked_policy: zero

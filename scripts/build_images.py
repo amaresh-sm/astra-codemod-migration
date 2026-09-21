@@ -11,6 +11,20 @@ from pathlib import Path
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 
 
+def gateway_package_source_digest() -> str:
+    """Return a stable digest for the vendored Gateway package source."""
+    package_root = REPOSITORY_ROOT / "vendor/hackerrank-openhands-gateway"
+    digest = hashlib.sha256()
+    for path in sorted(package_root.rglob("*")):
+        if not path.is_file() or "__pycache__" in path.parts or ".egg-info" in path.parts:
+            continue
+        digest.update(str(path.relative_to(REPOSITORY_ROOT)).encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(path.read_bytes())
+        digest.update(b"\0")
+    return digest.hexdigest()
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Build ASTRA's isolated Docker images")
     parser.add_argument(
@@ -49,21 +63,20 @@ def package_sources() -> tuple[Path, ...]:
     return tuple(path for path in sorted(package_root.rglob("*")) if path.is_file())
 
 
-def build(tag: str, dockerfile: Path, sources: tuple[Path, ...]) -> None:
+def build(tag: str, dockerfile: Path, sources: tuple[Path, ...], gateway_digest: str | None = None) -> None:
     """Build one image from the repository root so Docker COPY paths are stable."""
     digest = source_digest(sources)
+    command = [
+        "docker",
+        "build",
+        "--label",
+        f"astra.source-digest={digest}",
+    ]
+    if gateway_digest is not None:
+        command.extend(("--label", f"astra.gateway-package-digest={gateway_digest}"))
+    command.extend(("--tag", tag, "--file", str(dockerfile), "."))
     subprocess.run(
-        [
-            "docker",
-            "build",
-            "--label",
-            f"astra.source-digest={digest}",
-            "--tag",
-            tag,
-            "--file",
-            str(dockerfile),
-            ".",
-        ],
+        command,
         cwd=REPOSITORY_ROOT,
         check=True,
     )
@@ -71,6 +84,7 @@ def build(tag: str, dockerfile: Path, sources: tuple[Path, ...]) -> None:
 
 def main() -> int:
     args = parse_args()
+    gateway_digest = gateway_package_source_digest()
     build(
         args.candidate_tag,
         REPOSITORY_ROOT / "environment/candidate-generation/Dockerfile",
@@ -79,6 +93,7 @@ def main() -> int:
             REPOSITORY_ROOT / "environment/candidate-generation/entrypoint.sh",
             *package_sources(),
         ),
+        gateway_digest,
     )
     build(
         args.runtime_tag,

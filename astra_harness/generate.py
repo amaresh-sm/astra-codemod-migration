@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -90,7 +91,7 @@ def parse_args() -> argparse.Namespace:
         default="1g",
         help="Size of the OpenHands container /tmp tmpfs (for example: 1g or 3g)",
     )
-    parser.add_argument("--timeout-seconds", type=int, default=14_400)
+    parser.add_argument("--timeout-seconds", type=int, default=21_600)
     parser.add_argument("--command", default=None, help="Override the provider CLI command for a custom installation")
     return parser.parse_args()
 
@@ -117,8 +118,10 @@ def ensure_image(args: argparse.Namespace) -> None:
     if args.provider == "openhands":
         required_tools = f"{required_tools} rsync tmux"
     version_check = ""
+    expected_gateway_digest = None
     if args.provider == "openhands":
         expected_version = gateway_package_version()
+        expected_gateway_digest = gateway_package_source_digest()
         version_check = (
             " && test \"$(python3.12 -c "
             + shlex.quote(
@@ -128,6 +131,19 @@ def ensure_image(args: argparse.Namespace) -> None:
             + f")\" = {shlex.quote(expected_version)}"
         )
     if found.returncode == 0:
+        digest = subprocess.run(
+            [
+                "docker",
+                "image",
+                "inspect",
+                "--format={{index .Config.Labels \"astra.gateway-package-digest\"}}",
+                args.image,
+            ],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        source_matches = expected_gateway_digest is None or digest.stdout.strip() == expected_gateway_digest
         installed = subprocess.run(
             [
                 "docker", "run", "--rm", "--entrypoint", "sh", args.image, "-lc",
@@ -138,16 +154,17 @@ def ensure_image(args: argparse.Namespace) -> None:
             stderr=subprocess.DEVNULL,
             check=False,
         )
-        if installed.returncode == 0:
+        if installed.returncode == 0 and source_matches:
             return
     repository_root = Path(__file__).resolve().parents[1]
     dockerfile = (args.dockerfile or repository_root / "environment/candidate-generation/Dockerfile").resolve()
     if not dockerfile.is_file():
         raise SystemExit(f"generation image is missing and Dockerfile was not found: {dockerfile}")
-    subprocess.run(
-        ["docker", "build", "--tag", args.image, "--file", str(dockerfile), str(repository_root)],
-        check=True,
-    )
+    build_command = ["docker", "build", "--tag", args.image]
+    if expected_gateway_digest is not None:
+        build_command.extend(("--label", f"astra.gateway-package-digest={expected_gateway_digest}"))
+    build_command.extend(("--file", str(dockerfile), str(repository_root)))
+    subprocess.run(build_command, check=True)
 
 
 def gateway_package_version() -> str:
@@ -161,6 +178,20 @@ def gateway_package_version() -> str:
     if not isinstance(version, str) or not version:
         raise GenerationPreflightError(f"Gateway package version is missing: {package_file}")
     return version
+
+
+def gateway_package_source_digest() -> str:
+    """Return a stable digest for the vendored Gateway package source."""
+    package_root = REPOSITORY_ROOT / "vendor" / "hackerrank-openhands-gateway"
+    digest = hashlib.sha256()
+    for path in sorted(package_root.rglob("*")):
+        if not path.is_file() or "__pycache__" in path.parts or ".egg-info" in path.parts:
+            continue
+        digest.update(str(path.relative_to(REPOSITORY_ROOT)).encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(path.read_bytes())
+        digest.update(b"\0")
+    return digest.hexdigest()
 
 
 def openhands_runtime_environment() -> dict[str, str]:

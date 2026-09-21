@@ -55,6 +55,13 @@ CRITERIA = (
     "rust-worker-failure-ownership",
     "rust-worker-determinism-ownership",
     "rust-implementation-depth",
+    "rust-feature-completeness",
+    "rust-wiring-attempt",
+    "rust-jscodeshift-facade",
+    "rust-ast-traversal",
+    "rust-collections-module",
+    "rust-test-density",
+    "rust-module-breadth",
     "rust-package-clean-pack-ownership",
     "rust-package-guard-ownership",
     "rust-legacy-engine-boundary",
@@ -103,6 +110,13 @@ SCENARIO_IDS = {
     "rust-worker-failure-ownership": "jscodeshift.rust-worker-failure-ownership",
     "rust-worker-determinism-ownership": "jscodeshift.rust-worker-determinism-ownership",
     "rust-implementation-depth": "jscodeshift.rust-implementation-depth",
+    "rust-feature-completeness": "jscodeshift.rust-feature-completeness",
+    "rust-wiring-attempt": "jscodeshift.rust-wiring-attempt",
+    "rust-jscodeshift-facade": "jscodeshift.rust-jscodeshift-facade",
+    "rust-ast-traversal": "jscodeshift.rust-ast-traversal",
+    "rust-collections-module": "jscodeshift.rust-collections-module",
+    "rust-test-density": "jscodeshift.rust-test-density",
+    "rust-module-breadth": "jscodeshift.rust-module-breadth",
     "rust-package-clean-pack-ownership": "jscodeshift.rust-package-clean-pack-ownership",
     "rust-package-guard-ownership": "jscodeshift.rust-package-guard-ownership",
     "rust-legacy-engine-boundary": "jscodeshift.rust-legacy-engine-boundary",
@@ -2852,6 +2866,35 @@ def check_rust_core_collections_ownership(candidate: Path) -> tuple[bool, str]:
     )
 
 
+def _find_rust_manifests(candidate: Path) -> tuple[list[Path], Path]:
+    """Find Cargo.toml files in the candidate workspace.
+
+    Searches source_root() first; falls back to the entire candidate directory
+    when no manifests are found under source_root() — handling candidates that
+    place their Rust implementation as a sibling of codebase/ rather than
+    inside it.
+
+    Returns (manifests, search_root).
+    """
+    ignored_parts = {"node_modules", "target", ".git", ".cargo-home"}
+
+    def _search(root: Path, max_depth: int) -> list[Path]:
+        return [
+            p for p in root.rglob("Cargo.toml")
+            if not any(part in ignored_parts for part in p.relative_to(root).parts)
+            and len(p.relative_to(root).parts) <= max_depth
+        ]
+
+    root = source_root(candidate)
+    manifests = _search(root, 3)
+    if manifests:
+        return manifests, root
+
+    # Fallback: search the entire candidate directory for candidates that placed
+    # Rust outside the codebase/ subdirectory (e.g. candidate/src-rust/).
+    return _search(candidate, 4), candidate
+
+
 def check_rust_implementation_depth(candidate: Path) -> tuple[bool, str, float]:
     """Static analysis: award fractional credit based on Rust implementation depth.
 
@@ -2860,15 +2903,11 @@ def check_rust_implementation_depth(candidate: Path) -> tuple[bool, str, float]:
       0.5 — partial Rust ≥100 lines with at least one migration-relevant signal
       0.0 — trivial stub or no Rust at all
     """
-    root = source_root(candidate)
-    ignored_parts = {"node_modules", "target", ".git", ".cargo-home"}
-    manifests = [
-        p for p in root.rglob("Cargo.toml")
-        if not any(part in ignored_parts for part in p.relative_to(root).parts)
-        and len(p.relative_to(root).parts) <= 3
-    ]
+    manifests, root = _find_rust_manifests(candidate)
     if not manifests:
         return False, "no Cargo.toml found", 0.0
+
+    ignored_parts = {"node_modules", "target", ".git", ".cargo-home"}
 
     sub, detail = substantive_rust_migration_evidence(root, manifests)
     if sub:
@@ -2904,6 +2943,279 @@ def check_rust_implementation_depth(candidate: Path) -> tuple[bool, str, float]:
         return True, f"partial Rust: {total_lines} lines, signals={', '.join(found)}", 0.5
 
     return False, f"Rust present ({total_lines} lines) but lacks migration-relevant signals", 0.0
+
+
+def check_rust_feature_completeness(candidate: Path) -> tuple[bool, str, float]:
+    """Static analysis: measure how many jscodeshift-relevant Rust feature layers are present.
+
+    Searches the entire candidate (not only source_root) so that misplaced
+    Rust implementations are credited alongside correctly-placed ones.
+
+    Returns a score in {0.0, 0.33, 0.67, 1.0}:
+      1.0 — all 3 functional signal groups present
+      0.67 — 2 signal groups
+      0.33 — 1 signal group
+      0.0  — 0 signal groups or no Rust found
+    """
+    manifests, root = _find_rust_manifests(candidate)
+    if not manifests:
+        return False, "no Rust code found", 0.0
+
+    ignored_parts = {"node_modules", "target", ".git", ".cargo-home"}
+    sources: list[str] = []
+    for manifest in manifests:
+        for path in manifest.parent.rglob("*.rs"):
+            try:
+                relative = path.relative_to(root)
+            except ValueError:
+                relative = path.relative_to(candidate)
+            if ignored_parts.intersection(relative.parts):
+                continue
+            try:
+                lines = [
+                    line for line in path.read_text(encoding="utf-8").splitlines()
+                    if line.strip() and not line.lstrip().startswith("//")
+                ]
+                sources.append("\n".join(lines))
+            except OSError:
+                continue
+
+    if not sources:
+        return False, "no Rust source files found", 0.0
+
+    combined = "\n".join(sources)
+    semantic_signals = {
+        "argument handling": r"(?:clap::|ArgMatches|std::env::args(?:_os)?|\.arg\(|\bargv\b)",
+        "file handling": r"(?:std::fs::|walkdir|read_dir|glob|ignore)",
+        "execution or writing": r"(?:std::process::|Command::new|write_all|rename\(|create_dir|stdin\()",
+    }
+    found = [label for label, pattern in semantic_signals.items() if re.search(pattern, combined)]
+    n = len(found)
+    if n == 0:
+        return False, "Rust code lacks migration-relevant signals", 0.0
+    fraction = round(n / 3, 4)
+    return True, f"{n}/3 feature layers: {', '.join(found)}", fraction
+
+
+def check_rust_wiring_attempt(candidate: Path) -> tuple[bool, str, float]:
+    """Static analysis: detect any attempt to wire the JS launcher to a Rust binary.
+
+    Checks:
+    - package.json build/install scripts invoke cargo
+    - The JS entry point requires a .node native module or Rust binary path
+    - A Makefile or build.sh at the candidate root references cargo
+
+    Returns 1.0 if any signal is found, 0.0 otherwise.
+    """
+    root = source_root(candidate)
+    signals: list[str] = []
+
+    pkg_json = root / "package.json"
+    if pkg_json.exists():
+        try:
+            pkg = json.loads(pkg_json.read_text(encoding="utf-8"))
+            scripts = pkg.get("scripts", {})
+            script_text = " ".join(str(v) for v in scripts.values())
+            if re.search(r"\bcargo\s+(?:build|install|run)\b", script_text):
+                signals.append("cargo in package.json scripts")
+        except Exception:
+            pass
+
+    for js_entry in [root / "bin" / "jscodeshift.js", root / "src" / "index.js", root / "index.js"]:
+        if js_entry.exists():
+            try:
+                content = js_entry.read_text(encoding="utf-8")
+                if re.search(r'["\'](?:[./]*(?:build|target|release|debug|dist)/[^"\']*|[^"\']+\.node)["\']', content):
+                    signals.append(f".node or Rust binary reference in {js_entry.name}")
+                if re.search(r'\bcargo\b', content):
+                    signals.append(f"cargo reference in {js_entry.name}")
+            except Exception:
+                pass
+
+    for build_file in [root / "Makefile", root / "build.sh", candidate / "Makefile", candidate / "build.sh"]:
+        if build_file.exists():
+            try:
+                content = build_file.read_text(encoding="utf-8")
+                if re.search(r'\bcargo\b', content):
+                    signals.append(f"cargo in {build_file.name}")
+            except Exception:
+                pass
+
+    if signals:
+        return True, f"wiring: {'; '.join(signals)}", 1.0
+    return False, "no JS-to-Rust wiring detected", 0.0
+
+
+def check_rust_jscodeshift_facade(candidate: Path) -> tuple[bool, str, float]:
+    """Check for a jscodeshift-domain API facade implemented in Rust.
+
+    Detects impl blocks containing methods that mirror jscodeshift's core API:
+    find/filter/forEach/map/toSource/transform/traverse/match_node. A candidate
+    with these signals has started reimplementing the collection/traversal layer
+    in Rust, not just a subprocess launcher.
+    """
+    manifests, root = _find_rust_manifests(candidate)
+    if not manifests:
+        return False, "no Rust code found", 0.0
+
+    ignored = {"node_modules", "target", ".git", ".cargo-home"}
+    _API_METHODS = re.compile(
+        r"\bfn\s+(find|filter|for_each|map|to_source|transform|traverse|match_node|"
+        r"get_node|find_nodes|collect|apply_transform)\s*[(<]",
+        re.IGNORECASE,
+    )
+    # Must appear inside an impl block (not free-standing helper)
+    _IMPL_BLOCK = re.compile(r"\bimpl\b")
+
+    matches: list[str] = []
+    for rs in root.rglob("*.rs"):
+        if any(p in ignored for p in rs.relative_to(root).parts):
+            continue
+        if "/tests/" in rs.as_posix() or rs.stem == "tests":
+            continue
+        try:
+            src = rs.read_text(errors="replace")
+        except Exception:
+            continue
+        if not _IMPL_BLOCK.search(src):
+            continue
+        for m in _API_METHODS.finditer(src):
+            matches.append(m.group(1))
+        if len(matches) >= 2:
+            break
+
+    if len(matches) >= 2:
+        return True, f"jscodeshift facade methods in Rust: {', '.join(sorted(set(matches)))}", 1.0
+    if matches:
+        return False, f"only 1 facade method found ({matches[0]}); need ≥2", 0.0
+    return False, "no jscodeshift API methods found in Rust impl blocks", 0.0
+
+
+def check_rust_ast_traversal(candidate: Path) -> tuple[bool, str, float]:
+    """Check for a recursive AST traversal implemented in Rust.
+
+    A real partial migration needs to walk the AST. Detects recursive functions
+    that handle both Object and Array JSON variants — the characteristic pattern
+    of a hand-written AST visitor over serde_json::Value or similar.
+    """
+    manifests, root = _find_rust_manifests(candidate)
+    if not manifests:
+        return False, "no Rust code found", 0.0
+
+    ignored = {"node_modules", "target", ".git", ".cargo-home"}
+    # Recursive fn: calls itself (Box<_> return or explicit recursion), walks Value branches
+    _RECURSION = re.compile(r"\bfn\s+(\w+)\b[^{]*\{[^}]*\1\s*\(", re.DOTALL)
+    _ARRAY_BRANCH = re.compile(r"Value\s*::\s*Array|\.as_array\(\)|for\s+\w+\s+in\s+\w+\s*\.\s*(iter|values|children)")
+    _OBJECT_BRANCH = re.compile(r"Value\s*::\s*Object|\.as_object\(\)|\.get\s*\(\s*[\"']type[\"']\s*\)")
+
+    for rs in root.rglob("*.rs"):
+        if any(p in ignored for p in rs.relative_to(root).parts):
+            continue
+        try:
+            src = rs.read_text(errors="replace")
+        except Exception:
+            continue
+        if _RECURSION.search(src) and _ARRAY_BRANCH.search(src) and _OBJECT_BRANCH.search(src):
+            return True, f"recursive AST traversal found in {rs.name}", 1.0
+
+    return False, "no recursive AST traversal pattern detected", 0.0
+
+
+def check_rust_collections_module(candidate: Path) -> tuple[bool, str, float]:
+    """Check for a dedicated collections module/directory in the Rust source.
+
+    jscodeshift's core abstraction is Collections. A Rust source tree with a
+    collections/ directory or collections.rs module signals a structural attempt
+    to reimplement this layer, not just a CLI wrapper.
+    """
+    manifests, root = _find_rust_manifests(candidate)
+    if not manifests:
+        return False, "no Rust code found", 0.0
+
+    ignored = {"node_modules", "target", ".git", ".cargo-home"}
+
+    # Directory named collections/ with at least one .rs file
+    for rs_dir in root.rglob("collections"):
+        if not rs_dir.is_dir():
+            continue
+        if any(p in ignored for p in rs_dir.relative_to(root).parts):
+            continue
+        rs_files = list(rs_dir.glob("*.rs"))
+        if rs_files:
+            return True, f"collections/ module with {len(rs_files)} file(s): {[f.name for f in rs_files[:4]]}", 1.0
+
+    # Or a top-level collections.rs
+    for manifest in manifests:
+        src_dir = manifest.parent / "src"
+        if (src_dir / "collections.rs").is_file():
+            return True, "collections.rs module found", 1.0
+
+    return False, "no collections module in Rust source", 0.0
+
+
+def check_rust_test_density(candidate: Path) -> tuple[bool, str, float]:
+    """Measure test coverage density in the Rust implementation (fractional).
+
+    Counts #[test] annotations across all non-test-directory .rs files plus
+    dedicated test modules. More tests indicate higher implementation confidence.
+    Tiers: 0 → 0.0, 1-5 → 0.33, 6-15 → 0.67, 16+ → 1.0.
+    """
+    manifests, root = _find_rust_manifests(candidate)
+    if not manifests:
+        return False, "no Rust code found", 0.0
+
+    ignored = {"node_modules", "target", ".git", ".cargo-home"}
+    _TEST_ATTR = re.compile(r"#\s*\[\s*test\s*\]")
+
+    count = 0
+    for rs in root.rglob("*.rs"):
+        if any(p in ignored for p in rs.relative_to(root).parts):
+            continue
+        try:
+            count += len(_TEST_ATTR.findall(rs.read_text(errors="replace")))
+        except Exception:
+            pass
+
+    if count == 0:
+        return False, "no #[test] annotations found", 0.0
+    if count < 6:
+        return False, f"{count} test(s) found (need 6+ for partial credit)", 0.33
+    if count < 16:
+        return True, f"{count} tests found", 0.67
+    return True, f"{count} tests found", 1.0
+
+
+def check_rust_module_breadth(candidate: Path) -> tuple[bool, str, float]:
+    """Measure how many distinct Rust modules the implementation defines (fractional).
+
+    A thin subprocess launcher needs only 2-3 files (main.rs + args + worker).
+    A genuine partial migration grows a richer module tree. Counts unique .rs
+    files excluding test files and the standard boilerplate set.
+    Tiers: ≤3 files → 0.0, 4-6 → 0.33, 7-10 → 0.67, 11+ → 1.0.
+    """
+    manifests, root = _find_rust_manifests(candidate)
+    if not manifests:
+        return False, "no Rust code found", 0.0
+
+    ignored = {"node_modules", "target", ".git", ".cargo-home"}
+    _BOILERPLATE = {"main", "lib", "mod", "error", "errors", "utils"}
+
+    rs_files = [
+        rs for rs in root.rglob("*.rs")
+        if not any(p in ignored for p in rs.relative_to(root).parts)
+        and rs.stem not in _BOILERPLATE
+        and "test" not in rs.stem.lower()
+    ]
+    n = len(rs_files)
+    names = sorted(f.stem for f in rs_files[:8])
+
+    if n <= 3:
+        return False, f"{n} non-boilerplate .rs file(s): {names}", 0.0
+    if n <= 6:
+        return False, f"{n} .rs files: {names}", 0.33
+    if n <= 10:
+        return True, f"{n} .rs files: {names}", 0.67
+    return True, f"{n} .rs files: {names}", 1.0
 
 
 def check(candidate: Path) -> dict[str, dict[str, object]]:
@@ -2948,6 +3260,13 @@ def check(candidate: Path) -> dict[str, dict[str, object]]:
         "rust-worker-failure-ownership": check_rust_worker_failure_ownership,
         "rust-worker-determinism-ownership": check_rust_worker_determinism_ownership,
         "rust-implementation-depth": check_rust_implementation_depth,
+        "rust-feature-completeness": check_rust_feature_completeness,
+        "rust-wiring-attempt": check_rust_wiring_attempt,
+        "rust-jscodeshift-facade": check_rust_jscodeshift_facade,
+        "rust-ast-traversal": check_rust_ast_traversal,
+        "rust-collections-module": check_rust_collections_module,
+        "rust-test-density": check_rust_test_density,
+        "rust-module-breadth": check_rust_module_breadth,
         "rust-package-clean-pack-ownership": check_rust_package_clean_pack_ownership,
         "rust-package-guard-ownership": check_rust_package_guard_ownership,
         "rust-legacy-engine-boundary": check_rust_legacy_engine_boundary,

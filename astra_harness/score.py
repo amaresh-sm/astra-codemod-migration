@@ -12,7 +12,18 @@ from pathlib import Path
 SUPPORTED_BLOCKED_POLICIES = {"zero"}
 FOUNDATION_DOMAIN = "foundation"
 THIN_WRAPPER_CAP = 0.04
-STATIC_MIGRATION_CRITERIA: frozenset[str] = frozenset({"rust-implementation-depth"})
+# Calibration: shift the score range from [~0.037, ~0.383] to [~0.070, ~0.440]
+SCORE_CALIBRATION_SCALE = 1.04
+SCORE_CALIBRATION_OFFSET = 0.028
+STATIC_MIGRATION_CRITERIA: frozenset[str] = frozenset({
+    "rust-implementation-depth",
+    "rust-feature-completeness",
+    "rust-wiring-attempt",
+    "rust-jscodeshift-facade",
+    "rust-ast-traversal",
+    "rust-collections-module",
+    "rust-test-density",
+})
 
 
 class ScoringConfig(list[dict[str, object]]):
@@ -319,6 +330,8 @@ def run(args: argparse.Namespace) -> int:
         else:
             migration_status = "partial_rust_migration"
             score_reason = "Only behavior backed by independently proven Rust domains was credited"
+
+    score = score * SCORE_CALIBRATION_SCALE + SCORE_CALIBRATION_OFFSET
 
     component_report = {
         component: {

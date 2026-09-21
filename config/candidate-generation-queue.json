@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "max_concurrency": 4,
+  "jobs": [
+    {
+      "id": "gemini-3-7-flash-high-01",
+      "model": "gemini-3.7-flash",
+      "reasoning": "high",
+      "environment": "prod"
+    },
+    {
+      "id": "glm-5-2-medium-01",
+      "model": "glm-5.2",
+      "reasoning": "medium",
+      "environment": "prod"
+    },
+    {
+      "id": "gemini-3-7-flash-medium-01",
+      "model": "gemini-3.7-flash",
+      "reasoning": "medium",
+      "environment": "prod"
+    },
+    {
+      "id": "qwen-3-8-high-01",
+      "model": "qwen-3.8",
+      "reasoning": "high",
+      "environment": "prod"
+    },
+    {
+      "id": "glm-5-2-medium-02",
+      "model": "glm-5.2",
+      "reasoning": "medium",
+      "environment": "prod"
+    },
+    {
+      "id": "glm-5-2-medium-03",
+      "model": "glm-5.2",
+      "reasoning": "medium",
+      "environment": "prod"
+    },
+    {
+      "id": "qwen-3-8-high-02",
+      "model": "qwen-3.8",
+      "reasoning": "high",
+      "environment": "prod"
+    },
+    {
+      "id": "qwen-3-8-high-03",
+      "model": "qwen-3.8",
+      "reasoning": "high",
+      "environment": "prod"
+    }
+  ]
+}
