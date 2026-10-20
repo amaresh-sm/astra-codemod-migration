@@ -1,22 +1,106 @@
 {
   "schema_version": 1,
-  "tokens": {
-    "input": null,
-    "output": 2028,
-    "cached_input": null,
-    "total": null,
-    "source": "agent-log"
+  "harness": {
+    "name": "hackerrank-openhands-gateway",
+    "version": "0.1.4"
   },
-  "tool_calls": {
-    "total": null,
-    "by_type": {
-      "read": null,
-      "shell": null,
-      "edit": null,
-      "write": null,
-      "other": null
+  "run": {
+    "status": "timed_out",
+    "exit_code": 124,
+    "error": null
+  },
+  "model": {
+    "name": "qwen-3.8",
+    "reasoning": "high",
+    "provider": "hackerrank-gateway"
+  },
+  "timing": {
+    "started_at": "2026-09-19T00:58:45.500645+00:00",
+    "completed_at": "2026-09-19T06:58:50.831798+00:00",
+    "duration_ms": 21605331,
+    "llm_requests": {
+      "count": 476,
+      "with_latency": 476,
+      "successful": 475,
+      "failed": 1,
+      "total_latency_ms": 21141031.063,
+      "average_latency_ms": 44413.931,
+      "min_latency_ms": 1185.172,
+      "max_latency_ms": 548741.348
+    }
+  },
+  "usage": {
+    "source": "gateway",
+    "requests": 475,
+    "input_tokens": 18883594,
+    "cached_input_tokens": 15589760,
+    "cache_read_tokens": 15589760,
+    "cache_write_tokens": 0,
+    "output_tokens": 2558267,
+    "reasoning_tokens": 2446917,
+    "total_tokens": 21441861
+  },
+  "cost": {
+    "gateway": {
+      "amount_usd": 25.83471,
+      "currency": "USD",
+      "status": "reported",
+      "source": "gateway",
+      "responses_with_cost": 475
     },
-    "source": "unavailable"
+    "openhands": {
+      "amount_usd": null,
+      "currency": "USD",
+      "status": "unavailable",
+      "source": "openhands"
+    },
+    "custom_estimation": {
+      "amount_usd": 53.11679,
+      "currency": "USD",
+      "status": "estimated",
+      "source": "custom_pricing_table",
+      "pricing_version": 1,
+      "model": "qwen-3.8",
+      "normalized_model": "qwen-3.8",
+      "requests": 1,
+      "requests_with_usage": 1,
+      "requests_missing_usage": 0,
+      "usage_source": "openhands_usage",
+      "pricing": {
+        "input_usd_per_million": 2.0,
+        "output_usd_per_million": 6.0,
+        "cache_read_usd_per_million": null,
+        "cache_write_usd_per_million": null,
+        "note": "Alibaba Qwen 3.8 pricing; cache read not publicly confirmed"
+      }
+    },
+    "recalculated_from_tokens": {
+      "source": "scripts/recalculate_benchmark_costs.py",
+      "cache_tokens_included": true
+    }
+  },
+  "workspace": {
+    "status": "unavailable",
+    "reason": "workspace metrics event not found"
+  },
+  "tools": {
+    "total": 466,
+    "successful": 444,
+    "failed": 22,
+    "cancelled": 0,
+    "rejected": 0,
+    "unknown": 0,
+    "by_tool": {
+      "file_editor": 44,
+      "terminal": 415,
+      "think": 7
+    }
+  },
+  "trace": {
+    "events_path": "events.jsonl",
+    "event_count": 972,
+    "invalid_event_count": 0,
+    "integrity_sha256": "86c06537070f5ac803d785c11634ddc0ff785387cde0ecfcdc8eda38586e3fd2"
   },
   "solution_size": {
     "workspace_source_files": 2425,
@@ -27,9 +111,6 @@
     "agent_changed_source_files": 2424,
     "agent_changed_source_lines": 1501835
   },
-  "duration_seconds": 21605.234,
-  "started_at": "2026-09-19T00:58:45.500645+00:00",
-  "finished_at": "2026-09-19T06:58:50.831798+00:00",
   "benchmarking": {
     "score": 0.0904,
     "source": "scores.json",

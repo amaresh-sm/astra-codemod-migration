@@ -10,6 +10,7 @@ carried in the estimate metadata instead of affecting the authoritative costs.
 from __future__ import annotations
 
 import json
+import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable, Mapping
@@ -106,6 +107,74 @@ def _load_pricing_table() -> dict[str, PriceSpec]:
 PRICING_TABLE = _load_pricing_table()
 
 MASTER_MODEL_NAMES = tuple(PRICING_TABLE)
+
+
+# Optional overlay compiled from pricing_actual.json (Gateway catalog dump).
+# We keep the master list in pricing.json as the single source of model keys
+# (tests assert this) and apply actual provider rates at estimation time.
+
+def _load_actual_overlay() -> dict[str, PriceSpec]:
+    """Build a per-alias PriceSpec table from pricing_actual.json, if present.
+
+    The actual file stores USD per-1k token rates; we convert to per-million.
+    If both central and preview exist, we conservatively take the minimum
+    non-null price for each field across all entries. Long-context tiers are
+    not represented in the actual dump; preserve any long-context thresholds
+    and rates from the master PRICING_TABLE so tests and behavior stay stable.
+    """
+    path = Path(__file__).with_name("pricing_actual.json")
+    if not path.exists():
+        return {}
+    try:
+        doc = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    models = doc.get("models")
+    if not isinstance(models, Mapping):
+        return {}
+
+    overlay: dict[str, PriceSpec] = {}
+    for alias, regions in models.items():
+        if not isinstance(alias, str) or not isinstance(regions, Mapping):
+            continue
+        entries: list[Mapping[str, Any]] = []
+        for key in ("central", "preview"):
+            seq = regions.get(key)
+            if isinstance(seq, list):
+                entries.extend([e for e in seq if isinstance(e, Mapping)])
+        if not entries:
+            continue
+
+        def pick_min(field: str) -> float | None:
+            values: list[float] = []
+            for e in entries:
+                pricing = e.get("pricing") if isinstance(e.get("pricing"), Mapping) else {}
+                v = pricing.get(field)
+                if isinstance(v, (int, float)) and not isinstance(v, bool) and v >= 0:
+                    values.append(float(v))
+            return (min(values) * 1000.0) if values else None
+
+        input_rate = pick_min("input_cost_per_1k")
+        output_rate = pick_min("output_cost_per_1k")
+        cache_read_rate = pick_min("cached_input_cost_per_1k")
+        cache_write_rate = pick_min("cache_write_cost_per_1k")
+
+        master = PRICING_TABLE.get(alias)
+        overlay[alias] = PriceSpec(
+            input_rate,
+            output_rate,
+            cache_read_rate,
+            cache_write_rate,
+            note="derived_from_pricing_actual.json",
+            long_context_threshold_tokens=master.long_context_threshold_tokens if master else None,
+            long_input_usd_per_million=master.long_input_usd_per_million if master else None,
+            long_output_usd_per_million=master.long_output_usd_per_million if master else None,
+            long_cache_read_usd_per_million=master.long_cache_read_usd_per_million if master else None,
+        )
+    return overlay
+
+
+_ACTUAL_OVERLAY_TABLE = _load_actual_overlay()
 
 
 def normalize_model_name(model: Any) -> str:
@@ -207,7 +276,10 @@ def estimate_custom_cost(
     """
     original_model = str(model or "")
     normalized_model = normalize_model_name(model)
-    spec = PRICING_TABLE.get(normalized_model)
+    master_spec = PRICING_TABLE.get(normalized_model)
+    overlay_enabled = os.environ.get("HACKERRANK_OPENHANDS_USE_ACTUAL_PRICING") == "1"
+    overlay_spec = _ACTUAL_OVERLAY_TABLE.get(normalized_model) if overlay_enabled else None
+    spec = overlay_spec or master_spec
     gateway_records = list(gateway_usages)
     result: dict[str, Any] = {
         "amount_usd": None,
@@ -224,9 +296,9 @@ def estimate_custom_cost(
     if spec is None:
         result["reason"] = "model_not_in_pricing_master_list"
         return result
-    if not spec.configured:
+    if not ((spec and spec.configured) or (master_spec and master_spec.configured)):
         result["reason"] = "pricing_not_configured_for_model"
-        result["pricing_note"] = spec.note
+        result["pricing_note"] = (spec.note if spec else (master_spec.note if master_spec else None))
         return result
 
     parsed_usages = [normalize_usage(usage) for usage in gateway_records]
@@ -249,9 +321,24 @@ def estimate_custom_cost(
         result["requests_missing_usage"] = len(gateway_records)
         source = "openhands_usage"
 
+    def merged_rates_for_input(input_tokens: int | float) -> tuple[float, float, float | None, float | None]:
+        # Merge overlay and master per-field, preserving long-context behavior
+        base = master_spec or spec
+        assert base is not None
+        b_in, b_out, b_cr, b_cw = base.rates_for_input(input_tokens)
+        if overlay_spec is None:
+            return b_in, b_out, b_cr, b_cw
+        o_in, o_out, o_cr, o_cw = overlay_spec.rates_for_input(input_tokens)
+        return (
+            o_in or b_in,
+            o_out or b_out,
+            o_cr if o_cr is not None else b_cr,
+            o_cw if o_cw is not None else b_cw,
+        )
+
     total = 0.0
     for usage in usages:
-        input_rate, output_rate, cache_read_rate, cache_write_rate = spec.rates_for_input(usage["input_tokens"])
+        input_rate, output_rate, cache_read_rate, cache_write_rate = merged_rates_for_input(usage["input_tokens"])
         uncached = usage["input_tokens"] - usage["cache_read_tokens"] - usage["cache_write_tokens"]
         total += (
             uncached * input_rate
@@ -265,18 +352,22 @@ def estimate_custom_cost(
     result["usage_source"] = source
     if missing_gateway:
         result["reason"] = "some_gateway_responses_missing_token_usage"
+    # Reflect the merged effective rates used for estimation.
+    sample_input = _first_number(*(u.get("input_tokens") for u in usages)) or 0
+    eff_in, eff_out, eff_cr, eff_cw = merged_rates_for_input(sample_input)
     result["pricing"] = {
-        "input_usd_per_million": spec.input_usd_per_million,
-        "output_usd_per_million": spec.output_usd_per_million,
-        "cache_read_usd_per_million": spec.cache_read_usd_per_million,
-        "cache_write_usd_per_million": spec.cache_write_usd_per_million,
-        "note": spec.note,
+        "input_usd_per_million": eff_in,
+        "output_usd_per_million": eff_out,
+        "cache_read_usd_per_million": eff_cr,
+        "cache_write_usd_per_million": eff_cw,
+        "note": (overlay_spec.note if overlay_spec and overlay_spec.note else (master_spec.note if master_spec else None)),
     }
-    if spec.long_context_threshold_tokens is not None:
-        result["pricing"]["long_context_threshold_tokens"] = spec.long_context_threshold_tokens
+    long_source = master_spec or spec
+    if long_source and long_source.long_context_threshold_tokens is not None:
+        result["pricing"]["long_context_threshold_tokens"] = long_source.long_context_threshold_tokens
         result["pricing"]["long_context"] = {
-            "input_usd_per_million": spec.long_input_usd_per_million,
-            "output_usd_per_million": spec.long_output_usd_per_million,
-            "cache_read_usd_per_million": spec.long_cache_read_usd_per_million,
+            "input_usd_per_million": long_source.long_input_usd_per_million,
+            "output_usd_per_million": long_source.long_output_usd_per_million,
+            "cache_read_usd_per_million": long_source.long_cache_read_usd_per_million,
         }
     return result

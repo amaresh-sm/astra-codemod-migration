@@ -70,8 +70,12 @@
         "output_usd_per_million": 1.98,
         "cache_read_usd_per_million": 0.022,
         "cache_write_usd_per_million": null,
-        "note": "DeepSeek V4 Pro off-peak pricing; peak rates are 2x"
+        "note": "DeepSeek V4 Pro off-peak pricing; peak may be higher"
       }
+    },
+    "recalculated_from_tokens": {
+      "source": "scripts/recalculate_benchmark_costs.py",
+      "cache_tokens_included": true
     }
   },
   "workspace": {

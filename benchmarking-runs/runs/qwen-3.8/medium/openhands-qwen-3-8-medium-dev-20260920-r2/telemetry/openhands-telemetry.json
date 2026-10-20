@@ -1,0 +1,124 @@
+{
+  "schema_version": 1,
+  "harness": {
+    "name": "hackerrank-openhands-gateway",
+    "version": "0.1.1"
+  },
+  "run": {
+    "status": "completed",
+    "exit_code": 0,
+    "error": null
+  },
+  "model": {
+    "name": "openai/qwen-3.8",
+    "reasoning": "medium",
+    "provider": "hackerrank-gateway"
+  },
+  "timing": {
+    "started_at": "2026-09-20T14:18:42.334Z",
+    "completed_at": "2026-09-20T15:43:34.191Z",
+    "duration_ms": 5090244,
+    "llm_requests": {
+      "count": 149,
+      "with_latency": 149,
+      "successful": 149,
+      "failed": 0,
+      "total_latency_ms": 5090287,
+      "average_latency_ms": 34163,
+      "min_latency_ms": 3019,
+      "max_latency_ms": 407551
+    }
+  },
+  "usage": {
+    "source": "gateway",
+    "requests": 149,
+    "input_tokens": 9814562,
+    "cached_input_tokens": 8892341,
+    "cache_read_tokens": 8892341,
+    "cache_write_tokens": 0,
+    "output_tokens": 391847,
+    "reasoning_tokens": 304218,
+    "total_tokens": 10206409
+  },
+  "cost": {
+    "gateway": {
+      "amount_usd": null,
+      "currency": "USD",
+      "status": "unavailable",
+      "source": "gateway",
+      "responses_with_cost": 0
+    },
+    "openhands": {
+      "amount_usd": null,
+      "currency": "USD",
+      "status": "unavailable",
+      "source": "openhands"
+    },
+    "custom_estimation": {
+      "amount_usd": 21.980206,
+      "currency": "USD",
+      "status": "estimated",
+      "source": "custom_pricing_table",
+      "pricing_version": 1,
+      "model": "openai/qwen-3.8",
+      "normalized_model": "qwen-3.8",
+      "requests": 1,
+      "requests_with_usage": 1,
+      "requests_missing_usage": 0,
+      "usage_source": "openhands_usage",
+      "pricing": {
+        "input_usd_per_million": 2.0,
+        "output_usd_per_million": 6.0,
+        "cache_read_usd_per_million": null,
+        "cache_write_usd_per_million": null,
+        "note": "Alibaba Qwen 3.8 pricing; cache read not publicly confirmed"
+      }
+    },
+    "recalculated_from_tokens": {
+      "source": "scripts/recalculate_benchmark_costs.py",
+      "cache_tokens_included": true
+    }
+  },
+  "workspace": {
+    "type": "workspace_metrics",
+    "status": "available",
+    "files": {
+      "added": 1072,
+      "modified": 11,
+      "deleted": 0,
+      "renamed": 0,
+      "total_changed": 1083
+    },
+    "lines": {
+      "added": 261782,
+      "deleted": 1563,
+      "changed": 263345
+    },
+    "renames": []
+  },
+  "tools": {
+    "total": 161,
+    "successful": 154,
+    "failed": 7,
+    "cancelled": 0,
+    "rejected": 0,
+    "unknown": 0,
+    "by_tool": {
+      "terminal": 112,
+      "file_editor": 47,
+      "think": 1,
+      "finish": 1
+    }
+  },
+  "trace": {
+    "events_path": "events.jsonl",
+    "event_count": 323,
+    "invalid_event_count": 0,
+    "integrity_sha256": "d5a7c2e9f4b1083g7b3c5d9e2f4a6b8c1d3e5f7a9b2c4d6e8f1a3b5c7d9e2f4"
+  },
+  "benchmarking": {
+    "score": 0.0668,
+    "source": "scores.json",
+    "run_name": "openhands-qwen-3-8-medium-dev-20260920-r2"
+  }
+}

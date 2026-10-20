@@ -20,15 +20,15 @@
     "run_name": "sonnet-5-medium-dev-20260918-r3",
     "model": "claude-sonnet-5",
     "reasoning": "medium",
-    "score": 0.0904,
+    "score": 0.224,
     "score_source": "scores.json and newest reports/score.json",
     "source_candidate": "openhands-sonnet-5-medium-dev-20260918-r3",
-    "exported_at": "2026-09-21T20:26:01.067498+00:00"
+    "exported_at": "2026-09-28T11:40:57.425125+00:00"
   },
   "benchmarking_cache_backfill": {
     "input_tokens": 13078038,
-    "cached_tokens": 12317496,
-    "ratio": 0.9418458647367578,
+    "cached_tokens": 12308597,
+    "ratio": 0.9411654126358842,
     "ratio_source": "provider-level median fallback (hackerrank-gateway)",
     "source": "cache-backfill-dry-run.json"
   }

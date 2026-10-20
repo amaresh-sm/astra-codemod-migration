@@ -62,17 +62,21 @@
       "pricing_version": 1,
       "model": "openai/glm-5.2",
       "normalized_model": "glm-5.2",
-      "requests": 413,
-      "requests_with_usage": 413,
+      "requests": 1,
+      "requests_with_usage": 1,
       "requests_missing_usage": 0,
-      "usage_source": "gateway_usage",
+      "usage_source": "openhands_usage",
       "pricing": {
         "input_usd_per_million": 1.4,
         "output_usd_per_million": 4.4,
         "cache_read_usd_per_million": 0.26,
         "cache_write_usd_per_million": null,
-        "note": "Z.AI GLM-5.2 public API pricing"
+        "note": "Z.AI GLM-5.2 pricing"
       }
+    },
+    "recalculated_from_tokens": {
+      "source": "scripts/recalculate_benchmark_costs.py",
+      "cache_tokens_included": true
     }
   },
   "workspace": {

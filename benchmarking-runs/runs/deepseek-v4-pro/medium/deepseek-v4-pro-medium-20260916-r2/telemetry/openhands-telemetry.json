@@ -62,17 +62,21 @@
       "pricing_version": 1,
       "model": "openai/deepseek-v4-pro",
       "normalized_model": "deepseek-v4-pro",
-      "requests": 81,
-      "requests_with_usage": 81,
+      "requests": 1,
+      "requests_with_usage": 1,
       "requests_missing_usage": 0,
-      "usage_source": "gateway_usage",
+      "usage_source": "openhands_usage",
       "pricing": {
         "input_usd_per_million": 0.66,
         "output_usd_per_million": 1.98,
         "cache_read_usd_per_million": 0.022,
         "cache_write_usd_per_million": null,
-        "note": "DeepSeek V4 Pro off-peak pricing; peak rates are 2x"
+        "note": "DeepSeek V4 Pro off-peak pricing; peak may be higher"
       }
+    },
+    "recalculated_from_tokens": {
+      "source": "scripts/recalculate_benchmark_costs.py",
+      "cache_tokens_included": true
     }
   },
   "workspace": {

@@ -1,0 +1,264 @@
+{
+  "criteria": {
+    "cli-transform-api": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "JavaScript, TypeScript, async transforms, and transform options received the expected API"
+    },
+    "parser-and-transform-variants": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "TSX, Flow, transform-declared parser, and local URL transforms behaved correctly"
+    },
+    "file-selection-and-stdin": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "recursive, extension, ignore, and stdin selection behaved correctly"
+    },
+    "dry-run-print-and-reporting": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "dry run, print output, statistics, reports, and result statuses were preserved"
+    },
+    "parallel-workers-and-results": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "parallel and serial workers processed every file with correct aggregate statuses"
+    },
+    "failure-and-exit-contract": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "transform errors and --fail-on-error behaved correctly"
+    },
+    "cli-surface-and-identity": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "help output does not expose the required CLI surface"
+    },
+    "silent-output-contract": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "--silent suppresses output without suppressing the transform"
+    },
+    "symlink-boundary": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "symlink discovery preserves legacy in-root and out-of-root link processing"
+    },
+    "parallel-failure-recovery": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "parallel workers isolate failures and complete independent files"
+    },
+    "lifecycle-manifest": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "build, reset, and start lifecycle commands are declared"
+    },
+    "custom-option-forwarding": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "repeatable and equals-form custom options reach transforms"
+    },
+    "atomic-write-on-error": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "failed transforms leave source files unchanged"
+    },
+    "parallel-result-determinism": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "parallel scheduling produces stable aggregate results"
+    },
+    "utf8-source-preservation": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "UTF-8 source content is preserved for no-op transforms"
+    },
+    "ast-collections-and-builders": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "collections and standard AST builders remain available"
+    },
+    "ast-formatting-and-comments": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "AST edits preserve comments and formatting options"
+    },
+    "ast-modern-syntax": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "TypeScript, TSX, and modern JavaScript syntax remain traversable"
+    },
+    "core-api-surface": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "package core exports, parser binding, matching, plugins, and templates remain compatible"
+    },
+    "collection-extensions": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "typed collections, filters, mappings, mutations, and path accessors remain compatible"
+    },
+    "template-code-generation": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "statement, expression, and async-expression templates retain their public behavior"
+    },
+    "package-root-export": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "package root exports the callable jscodeshift API and parses source"
+    },
+    "rust-runner-entrypoint": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "public CLI is backed by the compiled Rust runner; substantive Rust migration foundation: modular layout with 7545 executable lines across 19 modules; signals=argument handling, file handling, execution or writing; migration progress: arguments, file discovery, ignore handling, atomic writing, runner protocol, worker orchestration, package integration"
+    },
+    "rust-parser-babel-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "Babel parser/printer ownership probe did not produce the expected native result: project/babel.js"
+    },
+    "rust-parser-typescript-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "TypeScript parser ownership probe did not produce the expected native result: project/types.ts"
+    },
+    "rust-parser-tsx-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "TSX parser ownership probe did not produce the expected native result: project/view.tsx"
+    },
+    "rust-printer-comments-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "comment-preserving printer did not retain comments, formatting, and the edited literal"
+    },
+    "rust-core-collections-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "core collections ownership probe did not produce the expected native result: project/collections.js"
+    },
+    "rust-core-builders-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "core builders ownership probe did not produce the expected native result: project/builders.js"
+    },
+    "rust-core-templates-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "template generation ownership probe did not produce the expected native result: project/templates.js"
+    },
+    "rust-core-nodepath-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "NodePath accessors ownership probe did not produce the expected native result: project/nodepath.js"
+    },
+    "rust-edge-ast-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "edge-case AST syntax ownership probe did not produce the expected native result: project/edge.tsx"
+    },
+    "rust-edge-cli-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "edge-case CLI ownership probe did not preserve stdin and extension boundaries"
+    },
+    "rust-worker-multifile-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "multi-file worker execution ownership probe did not produce the expected native result: project/file-0.js, project/file-1.js, project/file-2.js, project/file-3.js, project/file-4.js, project/file-5.js"
+    },
+    "rust-worker-parallel-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "parallel worker execution ownership probe did not produce the expected native result: project/file-0.js, project/file-1.js, project/file-2.js, project/file-3.js, project/file-4.js, project/file-5.js"
+    },
+    "rust-worker-failure-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "worker failure recovery ownership failed (rc=0)"
+    },
+    "rust-worker-determinism-ownership": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "parallel worker replay was deterministic with only the explicit JS bridge"
+    },
+    "rust-implementation-depth": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "substantive Rust migration foundation: modular layout with 7545 executable lines across 19 modules; signals=argument handling, file handling, execution or writing"
+    },
+    "rust-feature-completeness": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "3/3 feature layers: argument handling, file handling, execution or writing"
+    },
+    "rust-wiring-attempt": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "no JS-to-Rust wiring detected"
+    },
+    "rust-jscodeshift-facade": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "no jscodeshift API methods found in Rust impl blocks"
+    },
+    "rust-ast-traversal": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "recursive AST traversal found in napi_ext.rs"
+    },
+    "rust-collections-module": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "collections/ module with 5 file(s): ['jsx_element.rs', 'import_declaration.rs', 'variable_declarator.rs', 'mod.rs']"
+    },
+    "rust-test-density": {
+      "status": "partial",
+      "score": 0.33,
+      "detail": "3 test(s) found (need 6+ for partial credit)"
+    },
+    "rust-module-breadth": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "16 .rs files: ['args_parser', 'core', 'ignore_files', 'match_node', 'napi_ext', 'require_package', 'runner', 'worker']"
+    },
+    "rust-package-clean-pack-ownership": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "clean packed artifact executes with only the explicit JS bridge"
+    },
+    "rust-package-guard-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "package-root guard probe failed"
+    },
+    "rust-legacy-engine-boundary": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "Rust CLI ownership probe did not write the transform result"
+    },
+    "cross-feature-compatibility": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "CLI options, worker scheduling, TSX parsing, templates, and ignore rules composed correctly"
+    },
+    "package-boundary-compatibility": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "npm pack failed (rc=1)"
+    },
+    "ast-composition-corpus": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "multi-file AST corpus preserves syntax, plugins, collections, templates, and formatting"
+    },
+    "worker-replay-consistency": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "parallel and serial worker replays preserve successful, failed, and delayed outcomes"
+    }
+  }
+}

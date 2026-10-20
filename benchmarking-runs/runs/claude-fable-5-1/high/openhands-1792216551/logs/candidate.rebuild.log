@@ -1,0 +1,11 @@
+yarn install v1.22.22
+[1/5] Validating package.json...
+[2/5] Resolving packages...
+success Already up-to-date.
+$ yarn clean && cp -R src/ dist/
+yarn run v1.22.22
+$ rm -rf dist/
+Done in 0.04s.
+Done in 0.23s.
+    Finished `release` profile [optimized] target(s) in 0.08s
+jscodeshift build complete: native/jscodeshift, native/jscodeshift-api.node

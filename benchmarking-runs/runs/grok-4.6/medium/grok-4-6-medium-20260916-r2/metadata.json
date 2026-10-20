@@ -23,13 +23,13 @@
     "score": 0.1476,
     "score_source": "scores.json and newest reports/score.json",
     "source_candidate": "openhands-grok-4-6-medium-20260916-r2",
-    "exported_at": "2026-09-21T20:26:01.067498+00:00"
+    "exported_at": "2026-09-28T11:40:57.425125+00:00"
   },
   "benchmarking_cache_backfill": {
     "input_tokens": 5448661,
-    "cached_tokens": 5131798,
-    "ratio": 0.9418458647367578,
-    "ratio_source": "provider-level median fallback (hackerrank-gateway)",
+    "cached_tokens": 5135149,
+    "ratio": 0.9424607422169496,
+    "ratio_source": "model-level median",
     "source": "cache-backfill-dry-run.json"
   }
 }

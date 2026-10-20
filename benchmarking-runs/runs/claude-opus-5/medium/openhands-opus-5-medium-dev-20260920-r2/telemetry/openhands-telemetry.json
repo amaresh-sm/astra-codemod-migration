@@ -1,0 +1,124 @@
+{
+  "schema_version": 1,
+  "harness": {
+    "name": "hackerrank-openhands-gateway",
+    "version": "0.1.1"
+  },
+  "run": {
+    "status": "completed",
+    "exit_code": 0,
+    "error": null
+  },
+  "model": {
+    "name": "openai/claude-opus-5",
+    "reasoning": "medium",
+    "provider": "hackerrank-gateway"
+  },
+  "timing": {
+    "started_at": "2026-09-20T10:12:33.441Z",
+    "completed_at": "2026-09-20T11:54:44.312Z",
+    "duration_ms": 6130829,
+    "llm_requests": {
+      "count": 289,
+      "with_latency": 289,
+      "successful": 289,
+      "failed": 0,
+      "total_latency_ms": 5395130,
+      "average_latency_ms": 18668.268,
+      "min_latency_ms": 2100.0,
+      "max_latency_ms": 183925
+    }
+  },
+  "usage": {
+    "source": "gateway",
+    "requests": 289,
+    "input_tokens": 27143881,
+    "cached_input_tokens": 26411233,
+    "cache_read_tokens": 26411233,
+    "cache_write_tokens": 0,
+    "output_tokens": 309744,
+    "reasoning_tokens": 157832,
+    "total_tokens": 27453625
+  },
+  "cost": {
+    "gateway": {
+      "amount_usd": null,
+      "currency": "USD",
+      "status": "unavailable",
+      "source": "gateway",
+      "responses_with_cost": 0
+    },
+    "openhands": {
+      "amount_usd": null,
+      "currency": "USD",
+      "status": "unavailable",
+      "source": "openhands"
+    },
+    "custom_estimation": {
+      "amount_usd": 24.6124565,
+      "currency": "USD",
+      "status": "estimated",
+      "source": "custom_pricing_table",
+      "pricing_version": 1,
+      "model": "openai/claude-opus-5",
+      "normalized_model": "claude-opus-5",
+      "requests": 1,
+      "requests_with_usage": 1,
+      "requests_missing_usage": 0,
+      "usage_source": "openhands_usage",
+      "pricing": {
+        "input_usd_per_million": 5.0,
+        "output_usd_per_million": 25.0,
+        "cache_read_usd_per_million": 0.5,
+        "cache_write_usd_per_million": 6.25,
+        "note": "Anthropic Claude Opus 5 pricing"
+      }
+    },
+    "recalculated_from_tokens": {
+      "source": "scripts/recalculate_benchmark_costs.py",
+      "cache_tokens_included": true
+    }
+  },
+  "workspace": {
+    "type": "workspace_metrics",
+    "status": "available",
+    "files": {
+      "added": 7817,
+      "modified": 21,
+      "deleted": 3,
+      "renamed": 0,
+      "total_changed": 7841
+    },
+    "lines": {
+      "added": 1921643,
+      "deleted": 2868,
+      "changed": 1924511
+    },
+    "renames": []
+  },
+  "tools": {
+    "total": 285,
+    "successful": 273,
+    "failed": 12,
+    "cancelled": 0,
+    "rejected": 0,
+    "unknown": 0,
+    "by_tool": {
+      "terminal": 205,
+      "think": 2,
+      "file_editor": 74,
+      "finish": 1
+    }
+  },
+  "trace": {
+    "events_path": "events.jsonl",
+    "event_count": 575,
+    "invalid_event_count": 0,
+    "integrity_sha256": "synthetic-run-no-trace-available"
+  },
+  "benchmarking": {
+    "score": 0.33,
+    "source": "scores.json",
+    "run_name": "openhands-opus-5-medium-dev-20260920-r2"
+  }
+}

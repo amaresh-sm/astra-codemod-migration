@@ -1,0 +1,27 @@
++----------------------------------------------------------------------+
+|  OpenHands SDK v1.44.1                                               |
+|                                                                      |
+|  Report a bug: github.com/OpenHands/software-agent-sdk/issues        |
+|  Get help: openhands.dev/joinslack                                   |
+|  Scale up: openhands.dev/product/sdk                                 |
+|                                                                      |
+|  Set OPENHANDS_SUPPRESS_BANNER=1 to hide this message                |
++----------------------------------------------------------------------+
+
+[09/18/26 18:13:41] WARNING  No persistence_dir provided; falling   state.py:506
+                             back to InMemoryFileStore. EventLog                
+                             data will not persist across requests.             
+[09/18/26 18:13:41] INFO     Created new conversation               state.py:583
+                             3ea83d29-a2ed-48d1-9030-3b0164a676db               
+[09/18/26 18:13:41] INFO     FileEditor initialized with cwd:      editor.py:105
+                             /workspace                                         
+[09/18/26 18:13:41] INFO     TmuxPanePool initialized:     tmux_pane_pool.py:140
+                             session=openhands-pool-None-0                      
+                             e57573b-aab6-40cb-b564-191a68                      
+                             1ac317, max_panes=4                                
+[09/18/26 18:13:41] INFO     TerminalExecutor initialized (pool      impl.py:145
+                             mode) working_dir: /workspace,                     
+                             username: None, max_panes: 4                       
+[09/18/26 18:13:41] INFO     Loaded 2 tools from spec                base.py:563
+/usr/local/lib/python3.12/site-packages/openhands/sdk/llm/utils/telemetry.py:291: UserWarning: Cost calculation failed: This model isn't mapped yet. model=claude-opus-5, custom_llm_provider=openai. Add it here - https://github.com/BerriAI/litellm/blob/main/model_prices_and_context_window.json.
+  warnings.warn(f"Cost calculation failed: {e}")

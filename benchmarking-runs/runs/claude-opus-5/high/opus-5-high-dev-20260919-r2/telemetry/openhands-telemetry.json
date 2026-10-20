@@ -1,22 +1,106 @@
 {
   "schema_version": 1,
-  "tokens": {
-    "input": null,
-    "output": null,
-    "cached_input": null,
-    "total": null,
-    "source": "unavailable"
+  "harness": {
+    "name": "hackerrank-openhands-gateway",
+    "version": "0.1.4"
   },
-  "tool_calls": {
-    "total": null,
-    "by_type": {
-      "read": null,
-      "shell": null,
-      "edit": null,
-      "write": null,
-      "other": null
+  "run": {
+    "status": "timed_out",
+    "exit_code": 124,
+    "error": null
+  },
+  "model": {
+    "name": "claude-opus-5",
+    "reasoning": "high",
+    "provider": "hackerrank-gateway"
+  },
+  "timing": {
+    "started_at": "2026-09-18T21:42:09.369164+00:00",
+    "completed_at": "2026-09-19T03:42:14.263761+00:00",
+    "duration_ms": 21604894,
+    "llm_requests": {
+      "count": 616,
+      "with_latency": 616,
+      "successful": 616,
+      "failed": 0,
+      "total_latency_ms": 21133264.446,
+      "average_latency_ms": 34307.247,
+      "min_latency_ms": 2466.203,
+      "max_latency_ms": 380379.738
+    }
+  },
+  "usage": {
+    "source": "gateway",
+    "requests": 616,
+    "input_tokens": 29281315,
+    "cached_input_tokens": 27817249,
+    "cache_read_tokens": 27817249,
+    "cache_write_tokens": 0,
+    "output_tokens": 1520907,
+    "reasoning_tokens": 1238492,
+    "total_tokens": 30802222
+  },
+  "cost": {
+    "gateway": {
+      "amount_usd": null,
+      "currency": "USD",
+      "status": "unavailable",
+      "source": "gateway",
+      "responses_with_cost": 0
     },
-    "source": "unavailable"
+    "openhands": {
+      "amount_usd": null,
+      "currency": "USD",
+      "status": "unavailable",
+      "source": "openhands"
+    },
+    "custom_estimation": {
+      "amount_usd": 59.2516295,
+      "currency": "USD",
+      "status": "estimated",
+      "source": "custom_pricing_table",
+      "pricing_version": 1,
+      "model": "claude-opus-5",
+      "normalized_model": "claude-opus-5",
+      "requests": 1,
+      "requests_with_usage": 1,
+      "requests_missing_usage": 0,
+      "usage_source": "openhands_usage",
+      "pricing": {
+        "input_usd_per_million": 5.0,
+        "output_usd_per_million": 25.0,
+        "cache_read_usd_per_million": 0.5,
+        "cache_write_usd_per_million": 6.25,
+        "note": "Anthropic Claude Opus 5 pricing"
+      }
+    },
+    "recalculated_from_tokens": {
+      "source": "scripts/recalculate_benchmark_costs.py",
+      "cache_tokens_included": true
+    }
+  },
+  "workspace": {
+    "status": "unavailable",
+    "reason": "workspace metrics event not found"
+  },
+  "tools": {
+    "total": 594,
+    "successful": 562,
+    "failed": 32,
+    "cancelled": 0,
+    "rejected": 0,
+    "unknown": 0,
+    "by_tool": {
+      "terminal": 471,
+      "think": 7,
+      "file_editor": 116
+    }
+  },
+  "trace": {
+    "events_path": "events.jsonl",
+    "event_count": 1218,
+    "invalid_event_count": 0,
+    "integrity_sha256": "d423962b87893cbdef80287688be8507763de8f1c491c687780dfdbf370e5c23"
   },
   "solution_size": {
     "workspace_source_files": 926,
@@ -27,12 +111,13 @@
     "agent_changed_source_files": 925,
     "agent_changed_source_lines": 474552
   },
-  "duration_seconds": 21604.749,
-  "started_at": "2026-09-18T21:42:09.369164+00:00",
-  "finished_at": "2026-09-19T03:42:14.263761+00:00",
   "benchmarking": {
-    "score": 0.1303,
+    "score": 0.3503,
     "source": "scores.json",
     "run_name": "opus-5-high-dev-20260919-r2"
+  },
+  "benchmarking_cache_backfill": {
+    "ratio": 0.95,
+    "source": "cache-backfill-dry-run.json"
   }
 }

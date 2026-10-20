@@ -1,0 +1,2 @@
+Gateway has no /models catalog; model support will be checked by the generation request
+preflight ok: model=grok-4.5 reasoning=high gateway=http://gateway-internal-nlb.ai.hackerrank.com/v1

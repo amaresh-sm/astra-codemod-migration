@@ -12,7 +12,7 @@
     "reasoning": "high"
   },
   "benchmarking": {
-    "score": 0.0696,
+    "score": 0.2999,
     "source": "scores.json",
     "run_name": "pi-sonnet-5-high-20260919-r1"
   }

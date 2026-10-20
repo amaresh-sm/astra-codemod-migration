@@ -1,0 +1,542 @@
+{
+  "criterionStatus": {
+    "cli-transform-api": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.cli-transform-api",
+      "detail": "JavaScript, TypeScript, async transforms, and transform options received the expected API"
+    },
+    "parser-and-transform-variants": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.parser-and-transform-variants",
+      "detail": "TSX, Flow, transform-declared parser, and local URL transforms behaved correctly"
+    },
+    "file-selection-and-stdin": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.file-selection-and-stdin",
+      "detail": "recursive, extension, ignore, and stdin selection behaved correctly"
+    },
+    "dry-run-print-and-reporting": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.dry-run-print-and-reporting",
+      "detail": "dry run, print output, statistics, reports, and result statuses were preserved"
+    },
+    "parallel-workers-and-results": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.parallel-workers-and-results",
+      "detail": "parallel and serial workers processed every file with correct aggregate statuses"
+    },
+    "failure-and-exit-contract": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.failure-and-exit-contract",
+      "detail": "transform errors and --fail-on-error behaved correctly"
+    },
+    "cli-surface-and-identity": {
+      "status": "fail",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.cli-surface-and-identity",
+      "detail": "help output does not expose the required CLI surface"
+    },
+    "silent-output-contract": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.silent-output-contract",
+      "detail": "--silent suppresses output without suppressing the transform"
+    },
+    "symlink-boundary": {
+      "status": "fail",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.symlink-boundary",
+      "detail": "out-of-root symlink was not processed as it is by the legacy runner"
+    },
+    "parallel-failure-recovery": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.parallel-failure-recovery",
+      "detail": "parallel workers isolate failures and complete independent files"
+    },
+    "lifecycle-manifest": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.lifecycle-manifest",
+      "detail": "build, reset, and start lifecycle commands are declared"
+    },
+    "custom-option-forwarding": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.custom-option-forwarding",
+      "detail": "repeatable and equals-form custom options reach transforms"
+    },
+    "atomic-write-on-error": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.atomic-write-on-error",
+      "detail": "failed transforms leave source files unchanged"
+    },
+    "parallel-result-determinism": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.parallel-result-determinism",
+      "detail": "parallel scheduling produces stable aggregate results"
+    },
+    "utf8-source-preservation": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.utf8-source-preservation",
+      "detail": "UTF-8 source content is preserved for no-op transforms"
+    },
+    "ast-collections-and-builders": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.ast-collections-and-builders",
+      "detail": "collections and standard AST builders remain available"
+    },
+    "ast-formatting-and-comments": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.ast-formatting-and-comments",
+      "detail": "AST edits preserve comments and formatting options"
+    },
+    "ast-modern-syntax": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.ast-modern-syntax",
+      "detail": "TypeScript, TSX, and modern JavaScript syntax remain traversable"
+    },
+    "core-api-surface": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.core-api-surface",
+      "detail": "package core exports, parser binding, matching, plugins, and templates remain compatible"
+    },
+    "collection-extensions": {
+      "status": "fail",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.collection-extensions",
+      "detail": "typed collection compatibility failed (rc=1; /loader:254:19)     at Module.require (node:internal/modules/cjs/loader:1527:12)     at require (node:internal/modules/helpers:147:16)     at [eval]:1:18     at runScriptInThisContext (node:internal/vm:209:10)     at node:internal/process/execution:446:12 {   code: 'MODULE_NOT_FOUND',   requireStack: [ '/input/candidate/codebase/[eval]' ] }  Node.js v22.23.3)"
+    },
+    "template-code-generation": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.template-code-generation",
+      "detail": "statement, expression, and async-expression templates retain their public behavior"
+    },
+    "package-root-export": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.package-root-export",
+      "detail": "package root exports the callable jscodeshift API and parses source"
+    },
+    "rust-runner-entrypoint": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.rust-runner-entrypoint",
+      "detail": "public CLI is backed by the compiled Rust runner; substantive Rust migration foundation: modular layout with 7893 executable lines across 20 modules; signals=argument handling, file handling, execution or writing; migration progress: arguments, file discovery, ignore handling, atomic writing, runner protocol, worker orchestration, package integration"
+    },
+    "rust-parser-babel-ownership": {
+      "status": "blocked",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.rust-parser-babel-ownership",
+      "detail": "probe timed out after 30s: node /tmp/jscodeshift-bridge-only-c61zucdx/candidate/codebase/bin/jscodeshift.js --run-in-band --transform /tmp/jscodeshift-bridge-only-c61zucdx/transform.js /tmp/jscodeshift-bridge-only-c61zucdx/project; output=Processing 1 files... /tmp/jscodeshift-bridge-only-c61zucdx/candidate/codebase/bridge/transform-host.js:8\nprocess.dlopen(module, path.resolve(__dirname, '..', 'jscodeshift.node'));\n        ^\n\nError: /tmp/jscodeshift-bridge-only-c61zucdx/candidate/codebase/jscodeshift.node: invalid ELF header\n    at Object.<anonymous> (/tmp/jscodeshift-bridge-only-c61zucdx/candidate/codebase/bridge/transform-host.js:8:9)\n    at Module._compile (node:internal/modules/cjs/loader:1781:14)\n    at Object..js (node:internal/modules/cjs/loader:1913:10)\n    at Module.load (node:internal/modules/cjs/loader:1505:32)\n    at Function.<anonymous> (node:internal/modules/cjs/loader:1309:12)\n    at Module._load (/tmp/jscodeshift-bridge-only-c61zucdx/module-trace.js:15:23)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)\n    at node:internal/main/run_main_module:36:49 {\n  code: 'ERR_DLOPEN_FAILED'\n}\n\nNode.js v22.23.3",
+      "diagnostics": {
+        "kind": "timeout",
+        "command": [
+          "node",
+          "/tmp/jscodeshift-bridge-only-c61zucdx/candidate/codebase/bin/jscodeshift.js",
+          "--run-in-band",
+          "--transform",
+          "/tmp/jscodeshift-bridge-only-c61zucdx/transform.js",
+          "/tmp/jscodeshift-bridge-only-c61zucdx/project"
+        ],
+        "timeout_seconds": 30.0,
+        "stdout_tail": "Processing 1 files... \n",
+        "stderr_tail": "/tmp/jscodeshift-bridge-only-c61zucdx/candidate/codebase/bridge/transform-host.js:8\nprocess.dlopen(module, path.resolve(__dirname, '..', 'jscodeshift.node'));\n        ^\n\nError: /tmp/jscodeshift-bridge-only-c61zucdx/candidate/codebase/jscodeshift.node: invalid ELF header\n    at Object.<anonymous> (/tmp/jscodeshift-bridge-only-c61zucdx/candidate/codebase/bridge/transform-host.js:8:9)\n    at Module._compile (node:internal/modules/cjs/loader:1781:14)\n    at Object..js (node:internal/modules/cjs/loader:1913:10)\n    at Module.load (node:internal/modules/cjs/loader:1505:32)\n    at Function.<anonymous> (node:internal/modules/cjs/loader:1309:12)\n    at Module._load (/tmp/jscodeshift-bridge-only-c61zucdx/module-trace.js:15:23)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)\n    at node:internal/main/run_main_module:36:49 {\n  code: 'ERR_DLOPEN_FAILED'\n}\n\nNode.js v22.23.3\n"
+      }
+    },
+    "rust-parser-typescript-ownership": {
+      "status": "blocked",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.rust-parser-typescript-ownership",
+      "detail": "probe timed out after 30s: node /tmp/jscodeshift-bridge-only-7xdzrrv2/candidate/codebase/bin/jscodeshift.js --run-in-band --parser ts --transform /tmp/jscodeshift-bridge-only-7xdzrrv2/transform.js /tmp/jscodeshift-bridge-only-7xdzrrv2/project; output=Processing 1 files... /tmp/jscodeshift-bridge-only-7xdzrrv2/candidate/codebase/bridge/transform-host.js:8\nprocess.dlopen(module, path.resolve(__dirname, '..', 'jscodeshift.node'));\n        ^\n\nError: /tmp/jscodeshift-bridge-only-7xdzrrv2/candidate/codebase/jscodeshift.node: invalid ELF header\n    at Object.<anonymous> (/tmp/jscodeshift-bridge-only-7xdzrrv2/candidate/codebase/bridge/transform-host.js:8:9)\n    at Module._compile (node:internal/modules/cjs/loader:1781:14)\n    at Object..js (node:internal/modules/cjs/loader:1913:10)\n    at Module.load (node:internal/modules/cjs/loader:1505:32)\n    at Function.<anonymous> (node:internal/modules/cjs/loader:1309:12)\n    at Module._load (/tmp/jscodeshift-bridge-only-7xdzrrv2/module-trace.js:15:23)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)\n    at node:internal/main/run_main_module:36:49 {\n  code: 'ERR_DLOPEN_FAILED'\n}\n\nNode.js v22.23.3",
+      "diagnostics": {
+        "kind": "timeout",
+        "command": [
+          "node",
+          "/tmp/jscodeshift-bridge-only-7xdzrrv2/candidate/codebase/bin/jscodeshift.js",
+          "--run-in-band",
+          "--parser",
+          "ts",
+          "--transform",
+          "/tmp/jscodeshift-bridge-only-7xdzrrv2/transform.js",
+          "/tmp/jscodeshift-bridge-only-7xdzrrv2/project"
+        ],
+        "timeout_seconds": 30.0,
+        "stdout_tail": "Processing 1 files... \n",
+        "stderr_tail": "/tmp/jscodeshift-bridge-only-7xdzrrv2/candidate/codebase/bridge/transform-host.js:8\nprocess.dlopen(module, path.resolve(__dirname, '..', 'jscodeshift.node'));\n        ^\n\nError: /tmp/jscodeshift-bridge-only-7xdzrrv2/candidate/codebase/jscodeshift.node: invalid ELF header\n    at Object.<anonymous> (/tmp/jscodeshift-bridge-only-7xdzrrv2/candidate/codebase/bridge/transform-host.js:8:9)\n    at Module._compile (node:internal/modules/cjs/loader:1781:14)\n    at Object..js (node:internal/modules/cjs/loader:1913:10)\n    at Module.load (node:internal/modules/cjs/loader:1505:32)\n    at Function.<anonymous> (node:internal/modules/cjs/loader:1309:12)\n    at Module._load (/tmp/jscodeshift-bridge-only-7xdzrrv2/module-trace.js:15:23)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)\n    at node:internal/main/run_main_module:36:49 {\n  code: 'ERR_DLOPEN_FAILED'\n}\n\nNode.js v22.23.3\n"
+      }
+    },
+    "rust-parser-tsx-ownership": {
+      "status": "blocked",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.rust-parser-tsx-ownership",
+      "detail": "probe timed out after 30s: node /tmp/jscodeshift-bridge-only-ec3kc20t/candidate/codebase/bin/jscodeshift.js --run-in-band --parser tsx --transform /tmp/jscodeshift-bridge-only-ec3kc20t/transform.js /tmp/jscodeshift-bridge-only-ec3kc20t/project; output=Processing 1 files... /tmp/jscodeshift-bridge-only-ec3kc20t/candidate/codebase/bridge/transform-host.js:8\nprocess.dlopen(module, path.resolve(__dirname, '..', 'jscodeshift.node'));\n        ^\n\nError: /tmp/jscodeshift-bridge-only-ec3kc20t/candidate/codebase/jscodeshift.node: invalid ELF header\n    at Object.<anonymous> (/tmp/jscodeshift-bridge-only-ec3kc20t/candidate/codebase/bridge/transform-host.js:8:9)\n    at Module._compile (node:internal/modules/cjs/loader:1781:14)\n    at Object..js (node:internal/modules/cjs/loader:1913:10)\n    at Module.load (node:internal/modules/cjs/loader:1505:32)\n    at Function.<anonymous> (node:internal/modules/cjs/loader:1309:12)\n    at Module._load (/tmp/jscodeshift-bridge-only-ec3kc20t/module-trace.js:15:23)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)\n    at node:internal/main/run_main_module:36:49 {\n  code: 'ERR_DLOPEN_FAILED'\n}\n\nNode.js v22.23.3",
+      "diagnostics": {
+        "kind": "timeout",
+        "command": [
+          "node",
+          "/tmp/jscodeshift-bridge-only-ec3kc20t/candidate/codebase/bin/jscodeshift.js",
+          "--run-in-band",
+          "--parser",
+          "tsx",
+          "--transform",
+          "/tmp/jscodeshift-bridge-only-ec3kc20t/transform.js",
+          "/tmp/jscodeshift-bridge-only-ec3kc20t/project"
+        ],
+        "timeout_seconds": 30.0,
+        "stdout_tail": "Processing 1 files... \n",
+        "stderr_tail": "/tmp/jscodeshift-bridge-only-ec3kc20t/candidate/codebase/bridge/transform-host.js:8\nprocess.dlopen(module, path.resolve(__dirname, '..', 'jscodeshift.node'));\n        ^\n\nError: /tmp/jscodeshift-bridge-only-ec3kc20t/candidate/codebase/jscodeshift.node: invalid ELF header\n    at Object.<anonymous> (/tmp/jscodeshift-bridge-only-ec3kc20t/candidate/codebase/bridge/transform-host.js:8:9)\n    at Module._compile (node:internal/modules/cjs/loader:1781:14)\n    at Object..js (node:internal/modules/cjs/loader:1913:10)\n    at Module.load (node:internal/modules/cjs/loader:1505:32)\n    at Function.<anonymous> (node:internal/modules/cjs/loader:1309:12)\n    at Module._load (/tmp/jscodeshift-bridge-only-ec3kc20t/module-trace.js:15:23)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)\n    at node:internal/main/run_main_module:36:49 {\n  code: 'ERR_DLOPEN_FAILED'\n}\n\nNode.js v22.23.3\n"
+      }
+    },
+    "rust-printer-comments-ownership": {
+      "status": "blocked",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.rust-printer-comments-ownership",
+      "detail": "probe timed out after 30s: node /tmp/jscodeshift-bridge-only-aerrmu0e/candidate/codebase/bin/jscodeshift.js --run-in-band --transform /tmp/jscodeshift-bridge-only-aerrmu0e/transform.js /tmp/jscodeshift-bridge-only-aerrmu0e/project; output=Processing 1 files... /tmp/jscodeshift-bridge-only-aerrmu0e/candidate/codebase/bridge/transform-host.js:8\nprocess.dlopen(module, path.resolve(__dirname, '..', 'jscodeshift.node'));\n        ^\n\nError: /tmp/jscodeshift-bridge-only-aerrmu0e/candidate/codebase/jscodeshift.node: invalid ELF header\n    at Object.<anonymous> (/tmp/jscodeshift-bridge-only-aerrmu0e/candidate/codebase/bridge/transform-host.js:8:9)\n    at Module._compile (node:internal/modules/cjs/loader:1781:14)\n    at Object..js (node:internal/modules/cjs/loader:1913:10)\n    at Module.load (node:internal/modules/cjs/loader:1505:32)\n    at Function.<anonymous> (node:internal/modules/cjs/loader:1309:12)\n    at Module._load (/tmp/jscodeshift-bridge-only-aerrmu0e/module-trace.js:15:23)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)\n    at node:internal/main/run_main_module:36:49 {\n  code: 'ERR_DLOPEN_FAILED'\n}\n\nNode.js v22.23.3",
+      "diagnostics": {
+        "kind": "timeout",
+        "command": [
+          "node",
+          "/tmp/jscodeshift-bridge-only-aerrmu0e/candidate/codebase/bin/jscodeshift.js",
+          "--run-in-band",
+          "--transform",
+          "/tmp/jscodeshift-bridge-only-aerrmu0e/transform.js",
+          "/tmp/jscodeshift-bridge-only-aerrmu0e/project"
+        ],
+        "timeout_seconds": 30.0,
+        "stdout_tail": "Processing 1 files... \n",
+        "stderr_tail": "/tmp/jscodeshift-bridge-only-aerrmu0e/candidate/codebase/bridge/transform-host.js:8\nprocess.dlopen(module, path.resolve(__dirname, '..', 'jscodeshift.node'));\n        ^\n\nError: /tmp/jscodeshift-bridge-only-aerrmu0e/candidate/codebase/jscodeshift.node: invalid ELF header\n    at Object.<anonymous> (/tmp/jscodeshift-bridge-only-aerrmu0e/candidate/codebase/bridge/transform-host.js:8:9)\n    at Module._compile (node:internal/modules/cjs/loader:1781:14)\n    at Object..js (node:internal/modules/cjs/loader:1913:10)\n    at Module.load (node:internal/modules/cjs/loader:1505:32)\n    at Function.<anonymous> (node:internal/modules/cjs/loader:1309:12)\n    at Module._load (/tmp/jscodeshift-bridge-only-aerrmu0e/module-trace.js:15:23)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)\n    at node:internal/main/run_main_module:36:49 {\n  code: 'ERR_DLOPEN_FAILED'\n}\n\nNode.js v22.23.3\n"
+      }
+    },
+    "rust-core-collections-ownership": {
+      "status": "blocked",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.rust-core-collections-ownership",
+      "detail": "probe timed out after 30s: node /tmp/jscodeshift-bridge-only-7pg99zom/candidate/codebase/bin/jscodeshift.js --run-in-band --transform /tmp/jscodeshift-bridge-only-7pg99zom/transform.js /tmp/jscodeshift-bridge-only-7pg99zom/project; output=Processing 1 files... /tmp/jscodeshift-bridge-only-7pg99zom/candidate/codebase/bridge/transform-host.js:8\nprocess.dlopen(module, path.resolve(__dirname, '..', 'jscodeshift.node'));\n        ^\n\nError: /tmp/jscodeshift-bridge-only-7pg99zom/candidate/codebase/jscodeshift.node: invalid ELF header\n    at Object.<anonymous> (/tmp/jscodeshift-bridge-only-7pg99zom/candidate/codebase/bridge/transform-host.js:8:9)\n    at Module._compile (node:internal/modules/cjs/loader:1781:14)\n    at Object..js (node:internal/modules/cjs/loader:1913:10)\n    at Module.load (node:internal/modules/cjs/loader:1505:32)\n    at Function.<anonymous> (node:internal/modules/cjs/loader:1309:12)\n    at Module._load (/tmp/jscodeshift-bridge-only-7pg99zom/module-trace.js:15:23)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)\n    at node:internal/main/run_main_module:36:49 {\n  code: 'ERR_DLOPEN_FAILED'\n}\n\nNode.js v22.23.3",
+      "diagnostics": {
+        "kind": "timeout",
+        "command": [
+          "node",
+          "/tmp/jscodeshift-bridge-only-7pg99zom/candidate/codebase/bin/jscodeshift.js",
+          "--run-in-band",
+          "--transform",
+          "/tmp/jscodeshift-bridge-only-7pg99zom/transform.js",
+          "/tmp/jscodeshift-bridge-only-7pg99zom/project"
+        ],
+        "timeout_seconds": 30.0,
+        "stdout_tail": "Processing 1 files... \n",
+        "stderr_tail": "/tmp/jscodeshift-bridge-only-7pg99zom/candidate/codebase/bridge/transform-host.js:8\nprocess.dlopen(module, path.resolve(__dirname, '..', 'jscodeshift.node'));\n        ^\n\nError: /tmp/jscodeshift-bridge-only-7pg99zom/candidate/codebase/jscodeshift.node: invalid ELF header\n    at Object.<anonymous> (/tmp/jscodeshift-bridge-only-7pg99zom/candidate/codebase/bridge/transform-host.js:8:9)\n    at Module._compile (node:internal/modules/cjs/loader:1781:14)\n    at Object..js (node:internal/modules/cjs/loader:1913:10)\n    at Module.load (node:internal/modules/cjs/loader:1505:32)\n    at Function.<anonymous> (node:internal/modules/cjs/loader:1309:12)\n    at Module._load (/tmp/jscodeshift-bridge-only-7pg99zom/module-trace.js:15:23)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)\n    at node:internal/main/run_main_module:36:49 {\n  code: 'ERR_DLOPEN_FAILED'\n}\n\nNode.js v22.23.3\n"
+      }
+    },
+    "rust-core-builders-ownership": {
+      "status": "blocked",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.rust-core-builders-ownership",
+      "detail": "probe timed out after 30s: node /tmp/jscodeshift-bridge-only-_46337om/candidate/codebase/bin/jscodeshift.js --run-in-band --transform /tmp/jscodeshift-bridge-only-_46337om/transform.js /tmp/jscodeshift-bridge-only-_46337om/project; output=Processing 1 files... /tmp/jscodeshift-bridge-only-_46337om/candidate/codebase/bridge/transform-host.js:8\nprocess.dlopen(module, path.resolve(__dirname, '..', 'jscodeshift.node'));\n        ^\n\nError: /tmp/jscodeshift-bridge-only-_46337om/candidate/codebase/jscodeshift.node: invalid ELF header\n    at Object.<anonymous> (/tmp/jscodeshift-bridge-only-_46337om/candidate/codebase/bridge/transform-host.js:8:9)\n    at Module._compile (node:internal/modules/cjs/loader:1781:14)\n    at Object..js (node:internal/modules/cjs/loader:1913:10)\n    at Module.load (node:internal/modules/cjs/loader:1505:32)\n    at Function.<anonymous> (node:internal/modules/cjs/loader:1309:12)\n    at Module._load (/tmp/jscodeshift-bridge-only-_46337om/module-trace.js:15:23)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)\n    at node:internal/main/run_main_module:36:49 {\n  code: 'ERR_DLOPEN_FAILED'\n}\n\nNode.js v22.23.3",
+      "diagnostics": {
+        "kind": "timeout",
+        "command": [
+          "node",
+          "/tmp/jscodeshift-bridge-only-_46337om/candidate/codebase/bin/jscodeshift.js",
+          "--run-in-band",
+          "--transform",
+          "/tmp/jscodeshift-bridge-only-_46337om/transform.js",
+          "/tmp/jscodeshift-bridge-only-_46337om/project"
+        ],
+        "timeout_seconds": 30.0,
+        "stdout_tail": "Processing 1 files... \n",
+        "stderr_tail": "/tmp/jscodeshift-bridge-only-_46337om/candidate/codebase/bridge/transform-host.js:8\nprocess.dlopen(module, path.resolve(__dirname, '..', 'jscodeshift.node'));\n        ^\n\nError: /tmp/jscodeshift-bridge-only-_46337om/candidate/codebase/jscodeshift.node: invalid ELF header\n    at Object.<anonymous> (/tmp/jscodeshift-bridge-only-_46337om/candidate/codebase/bridge/transform-host.js:8:9)\n    at Module._compile (node:internal/modules/cjs/loader:1781:14)\n    at Object..js (node:internal/modules/cjs/loader:1913:10)\n    at Module.load (node:internal/modules/cjs/loader:1505:32)\n    at Function.<anonymous> (node:internal/modules/cjs/loader:1309:12)\n    at Module._load (/tmp/jscodeshift-bridge-only-_46337om/module-trace.js:15:23)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)\n    at node:internal/main/run_main_module:36:49 {\n  code: 'ERR_DLOPEN_FAILED'\n}\n\nNode.js v22.23.3\n"
+      }
+    },
+    "rust-core-templates-ownership": {
+      "status": "blocked",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.rust-core-templates-ownership",
+      "detail": "probe timed out after 30s: node /tmp/jscodeshift-bridge-only-abkgsfzm/candidate/codebase/bin/jscodeshift.js --run-in-band --transform /tmp/jscodeshift-bridge-only-abkgsfzm/transform.js /tmp/jscodeshift-bridge-only-abkgsfzm/project; output=Processing 1 files... /tmp/jscodeshift-bridge-only-abkgsfzm/candidate/codebase/bridge/transform-host.js:8\nprocess.dlopen(module, path.resolve(__dirname, '..', 'jscodeshift.node'));\n        ^\n\nError: /tmp/jscodeshift-bridge-only-abkgsfzm/candidate/codebase/jscodeshift.node: invalid ELF header\n    at Object.<anonymous> (/tmp/jscodeshift-bridge-only-abkgsfzm/candidate/codebase/bridge/transform-host.js:8:9)\n    at Module._compile (node:internal/modules/cjs/loader:1781:14)\n    at Object..js (node:internal/modules/cjs/loader:1913:10)\n    at Module.load (node:internal/modules/cjs/loader:1505:32)\n    at Function.<anonymous> (node:internal/modules/cjs/loader:1309:12)\n    at Module._load (/tmp/jscodeshift-bridge-only-abkgsfzm/module-trace.js:15:23)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)\n    at node:internal/main/run_main_module:36:49 {\n  code: 'ERR_DLOPEN_FAILED'\n}\n\nNode.js v22.23.3",
+      "diagnostics": {
+        "kind": "timeout",
+        "command": [
+          "node",
+          "/tmp/jscodeshift-bridge-only-abkgsfzm/candidate/codebase/bin/jscodeshift.js",
+          "--run-in-band",
+          "--transform",
+          "/tmp/jscodeshift-bridge-only-abkgsfzm/transform.js",
+          "/tmp/jscodeshift-bridge-only-abkgsfzm/project"
+        ],
+        "timeout_seconds": 30.0,
+        "stdout_tail": "Processing 1 files... \n",
+        "stderr_tail": "/tmp/jscodeshift-bridge-only-abkgsfzm/candidate/codebase/bridge/transform-host.js:8\nprocess.dlopen(module, path.resolve(__dirname, '..', 'jscodeshift.node'));\n        ^\n\nError: /tmp/jscodeshift-bridge-only-abkgsfzm/candidate/codebase/jscodeshift.node: invalid ELF header\n    at Object.<anonymous> (/tmp/jscodeshift-bridge-only-abkgsfzm/candidate/codebase/bridge/transform-host.js:8:9)\n    at Module._compile (node:internal/modules/cjs/loader:1781:14)\n    at Object..js (node:internal/modules/cjs/loader:1913:10)\n    at Module.load (node:internal/modules/cjs/loader:1505:32)\n    at Function.<anonymous> (node:internal/modules/cjs/loader:1309:12)\n    at Module._load (/tmp/jscodeshift-bridge-only-abkgsfzm/module-trace.js:15:23)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)\n    at node:internal/main/run_main_module:36:49 {\n  code: 'ERR_DLOPEN_FAILED'\n}\n\nNode.js v22.23.3\n"
+      }
+    },
+    "rust-core-nodepath-ownership": {
+      "status": "blocked",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.rust-core-nodepath-ownership",
+      "detail": "probe timed out after 30s: node /tmp/jscodeshift-bridge-only-y9ruc867/candidate/codebase/bin/jscodeshift.js --run-in-band --transform /tmp/jscodeshift-bridge-only-y9ruc867/transform.js /tmp/jscodeshift-bridge-only-y9ruc867/project; output=Processing 1 files... /tmp/jscodeshift-bridge-only-y9ruc867/candidate/codebase/bridge/transform-host.js:8\nprocess.dlopen(module, path.resolve(__dirname, '..', 'jscodeshift.node'));\n        ^\n\nError: /tmp/jscodeshift-bridge-only-y9ruc867/candidate/codebase/jscodeshift.node: invalid ELF header\n    at Object.<anonymous> (/tmp/jscodeshift-bridge-only-y9ruc867/candidate/codebase/bridge/transform-host.js:8:9)\n    at Module._compile (node:internal/modules/cjs/loader:1781:14)\n    at Object..js (node:internal/modules/cjs/loader:1913:10)\n    at Module.load (node:internal/modules/cjs/loader:1505:32)\n    at Function.<anonymous> (node:internal/modules/cjs/loader:1309:12)\n    at Module._load (/tmp/jscodeshift-bridge-only-y9ruc867/module-trace.js:15:23)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)\n    at node:internal/main/run_main_module:36:49 {\n  code: 'ERR_DLOPEN_FAILED'\n}\n\nNode.js v22.23.3",
+      "diagnostics": {
+        "kind": "timeout",
+        "command": [
+          "node",
+          "/tmp/jscodeshift-bridge-only-y9ruc867/candidate/codebase/bin/jscodeshift.js",
+          "--run-in-band",
+          "--transform",
+          "/tmp/jscodeshift-bridge-only-y9ruc867/transform.js",
+          "/tmp/jscodeshift-bridge-only-y9ruc867/project"
+        ],
+        "timeout_seconds": 30.0,
+        "stdout_tail": "Processing 1 files... \n",
+        "stderr_tail": "/tmp/jscodeshift-bridge-only-y9ruc867/candidate/codebase/bridge/transform-host.js:8\nprocess.dlopen(module, path.resolve(__dirname, '..', 'jscodeshift.node'));\n        ^\n\nError: /tmp/jscodeshift-bridge-only-y9ruc867/candidate/codebase/jscodeshift.node: invalid ELF header\n    at Object.<anonymous> (/tmp/jscodeshift-bridge-only-y9ruc867/candidate/codebase/bridge/transform-host.js:8:9)\n    at Module._compile (node:internal/modules/cjs/loader:1781:14)\n    at Object..js (node:internal/modules/cjs/loader:1913:10)\n    at Module.load (node:internal/modules/cjs/loader:1505:32)\n    at Function.<anonymous> (node:internal/modules/cjs/loader:1309:12)\n    at Module._load (/tmp/jscodeshift-bridge-only-y9ruc867/module-trace.js:15:23)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)\n    at node:internal/main/run_main_module:36:49 {\n  code: 'ERR_DLOPEN_FAILED'\n}\n\nNode.js v22.23.3\n"
+      }
+    },
+    "rust-edge-ast-ownership": {
+      "status": "blocked",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.rust-edge-ast-ownership",
+      "detail": "probe timed out after 30s: node /tmp/jscodeshift-bridge-only-zwusfzou/candidate/codebase/bin/jscodeshift.js --run-in-band --parser tsx --transform /tmp/jscodeshift-bridge-only-zwusfzou/transform.js /tmp/jscodeshift-bridge-only-zwusfzou/project; output=Processing 1 files... /tmp/jscodeshift-bridge-only-zwusfzou/candidate/codebase/bridge/transform-host.js:8\nprocess.dlopen(module, path.resolve(__dirname, '..', 'jscodeshift.node'));\n        ^\n\nError: /tmp/jscodeshift-bridge-only-zwusfzou/candidate/codebase/jscodeshift.node: invalid ELF header\n    at Object.<anonymous> (/tmp/jscodeshift-bridge-only-zwusfzou/candidate/codebase/bridge/transform-host.js:8:9)\n    at Module._compile (node:internal/modules/cjs/loader:1781:14)\n    at Object..js (node:internal/modules/cjs/loader:1913:10)\n    at Module.load (node:internal/modules/cjs/loader:1505:32)\n    at Function.<anonymous> (node:internal/modules/cjs/loader:1309:12)\n    at Module._load (/tmp/jscodeshift-bridge-only-zwusfzou/module-trace.js:15:23)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)\n    at node:internal/main/run_main_module:36:49 {\n  code: 'ERR_DLOPEN_FAILED'\n}\n\nNode.js v22.23.3",
+      "diagnostics": {
+        "kind": "timeout",
+        "command": [
+          "node",
+          "/tmp/jscodeshift-bridge-only-zwusfzou/candidate/codebase/bin/jscodeshift.js",
+          "--run-in-band",
+          "--parser",
+          "tsx",
+          "--transform",
+          "/tmp/jscodeshift-bridge-only-zwusfzou/transform.js",
+          "/tmp/jscodeshift-bridge-only-zwusfzou/project"
+        ],
+        "timeout_seconds": 30.0,
+        "stdout_tail": "Processing 1 files... \n",
+        "stderr_tail": "/tmp/jscodeshift-bridge-only-zwusfzou/candidate/codebase/bridge/transform-host.js:8\nprocess.dlopen(module, path.resolve(__dirname, '..', 'jscodeshift.node'));\n        ^\n\nError: /tmp/jscodeshift-bridge-only-zwusfzou/candidate/codebase/jscodeshift.node: invalid ELF header\n    at Object.<anonymous> (/tmp/jscodeshift-bridge-only-zwusfzou/candidate/codebase/bridge/transform-host.js:8:9)\n    at Module._compile (node:internal/modules/cjs/loader:1781:14)\n    at Object..js (node:internal/modules/cjs/loader:1913:10)\n    at Module.load (node:internal/modules/cjs/loader:1505:32)\n    at Function.<anonymous> (node:internal/modules/cjs/loader:1309:12)\n    at Module._load (/tmp/jscodeshift-bridge-only-zwusfzou/module-trace.js:15:23)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)\n    at node:internal/main/run_main_module:36:49 {\n  code: 'ERR_DLOPEN_FAILED'\n}\n\nNode.js v22.23.3\n"
+      }
+    },
+    "rust-edge-cli-ownership": {
+      "status": "blocked",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.rust-edge-cli-ownership",
+      "detail": "probe timed out after 30s: node /tmp/jscodeshift-bridge-only-07qb3d_f/candidate/codebase/bin/jscodeshift.js --run-in-band --stdin --extensions js --transform /tmp/jscodeshift-bridge-only-07qb3d_f/transform.js; output=Processing 1 files... Skipping path  which does not exist. \n/tmp/jscodeshift-bridge-only-07qb3d_f/candidate/codebase/bridge/transform-host.js:8\nprocess.dlopen(module, path.resolve(__dirname, '..', 'jscodeshift.node'));\n        ^\n\nError: /tmp/jscodeshift-bridge-only-07qb3d_f/candidate/codebase/jscodeshift.node: invalid ELF header\n    at Object.<anonymous> (/tmp/jscodeshift-bridge-only-07qb3d_f/candidate/codebase/bridge/transform-host.js:8:9)\n    at Module._compile (node:internal/modules/cjs/loader:1781:14)\n    at Object..js (node:internal/modules/cjs/loader:1913:10)\n    at Module.load (node:internal/modules/cjs/loader:1505:32)\n    at Function.<anonymous> (node:internal/modules/cjs/loader:1309:12)\n    at Module._load (/tmp/jscodeshift-bridge-only-07qb3d_f/module-trace.js:15:23)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)\n    at node:internal/main/run_main_module:36:49 {\n  code: 'ERR_DLOPEN_FAILED'\n}\n\nNode.js v22.23.3",
+      "diagnostics": {
+        "kind": "timeout",
+        "command": [
+          "node",
+          "/tmp/jscodeshift-bridge-only-07qb3d_f/candidate/codebase/bin/jscodeshift.js",
+          "--run-in-band",
+          "--stdin",
+          "--extensions",
+          "js",
+          "--transform",
+          "/tmp/jscodeshift-bridge-only-07qb3d_f/transform.js"
+        ],
+        "timeout_seconds": 30.0,
+        "stdout_tail": "Processing 1 files... \n",
+        "stderr_tail": "Skipping path  which does not exist. \n/tmp/jscodeshift-bridge-only-07qb3d_f/candidate/codebase/bridge/transform-host.js:8\nprocess.dlopen(module, path.resolve(__dirname, '..', 'jscodeshift.node'));\n        ^\n\nError: /tmp/jscodeshift-bridge-only-07qb3d_f/candidate/codebase/jscodeshift.node: invalid ELF header\n    at Object.<anonymous> (/tmp/jscodeshift-bridge-only-07qb3d_f/candidate/codebase/bridge/transform-host.js:8:9)\n    at Module._compile (node:internal/modules/cjs/loader:1781:14)\n    at Object..js (node:internal/modules/cjs/loader:1913:10)\n    at Module.load (node:internal/modules/cjs/loader:1505:32)\n    at Function.<anonymous> (node:internal/modules/cjs/loader:1309:12)\n    at Module._load (/tmp/jscodeshift-bridge-only-07qb3d_f/module-trace.js:15:23)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)\n    at node:internal/main/run_main_module:36:49 {\n  code: 'ERR_DLOPEN_FAILED'\n}\n\nNode.js v22.23.3\n"
+      }
+    },
+    "rust-worker-multifile-ownership": {
+      "status": "blocked",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.rust-worker-multifile-ownership",
+      "detail": "probe timed out after 30s: node /tmp/jscodeshift-bridge-only-2uzjtaza/candidate/codebase/bin/jscodeshift.js --cpus 1 --transform /tmp/jscodeshift-bridge-only-2uzjtaza/transform.js /tmp/jscodeshift-bridge-only-2uzjtaza/project; output=Processing 6 files... \nSpawning 1 workers... /tmp/jscodeshift-bridge-only-2uzjtaza/candidate/codebase/bridge/transform-host.js:8\nprocess.dlopen(module, path.resolve(__dirname, '..', 'jscodeshift.node'));\n        ^\n\nError: /tmp/jscodeshift-bridge-only-2uzjtaza/candidate/codebase/jscodeshift.node: invalid ELF header\n    at Object.<anonymous> (/tmp/jscodeshift-bridge-only-2uzjtaza/candidate/codebase/bridge/transform-host.js:8:9)\n    at Module._compile (node:internal/modules/cjs/loader:1781:14)\n    at Object..js (node:internal/modules/cjs/loader:1913:10)\n    at Module.load (node:internal/modules/cjs/loader:1505:32)\n    at Function.<anonymous> (node:internal/modules/cjs/loader:1309:12)\n    at Module._load (/tmp/jscodeshift-bridge-only-2uzjtaza/module-trace.js:15:23)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)\n    at node:internal/main/run_main_module:36:49 {\n  code: 'ERR_DLOPEN_FAILED'\n}\n\nNode.js v22.23.3",
+      "diagnostics": {
+        "kind": "timeout",
+        "command": [
+          "node",
+          "/tmp/jscodeshift-bridge-only-2uzjtaza/candidate/codebase/bin/jscodeshift.js",
+          "--cpus",
+          "1",
+          "--transform",
+          "/tmp/jscodeshift-bridge-only-2uzjtaza/transform.js",
+          "/tmp/jscodeshift-bridge-only-2uzjtaza/project"
+        ],
+        "timeout_seconds": 30.0,
+        "stdout_tail": "Processing 6 files... \nSpawning 1 workers...\n",
+        "stderr_tail": "/tmp/jscodeshift-bridge-only-2uzjtaza/candidate/codebase/bridge/transform-host.js:8\nprocess.dlopen(module, path.resolve(__dirname, '..', 'jscodeshift.node'));\n        ^\n\nError: /tmp/jscodeshift-bridge-only-2uzjtaza/candidate/codebase/jscodeshift.node: invalid ELF header\n    at Object.<anonymous> (/tmp/jscodeshift-bridge-only-2uzjtaza/candidate/codebase/bridge/transform-host.js:8:9)\n    at Module._compile (node:internal/modules/cjs/loader:1781:14)\n    at Object..js (node:internal/modules/cjs/loader:1913:10)\n    at Module.load (node:internal/modules/cjs/loader:1505:32)\n    at Function.<anonymous> (node:internal/modules/cjs/loader:1309:12)\n    at Module._load (/tmp/jscodeshift-bridge-only-2uzjtaza/module-trace.js:15:23)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)\n    at node:internal/main/run_main_module:36:49 {\n  code: 'ERR_DLOPEN_FAILED'\n}\n\nNode.js v22.23.3\n"
+      }
+    },
+    "rust-worker-parallel-ownership": {
+      "status": "blocked",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.rust-worker-parallel-ownership",
+      "detail": "probe timed out after 30s: node /tmp/jscodeshift-bridge-only-q3wm031e/candidate/codebase/bin/jscodeshift.js --cpus 2 --transform /tmp/jscodeshift-bridge-only-q3wm031e/transform.js /tmp/jscodeshift-bridge-only-q3wm031e/project; output=Processing 6 files... \nSpawning 2 workers... /tmp/jscodeshift-bridge-only-q3wm031e/candidate/codebase/bridge/transform-host.js:8\nprocess.dlopen(module, path.resolve(__dirname, '..', 'jscodeshift.node'));\n        ^\n\nError: /tmp/jscodeshift-bridge-only-q3wm031e/candidate/codebase/jscodeshift.node: invalid ELF header\n    at Object.<anonymous> (/tmp/jscodeshift-bridge-only-q3wm031e/candidate/codebase/bridge/transform-host.js:8:9)\n    at Module._compile (node:internal/modules/cjs/loader:1781:14)\n    at Object..js (node:internal/modules/cjs/loader:1913:10)\n    at Module.load (node:internal/modules/cjs/loader:1505:32)\n    at Function.<anonymous> (node:internal/modules/cjs/loader:1309:12)\n    at Module._load (/tmp/jscodeshift-bridge-only-q3wm031e/module-trace.js:15:23)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)\n    at node:internal/main/run_main_module:36:49 {\n  code: 'ERR_DLOPEN_FAILED'\n}\n\nNode.js v22.23.3",
+      "diagnostics": {
+        "kind": "timeout",
+        "command": [
+          "node",
+          "/tmp/jscodeshift-bridge-only-q3wm031e/candidate/codebase/bin/jscodeshift.js",
+          "--cpus",
+          "2",
+          "--transform",
+          "/tmp/jscodeshift-bridge-only-q3wm031e/transform.js",
+          "/tmp/jscodeshift-bridge-only-q3wm031e/project"
+        ],
+        "timeout_seconds": 30.0,
+        "stdout_tail": "Processing 6 files... \nSpawning 2 workers...\n",
+        "stderr_tail": "/tmp/jscodeshift-bridge-only-q3wm031e/candidate/codebase/bridge/transform-host.js:8\nprocess.dlopen(module, path.resolve(__dirname, '..', 'jscodeshift.node'));\n        ^\n\nError: /tmp/jscodeshift-bridge-only-q3wm031e/candidate/codebase/jscodeshift.node: invalid ELF header\n    at Object.<anonymous> (/tmp/jscodeshift-bridge-only-q3wm031e/candidate/codebase/bridge/transform-host.js:8:9)\n    at Module._compile (node:internal/modules/cjs/loader:1781:14)\n    at Object..js (node:internal/modules/cjs/loader:1913:10)\n    at Module.load (node:internal/modules/cjs/loader:1505:32)\n    at Function.<anonymous> (node:internal/modules/cjs/loader:1309:12)\n    at Module._load (/tmp/jscodeshift-bridge-only-q3wm031e/module-trace.js:15:23)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)\n    at node:internal/main/run_main_module:36:49 {\n  code: 'ERR_DLOPEN_FAILED'\n}\n\nNode.js v22.23.3\n"
+      }
+    },
+    "rust-worker-failure-ownership": {
+      "status": "blocked",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.rust-worker-failure-ownership",
+      "detail": "probe timed out after 30s: node /tmp/jscodeshift-bridge-only-_qadl5i9/candidate/codebase/bin/jscodeshift.js --cpus 2 --fail-on-error --transform /tmp/jscodeshift-bridge-only-_qadl5i9/transform.js /tmp/jscodeshift-bridge-only-_qadl5i9/project; output=Processing 3 files... \nSpawning 2 workers... /tmp/jscodeshift-bridge-only-_qadl5i9/candidate/codebase/bridge/transform-host.js:8\nprocess.dlopen(module, path.resolve(__dirname, '..', 'jscodeshift.node'));\n        ^\n\nError: /tmp/jscodeshift-bridge-only-_qadl5i9/candidate/codebase/jscodeshift.node: invalid ELF header\n    at Object.<anonymous> (/tmp/jscodeshift-bridge-only-_qadl5i9/candidate/codebase/bridge/transform-host.js:8:9)\n    at Module._compile (node:internal/modules/cjs/loader:1781:14)\n    at Object..js (node:internal/modules/cjs/loader:1913:10)\n    at Module.load (node:internal/modules/cjs/loader:1505:32)\n    at Function.<anonymous> (node:internal/modules/cjs/loader:1309:12)\n    at Module._load (/tmp/jscodeshift-bridge-only-_qadl5i9/module-trace.js:15:23)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)\n    at node:internal/main/run_main_module:36:49 {\n  code: 'ERR_DLOPEN_FAILED'\n}\n\nNode.js v22.23.3",
+      "diagnostics": {
+        "kind": "timeout",
+        "command": [
+          "node",
+          "/tmp/jscodeshift-bridge-only-_qadl5i9/candidate/codebase/bin/jscodeshift.js",
+          "--cpus",
+          "2",
+          "--fail-on-error",
+          "--transform",
+          "/tmp/jscodeshift-bridge-only-_qadl5i9/transform.js",
+          "/tmp/jscodeshift-bridge-only-_qadl5i9/project"
+        ],
+        "timeout_seconds": 30.0,
+        "stdout_tail": "Processing 3 files... \nSpawning 2 workers...\n",
+        "stderr_tail": "/tmp/jscodeshift-bridge-only-_qadl5i9/candidate/codebase/bridge/transform-host.js:8\nprocess.dlopen(module, path.resolve(__dirname, '..', 'jscodeshift.node'));\n        ^\n\nError: /tmp/jscodeshift-bridge-only-_qadl5i9/candidate/codebase/jscodeshift.node: invalid ELF header\n    at Object.<anonymous> (/tmp/jscodeshift-bridge-only-_qadl5i9/candidate/codebase/bridge/transform-host.js:8:9)\n    at Module._compile (node:internal/modules/cjs/loader:1781:14)\n    at Object..js (node:internal/modules/cjs/loader:1913:10)\n    at Module.load (node:internal/modules/cjs/loader:1505:32)\n    at Function.<anonymous> (node:internal/modules/cjs/loader:1309:12)\n    at Module._load (/tmp/jscodeshift-bridge-only-_qadl5i9/module-trace.js:15:23)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)\n    at node:internal/main/run_main_module:36:49 {\n  code: 'ERR_DLOPEN_FAILED'\n}\n\nNode.js v22.23.3\n"
+      }
+    },
+    "rust-worker-determinism-ownership": {
+      "status": "blocked",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.rust-worker-determinism-ownership",
+      "detail": "probe timed out after 30s: node /tmp/jscodeshift-bridge-only-lmdpn408/candidate/codebase/bin/jscodeshift.js --cpus 2 --transform /tmp/jscodeshift-bridge-only-lmdpn408/transform.js /tmp/jscodeshift-bridge-only-lmdpn408/project; output=Processing 6 files... \nSpawning 2 workers... /tmp/jscodeshift-bridge-only-lmdpn408/candidate/codebase/bridge/transform-host.js:8\nprocess.dlopen(module, path.resolve(__dirname, '..', 'jscodeshift.node'));\n        ^\n\nError: /tmp/jscodeshift-bridge-only-lmdpn408/candidate/codebase/jscodeshift.node: invalid ELF header\n    at Object.<anonymous> (/tmp/jscodeshift-bridge-only-lmdpn408/candidate/codebase/bridge/transform-host.js:8:9)\n    at Module._compile (node:internal/modules/cjs/loader:1781:14)\n    at Object..js (node:internal/modules/cjs/loader:1913:10)\n    at Module.load (node:internal/modules/cjs/loader:1505:32)\n    at Function.<anonymous> (node:internal/modules/cjs/loader:1309:12)\n    at Module._load (/tmp/jscodeshift-bridge-only-lmdpn408/module-trace.js:15:23)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)\n    at node:internal/main/run_main_module:36:49 {\n  code: 'ERR_DLOPEN_FAILED'\n}\n\nNode.js v22.23.3",
+      "diagnostics": {
+        "kind": "timeout",
+        "command": [
+          "node",
+          "/tmp/jscodeshift-bridge-only-lmdpn408/candidate/codebase/bin/jscodeshift.js",
+          "--cpus",
+          "2",
+          "--transform",
+          "/tmp/jscodeshift-bridge-only-lmdpn408/transform.js",
+          "/tmp/jscodeshift-bridge-only-lmdpn408/project"
+        ],
+        "timeout_seconds": 30.0,
+        "stdout_tail": "Processing 6 files... \nSpawning 2 workers...\n",
+        "stderr_tail": "/tmp/jscodeshift-bridge-only-lmdpn408/candidate/codebase/bridge/transform-host.js:8\nprocess.dlopen(module, path.resolve(__dirname, '..', 'jscodeshift.node'));\n        ^\n\nError: /tmp/jscodeshift-bridge-only-lmdpn408/candidate/codebase/jscodeshift.node: invalid ELF header\n    at Object.<anonymous> (/tmp/jscodeshift-bridge-only-lmdpn408/candidate/codebase/bridge/transform-host.js:8:9)\n    at Module._compile (node:internal/modules/cjs/loader:1781:14)\n    at Object..js (node:internal/modules/cjs/loader:1913:10)\n    at Module.load (node:internal/modules/cjs/loader:1505:32)\n    at Function.<anonymous> (node:internal/modules/cjs/loader:1309:12)\n    at Module._load (/tmp/jscodeshift-bridge-only-lmdpn408/module-trace.js:15:23)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)\n    at node:internal/main/run_main_module:36:49 {\n  code: 'ERR_DLOPEN_FAILED'\n}\n\nNode.js v22.23.3\n"
+      }
+    },
+    "rust-implementation-depth": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.rust-implementation-depth",
+      "detail": "substantive Rust migration foundation: modular layout with 7893 executable lines across 20 modules; signals=argument handling, file handling, execution or writing"
+    },
+    "rust-feature-completeness": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.rust-feature-completeness",
+      "detail": "3/3 feature layers: argument handling, file handling, execution or writing"
+    },
+    "rust-wiring-attempt": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.rust-wiring-attempt",
+      "detail": "wiring: cargo in package.json scripts"
+    },
+    "rust-jscodeshift-facade": {
+      "status": "fail",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.rust-jscodeshift-facade",
+      "detail": "no jscodeshift API methods found in Rust impl blocks"
+    },
+    "rust-ast-traversal": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.rust-ast-traversal",
+      "detail": "recursive AST traversal found in napi_sys.rs"
+    },
+    "rust-collections-module": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.rust-collections-module",
+      "detail": "collections/ module with 5 file(s): ['jsx_element.rs', 'import_declaration.rs', 'variable_declarator.rs', 'mod.rs']"
+    },
+    "rust-test-density": {
+      "status": "partial",
+      "score": 0.33,
+      "scenarioId": "jscodeshift.rust-test-density",
+      "detail": "3 test(s) found (need 6+ for partial credit)"
+    },
+    "rust-module-breadth": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.rust-module-breadth",
+      "detail": "16 .rs files: ['colors', 'ignore_files', 'match_node', 'napi_sys', 'parsers', 'require_package', 'runner', 'worker']"
+    },
+    "rust-package-clean-pack-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.rust-package-clean-pack-ownership",
+      "detail": "clean package ownership npm pack failed"
+    },
+    "rust-package-guard-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.rust-package-guard-ownership",
+      "detail": "package-root guard probe failed"
+    },
+    "rust-legacy-engine-boundary": {
+      "status": "blocked",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.rust-legacy-engine-boundary",
+      "detail": "probe timed out after 30s: node /tmp/jscodeshift-bridge-only-dslu7_7w/candidate/codebase/bin/jscodeshift.js --run-in-band --marker native-cli --transform /tmp/jscodeshift-bridge-only-dslu7_7w/transform.js /tmp/jscodeshift-bridge-only-dslu7_7w/project; output=Processing 1 files... /tmp/jscodeshift-bridge-only-dslu7_7w/candidate/codebase/bridge/transform-host.js:8\nprocess.dlopen(module, path.resolve(__dirname, '..', 'jscodeshift.node'));\n        ^\n\nError: /tmp/jscodeshift-bridge-only-dslu7_7w/candidate/codebase/jscodeshift.node: invalid ELF header\n    at Object.<anonymous> (/tmp/jscodeshift-bridge-only-dslu7_7w/candidate/codebase/bridge/transform-host.js:8:9)\n    at Module._compile (node:internal/modules/cjs/loader:1781:14)\n    at Object..js (node:internal/modules/cjs/loader:1913:10)\n    at Module.load (node:internal/modules/cjs/loader:1505:32)\n    at Function.<anonymous> (node:internal/modules/cjs/loader:1309:12)\n    at Module._load (/tmp/jscodeshift-bridge-only-dslu7_7w/module-trace.js:15:23)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)\n    at node:internal/main/run_main_module:36:49 {\n  code: 'ERR_DLOPEN_FAILED'\n}\n\nNode.js v22.23.3",
+      "diagnostics": {
+        "kind": "timeout",
+        "command": [
+          "node",
+          "/tmp/jscodeshift-bridge-only-dslu7_7w/candidate/codebase/bin/jscodeshift.js",
+          "--run-in-band",
+          "--marker",
+          "native-cli",
+          "--transform",
+          "/tmp/jscodeshift-bridge-only-dslu7_7w/transform.js",
+          "/tmp/jscodeshift-bridge-only-dslu7_7w/project"
+        ],
+        "timeout_seconds": 30.0,
+        "stdout_tail": "Processing 1 files... \n",
+        "stderr_tail": "/tmp/jscodeshift-bridge-only-dslu7_7w/candidate/codebase/bridge/transform-host.js:8\nprocess.dlopen(module, path.resolve(__dirname, '..', 'jscodeshift.node'));\n        ^\n\nError: /tmp/jscodeshift-bridge-only-dslu7_7w/candidate/codebase/jscodeshift.node: invalid ELF header\n    at Object.<anonymous> (/tmp/jscodeshift-bridge-only-dslu7_7w/candidate/codebase/bridge/transform-host.js:8:9)\n    at Module._compile (node:internal/modules/cjs/loader:1781:14)\n    at Object..js (node:internal/modules/cjs/loader:1913:10)\n    at Module.load (node:internal/modules/cjs/loader:1505:32)\n    at Function.<anonymous> (node:internal/modules/cjs/loader:1309:12)\n    at Module._load (/tmp/jscodeshift-bridge-only-dslu7_7w/module-trace.js:15:23)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)\n    at node:internal/main/run_main_module:36:49 {\n  code: 'ERR_DLOPEN_FAILED'\n}\n\nNode.js v22.23.3\n"
+      }
+    },
+    "cross-feature-compatibility": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.cross-feature-compatibility",
+      "detail": "CLI options, worker scheduling, TSX parsing, templates, and ignore rules composed correctly"
+    },
+    "package-boundary-compatibility": {
+      "status": "fail",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.package-boundary-compatibility",
+      "detail": "npm pack failed (rc=127)"
+    },
+    "ast-composition-corpus": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.ast-composition-corpus",
+      "detail": "multi-file AST corpus preserves syntax, plugins, collections, templates, and formatting"
+    },
+    "worker-replay-consistency": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.worker-replay-consistency",
+      "detail": "parallel and serial worker replays preserve successful, failed, and delayed outcomes"
+    }
+  },
+  "status": "fail"
+}

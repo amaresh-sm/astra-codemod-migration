@@ -23,12 +23,12 @@
     "score": 0.0835,
     "score_source": "scores.json and newest reports/score.json",
     "source_candidate": "openhands-luna-medium-20260915-r2",
-    "exported_at": "2026-09-21T20:26:01.067498+00:00"
+    "exported_at": "2026-09-28T11:40:57.425125+00:00"
   },
   "benchmarking_cache_backfill": {
     "input_tokens": 564446,
-    "cached_tokens": 531621,
-    "ratio": 0.9418458647367578,
+    "cached_tokens": 531237,
+    "ratio": 0.9411654126358842,
     "ratio_source": "provider-level median fallback (hackerrank-gateway)",
     "source": "cache-backfill-dry-run.json"
   }

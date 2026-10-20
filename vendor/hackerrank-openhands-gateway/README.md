@@ -99,4 +99,4 @@ repository/
 
 ## Current status
 
-This is version `0.1.1`. Local compatibility and telemetry checks pass. Live OpenHands/Gateway smoke tests were verified with the pinned dependencies and Gateway credentials; future runs require the same credentials to be available in the execution environment.
+This is version `0.1.4`. Local compatibility and telemetry checks pass. Live OpenHands/Gateway smoke tests require Gateway credentials in the execution environment.

@@ -7,6 +7,8 @@ import hashlib
 import json
 import re
 import shutil
+import sys
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -16,6 +18,10 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE_ROOT = ROOT / "benchmarking-candidates"
 REGISTRY = ROOT / "scores.json"
 DEST_ROOT = ROOT / "benchmarking-runs"
+GATEWAY_SRC = ROOT / "vendor" / "hackerrank-openhands-gateway" / "src"
+if str(GATEWAY_SRC) not in sys.path:
+    sys.path.insert(0, str(GATEWAY_SRC))
+from hackerrank_openhands.telemetry import collect as collect_openhands  # noqa: E402
 
 SECRET_PATTERNS = [
     (re.compile(r"(?i)(bearer\s+)[^\s,;\"']+"), r"\1[REDACTED]"),
@@ -115,6 +121,51 @@ def write_sanitized_jsonl(source_file: Path, destination: Path, run_id: str) -> 
             out.write(scrub(line) + "\n")
 
 
+def gateway_usage_present(telemetry: Any) -> bool:
+    usage = telemetry.get("usage") if isinstance(telemetry, dict) else None
+    return isinstance(usage, dict) and usage.get("source") == "gateway" and usage.get("total_tokens") not in (None, 0)
+
+
+def derive_openhands_artifacts(source: Path, metadata: dict[str, Any], model: str, reasoning: str) -> tuple[dict[str, Any] | None, Any]:
+    """Build trajectory and gateway usage when a timed-out run kept events but not a trajectory."""
+    events = source / "events.jsonl"
+    trajectory = source / "trajectory.json"
+    if not events.is_file() or events.stat().st_size == 0:
+        return None, None
+    if trajectory.is_file() and trajectory.stat().st_size > 0:
+        return None, None
+    with tempfile.TemporaryDirectory(prefix="astra-export-") as temporary:
+        output = Path(temporary)
+        derived = collect_openhands(
+            events,
+            output / "telemetry.json",
+            model=str(metadata.get("model") or model),
+            reasoning=str(metadata.get("reasoning") or reasoning),
+            started_at=str(metadata.get("started_at") or ""),
+            completed_at=str(metadata.get("finished_at") or metadata.get("completed_at") or ""),
+            status=str(metadata.get("status") or "completed"),
+            exit_code=int(metadata.get("exit_code") or 0),
+            gateway_responses_path=source / "gateway_responses.jsonl",
+            redact_output=True,
+        )
+        derived_trajectory = json.loads((output / "trajectory.json").read_text(encoding="utf-8"))
+    return derived, derived_trajectory
+
+
+def copy_retained_agent_logs(source: Path, target: Path) -> None:
+    """Keep the process log when the run never produced an OpenHands event stream."""
+    events = source / "events.jsonl"
+    if events.is_file() and events.stat().st_size > 0:
+        return
+    for name in ("stdout.log", "stderr.log", "preflight.log", "docker.log"):
+        path = source / "logs" / name
+        if not path.is_file() or path.stat().st_size == 0:
+            continue
+        destination = target / "logs" / f"agent-{name}"
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_text(scrub(path.read_text(encoding="utf-8", errors="replace")), encoding="utf-8")
+
+
 def verifier_log(source: Path, score_report: Path | None, score: float) -> str:
     lines = [
         "Benchmark scoring evidence",
@@ -182,14 +233,23 @@ def main() -> None:
                 "model": {"name": model, "reasoning": reasoning},
                 "benchmarking": {"score": score, "source": "scores.json"},
             })
+            derived_telemetry, derived_trajectory = derive_openhands_artifacts(source, metadata, model, reasoning)
+            if derived_telemetry is not None and not gateway_usage_present(telemetry):
+                if isinstance(telemetry, dict) and telemetry.get("solution_size") and not derived_telemetry.get("solution_size"):
+                    derived_telemetry["solution_size"] = telemetry["solution_size"]
+                telemetry = derived_telemetry
             if isinstance(telemetry, dict):
                 telemetry["benchmarking"] = {"score": score, "source": "scores.json", "run_name": run_name}
             write_json(target / "telemetry" / "openhands-telemetry.json", telemetry)
 
             trajectory = source / "trajectory.json"
-            copy_sanitized_json(trajectory, target / "trajectory" / "openhands-trajectory.json", {
-                "schema_version": 1, "capture": "not_captured", "run": run_name,
-            })
+            if derived_trajectory is not None:
+                write_json(target / "trajectory" / "openhands-trajectory.json", derived_trajectory)
+            else:
+                copy_sanitized_json(trajectory, target / "trajectory" / "openhands-trajectory.json", {
+                    "schema_version": 1, "capture": "not_captured", "run": run_name,
+                })
+            copy_retained_agent_logs(source, target)
             write_json(target / "logs" / "events.sanitized.json", event_summary(source))
             write_sanitized_jsonl(source / "gateway_responses.jsonl", target / "logs" / "openhands-gateway_responses.jsonl", run_name)
             (target / "logs" / "hidden-scorer.log").write_text(

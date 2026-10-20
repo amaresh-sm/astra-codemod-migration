@@ -1,7 +1,7 @@
 {
   "task_id": "migrate-jscodeshift-runner-to-rust",
   "verifier_revision": "8fa709b640fbe44dc9130ed10180d3cc2bd38d6fcafefc4562dc4cf2201cc35a",
-  "score": 0.0696,
+  "score": 0.3122,
   "score_components": {
     "behavior": {
       "score": 0.0296551724,
@@ -471,5 +471,5 @@
       "awarded": 0.0
     }
   },
-  "benchmarking_registry_score": 0.0696
+  "benchmarking_registry_score": 0.3122
 }

@@ -1,0 +1,264 @@
+{
+  "criteria": {
+    "cli-transform-api": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "JavaScript transform failed (rc=-6)"
+    },
+    "parser-and-transform-variants": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "TSX parser/AST transform failed (rc=-6)"
+    },
+    "file-selection-and-stdin": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "recursive selection failed (rc=-6)"
+    },
+    "dry-run-print-and-reporting": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "dry run failed (rc=-6)"
+    },
+    "parallel-workers-and-results": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "--run-in-band did not use the serial execution contract"
+    },
+    "failure-and-exit-contract": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "ordinary transform failure did not produce the expected error result"
+    },
+    "cli-surface-and-identity": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "help output does not expose the required CLI surface"
+    },
+    "silent-output-contract": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "--silent did not suppress CLI output"
+    },
+    "symlink-boundary": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "symlink selection failed (rc=-6)"
+    },
+    "parallel-failure-recovery": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "parallel workers isolate failures and complete independent files"
+    },
+    "lifecycle-manifest": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "build, reset, and start lifecycle commands are declared"
+    },
+    "custom-option-forwarding": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "custom option values were not preserved"
+    },
+    "atomic-write-on-error": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "transform failure was not reported"
+    },
+    "parallel-result-determinism": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "parallel scheduling produces stable aggregate results"
+    },
+    "utf8-source-preservation": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "no-op transform changed UTF-8 source content"
+    },
+    "ast-collections-and-builders": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "collection traversal or standard builders failed"
+    },
+    "ast-formatting-and-comments": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "AST printing did not preserve comments or requested formatting"
+    },
+    "ast-modern-syntax": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "TypeScript/TSX modern syntax was not available to the transform"
+    },
+    "core-api-surface": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "core package API compatibility failed (rc=-6)"
+    },
+    "collection-extensions": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "typed collections, filters, mappings, mutations, and path accessors remain compatible"
+    },
+    "template-code-generation": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "template code generation failed (rc=-6)"
+    },
+    "package-root-export": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "package root exports the callable jscodeshift API and parses source"
+    },
+    "rust-runner-entrypoint": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "Rust-backed version output was not observed through the public CLI"
+    },
+    "rust-parser-babel-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "Babel parser/printer ownership trace failed: no traced compiled Rust process was observed"
+    },
+    "rust-parser-typescript-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "TypeScript parser ownership trace failed: no traced compiled Rust process was observed"
+    },
+    "rust-parser-tsx-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "TSX parser ownership trace failed: no traced compiled Rust process was observed"
+    },
+    "rust-printer-comments-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "comment-preserving printer ownership trace failed: no traced compiled Rust process was observed"
+    },
+    "rust-core-collections-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "core collections ownership trace failed: no traced compiled Rust process was observed"
+    },
+    "rust-core-builders-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "core builders ownership trace failed: no traced compiled Rust process was observed"
+    },
+    "rust-core-templates-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "template generation ownership trace failed: no traced compiled Rust process was observed"
+    },
+    "rust-core-nodepath-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "NodePath accessors ownership trace failed: no traced compiled Rust process was observed"
+    },
+    "rust-edge-ast-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "edge-case AST syntax ownership trace failed: no traced compiled Rust process was observed"
+    },
+    "rust-edge-cli-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "edge-case CLI ownership trace failed: no traced compiled Rust process was observed"
+    },
+    "rust-worker-multifile-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "multi-file worker execution ownership trace failed: no traced compiled Rust process was observed"
+    },
+    "rust-worker-parallel-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "parallel worker execution ownership trace failed: no traced compiled Rust process was observed"
+    },
+    "rust-worker-failure-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "worker failure ownership trace failed: no traced compiled Rust process was observed"
+    },
+    "rust-worker-determinism-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "parallel worker ownership trace failed"
+    },
+    "rust-implementation-depth": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "substantive Rust migration foundation: modular layout with 8637 executable lines across 20 modules; signals=argument handling, file handling, execution or writing"
+    },
+    "rust-feature-completeness": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "3/3 feature layers: argument handling, file handling, execution or writing"
+    },
+    "rust-wiring-attempt": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "no JS-to-Rust wiring detected"
+    },
+    "rust-jscodeshift-facade": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "no jscodeshift API methods found in Rust impl blocks"
+    },
+    "rust-ast-traversal": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "recursive AST traversal found in match_node.rs"
+    },
+    "rust-collections-module": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "collections/ module with 5 file(s): ['jsx_element.rs', 'import_declaration.rs', 'variable_declarator.rs', 'mod.rs']"
+    },
+    "rust-test-density": {
+      "status": "partial",
+      "score": 0.33,
+      "detail": "4 test(s) found (need 6+ for partial credit)"
+    },
+    "rust-module-breadth": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "16 .rs files: ['args_parser', 'core', 'ignore_files', 'json', 'match_node', 'runner', 'runtime', 'worker']"
+    },
+    "rust-package-clean-pack-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "clean packed Rust CLI did not execute"
+    },
+    "rust-package-guard-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "package-root guard probe failed"
+    },
+    "rust-legacy-engine-boundary": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "Rust CLI ownership trace failed: no traced compiled Rust process was observed"
+    },
+    "cross-feature-compatibility": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "transform-declared parser did not compose with the public CLI"
+    },
+    "package-boundary-compatibility": {
+      "status": "fail",
+      "score": 0.0,
+      "detail": "npm pack failed (rc=1)"
+    },
+    "ast-composition-corpus": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "multi-file AST corpus preserves syntax, plugins, collections, templates, and formatting"
+    },
+    "worker-replay-consistency": {
+      "status": "pass",
+      "score": 1.0,
+      "detail": "parallel and serial worker replays preserve successful, failed, and delayed outcomes"
+    }
+  }
+}

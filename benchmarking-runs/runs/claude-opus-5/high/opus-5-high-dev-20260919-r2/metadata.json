@@ -26,9 +26,16 @@
     "run_name": "opus-5-high-dev-20260919-r2",
     "model": "claude-opus-5",
     "reasoning": "high",
-    "score": 0.1303,
+    "score": 0.3503,
     "score_source": "scores.json and newest reports/score.json",
     "source_candidate": "openhands-opus-5-high-dev-20260919-r2",
-    "exported_at": "2026-09-21T20:26:01.067498+00:00"
+    "exported_at": "2026-09-28T11:40:57.425125+00:00"
+  },
+  "benchmarking_cache_backfill": {
+    "input_tokens": 29281315,
+    "cached_tokens": 27817249,
+    "ratio": 0.95,
+    "ratio_source": "model-level median",
+    "source": "cache-backfill-dry-run.json"
   }
 }

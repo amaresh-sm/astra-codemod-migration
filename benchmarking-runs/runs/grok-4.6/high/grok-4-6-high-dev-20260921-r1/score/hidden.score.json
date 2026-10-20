@@ -1,0 +1,65 @@
+{
+  "task_id": "migrate-jscodeshift-runner-to-rust",
+  "verifier_revision": "8fa709b640fbe44dc9130ed10180d3cc2bd38d6fcafefc4562dc4cf2201cc35a",
+  "score": 0.139,
+  "score_components": {
+    "behavior": {
+      "score": 0.029655,
+      "maximum": 0.09,
+      "observed": 0.086
+    },
+    "migration_foundation": {
+      "score": 0.0,
+      "maximum": 0.15,
+      "observed": 0.0
+    },
+    "operational": {
+      "score": 0.010345,
+      "maximum": 0.04,
+      "observed": 0.03
+    },
+    "rust_ownership": {
+      "score": 0.067308,
+      "maximum": 0.72,
+      "observed": 0.067308
+    }
+  },
+  "ownership_domains": {
+    "ast": {
+      "score": 0.0,
+      "maximum": 0.15,
+      "fraction": 0.0
+    },
+    "cli": {
+      "score": 0.0,
+      "maximum": 0.08,
+      "fraction": 0.0
+    },
+    "core": {
+      "score": 0.0,
+      "maximum": 0.16,
+      "fraction": 0.0
+    },
+    "files": {
+      "score": 0.0,
+      "maximum": 0.06,
+      "fraction": 0.0
+    },
+    "package": {
+      "score": 0.067308,
+      "maximum": 0.19,
+      "fraction": 0.3542526316
+    },
+    "workers": {
+      "score": 0.0,
+      "maximum": 0.08,
+      "fraction": 0.0
+    }
+  },
+  "observed_wrapper_score": 0.116,
+  "thin_wrapper_cap": 0.04,
+  "migration_status": "thin_js_wrapper",
+  "score_reason": "Compatibility was observed through a launcher/bridge, but no substantive Rust migration foundation was validated",
+  "hard_pass": false,
+  "benchmarking_registry_score": 0.139
+}

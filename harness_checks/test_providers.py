@@ -37,6 +37,13 @@ class ProviderCommandTests(unittest.TestCase):
         self.assertIn("--output /output", command.command)
         self.assertIn("--env-file /tmp/openhands.env", command.command)
 
+    def test_openhands_enables_prompt_caching_for_claude_models_only(self) -> None:
+        claude = build_provider_command("openhands", "claude-opus-5", "high")
+        self.assertIn("--prompt-caching", claude.command)
+
+        gemini = build_provider_command("openhands", "gemini-3.7-flash", "medium")
+        self.assertNotIn("--prompt-caching", gemini.command)
+
 
 if __name__ == "__main__":
     unittest.main()

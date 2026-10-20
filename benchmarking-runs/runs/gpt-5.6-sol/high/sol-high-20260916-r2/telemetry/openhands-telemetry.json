@@ -54,7 +54,7 @@
       "source": "openhands"
     },
     "custom_estimation": {
-      "amount_usd": 1.245540875,
+      "amount_usd": 3.3336028,
       "currency": "USD",
       "status": "estimated",
       "source": "custom_pricing_table",
@@ -66,12 +66,16 @@
       "requests_missing_usage": 0,
       "usage_source": "openhands_usage",
       "pricing": {
-        "input_usd_per_million": 1.25,
-        "output_usd_per_million": 10.0,
-        "cache_read_usd_per_million": 0.125,
-        "cache_write_usd_per_million": null,
-        "note": "~GPT-5 public tier"
+        "input_usd_per_million": 4.0,
+        "output_usd_per_million": 20.0,
+        "cache_read_usd_per_million": 0.4,
+        "cache_write_usd_per_million": 5.0,
+        "note": "OpenAI catalog pricing; Bedrock variants may be higher"
       }
+    },
+    "recalculated_from_tokens": {
+      "source": "scripts/recalculate_benchmark_costs.py",
+      "cache_tokens_included": true
     }
   },
   "workspace": {

@@ -41,11 +41,12 @@ def build_provider_command(provider: str, model: str, reasoning: str) -> Provide
         # Use the reusable HackerRank/OpenHands package.  It owns the SDK
         # setup, Gateway compatibility fixes, response capture, and complete
         # telemetry/trajectory artifacts.
+        prompt_caching = " --prompt-caching" if model.lower().removeprefix("anthropic/").startswith("claude-") else ""
         return ProviderCommand(
             "hackerrank-openhands run "
             f"--workspace /workspace --instruction-file /workspace/INSTRUCTION.md "
             f"--model {model_arg} --reasoning {shlex.quote(reasoning)} "
-            "--output /output --env-file /tmp/openhands.env --redact",
+            f"--output /output --env-file /tmp/openhands.env --redact{prompt_caching}",
             ("ASTRA_GATEWAY_API_KEY", "ASTRA_GATEWAY_BASE_URL", "LLM_API_KEY", "LLM_BASE_URL"),
         )
     raise ValueError("provider must be codex, openai-compatible, claude-code, or openhands")

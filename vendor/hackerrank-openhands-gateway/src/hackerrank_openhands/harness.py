@@ -25,6 +25,8 @@ from .workspace_metrics import compare_snapshots, snapshot_workspace
 
 DEFAULT_GATEWAY_URL = "https://gateway-central.ai.private.hackerrank.link/v1"
 REASONING_OPTIONS = ("none", "minimal", "low", "medium", "high", "xhigh", "ultra", "max")
+DEFAULT_MAX_OUTPUT_TOKENS = 32_768
+ANTHROPIC_MAX_OUTPUT_TOKENS = 65_536
 _GATEWAY_RESPONSE_MAX_BYTES = 2 * 1024 * 1024
 _GATEWAY_ERROR_BODY_MAX_CHARS = 4096
 _gateway_response_path: ContextVar[Path | None] = ContextVar("gateway_response_path", default=None)
@@ -39,6 +41,20 @@ _redaction_enabled: ContextVar[bool] = ContextVar("redaction_enabled", default=T
 # falls back to whatever (if anything) LiteLLM/OpenHands can resolve on their own.
 GATEWAY_MODEL_CONTEXT_WINDOWS: dict[str, int] = {
     "minimax-m3": 524_288,  # confirmed via a context_length_exceeded rejection at 1,114,695 tokens
+}
+
+# A model-specific working cap may be lower than its actual context window. This lets
+# the agent retain more than the generic default while reserving generous space for
+# its response and avoiding oversized gateway payloads. Claude Opus 5-family and
+# GPT-6 Astra public documentation advertise 1.05M-token windows; their Gateway
+# aliases are therefore given deliberately lower working caps until exact deployment
+# limits are independently confirmed.
+GATEWAY_MODEL_MAX_INPUT_TOKENS: dict[str, int] = {
+    "claude-opus-5-5": 524_288,
+    "claude-sonnet-5": 524_288,   # observed max 170k in runs; 1M published window, conservative working cap
+    "claude-fable-5-1": 524_288,  # 1M published window; conservative working cap until gateway limit confirmed
+    "gpt-6-astra": 524_288,
+    "gemini-4-argon": 524_288,    # observed max 167k in runs; hard limit unconfirmed, conservative working cap
 }
 
 # Condensation must kick in well before the hard limit: OpenHands's own token count is
@@ -61,28 +77,128 @@ _DEFAULT_CONSERVATIVE_MAX_INPUT_TOKENS = 120_000
 def gateway_model_max_input_tokens(model: str) -> int:
     """Return the input-token cap to condense a gateway model's history against.
 
-    A confirmed model (``GATEWAY_MODEL_CONTEXT_WINDOWS``) uses a safety margin below
-    its real limit. Every other model still gets a bound: a conservative default
-    that keeps history small regardless of the model's actual (unconfirmed) ceiling.
+    A model-specific working cap overrides the generic safety-margin calculation.
+    Every other model still gets a bound: a conservative default that keeps history
+    small regardless of the model's actual (unconfirmed) ceiling.
     """
-    bare_model = model.removeprefix("openai/")
+    bare_model = model.removeprefix("openai/").removeprefix("anthropic/")
+    explicit_cap = GATEWAY_MODEL_MAX_INPUT_TOKENS.get(bare_model)
+    if explicit_cap is not None:
+        return explicit_cap
     window = GATEWAY_MODEL_CONTEXT_WINDOWS.get(bare_model)
     if window is not None:
         return int(window * _CONTEXT_WINDOW_SAFETY_FACTOR)
     return _DEFAULT_CONSERVATIVE_MAX_INPUT_TOKENS
 
 
-def normalize_gateway_model(model: str) -> str:
+def _is_claude_model(model: str) -> bool:
+    """Return whether the model is a Claude model (sonnet, opus, or fable family)."""
+    bare = model.removeprefix("openai/").removeprefix("anthropic/").lower()
+    return any(family in bare for family in ("sonnet", "opus", "fable"))
+
+
+def normalize_gateway_model(model: str, *, use_anthropic_format: bool = False) -> str:
     """Return the model string LiteLLM needs for its own client-side routing.
 
-    This prefix (``openai/...``) only tells LiteLLM which provider adapter to
-    use locally; LiteLLM strips it before serializing the request, so the
-    wire body's ``model`` field is always the bare alias regardless. Passing
-    a bare model here (no provider prefix) makes LiteLLM reject the call
-    client-side with "LLM Provider NOT provided" before it ever reaches the
-    network -- confirmed by reproducing that exact failure for minimax-m3.
+    By default (``use_anthropic_format=False``) this adds the ``openai/`` prefix,
+    which tells LiteLLM to use the OpenAI-compatible adapter and call
+    ``/v1/chat/completions``.
+
+    When ``use_anthropic_format=True`` (the default) and the model is a Claude
+    model (sonnet, opus, or fable), the ``anthropic/`` prefix is used instead so
+    LiteLLM calls ``/v1/messages`` with the Anthropic Messages API format,
+    enabling prompt caching via ``cache_control`` content blocks. Non-Claude
+    models keep the OpenAI-compatible adapter even when this flag is on.
+
+    LiteLLM strips the prefix before serializing the request, so the wire
+    body's ``model`` field is always the bare alias regardless. Passing a bare
+    model here (no provider prefix) makes LiteLLM reject the call client-side
+    with "LLM Provider NOT provided" -- confirmed by reproducing that exact
+    failure for minimax-m3.
     """
+    if use_anthropic_format and _is_claude_model(model):
+        # Candidate launchers historically supplied gateway aliases as
+        # ``openai/claude-*``. Leaving that prefix in place makes LiteLLM use
+        # its OpenAI-compatible adapter, so cache-control blocks never reach
+        # the Anthropic Messages API. Claude caching must actively replace a
+        # known transport prefix, not merely add one when the alias is bare.
+        if model.startswith(("openai/", "anthropic/")):
+            return f"anthropic/{model.split('/', 1)[1]}"
+        if "/" not in model:
+            return f"anthropic/{model}"
     return model if "/" in model else f"openai/{model}"
+
+
+def register_gateway_model_capabilities(normalized_model: str) -> None:
+    """Teach LiteLLM about Gateway aliases newer than its bundled model map."""
+    if normalized_model != "anthropic/claude-opus-5-5":
+        return
+    import litellm
+
+    # Without this entry LiteLLM maps reasoning_effort to legacy fixed-budget
+    # thinking. Opus 5.5 supports adaptive thinking and output_config effort.
+    litellm.register_model(
+        {
+            "claude-opus-5-5": {
+                "litellm_provider": "anthropic",
+                "mode": "chat",
+                "supports_reasoning": True,
+                "supports_adaptive_thinking": True,
+                "supports_output_config": True,
+                "max_input_tokens": 1_050_000,
+                "max_output_tokens": 128_000,
+            }
+        },
+        persist_across_reloads=False,
+    )
+
+
+def resolved_transport(model: str, base_url: str | None = None) -> dict[str, Any]:
+    """Return the LiteLLM adapter and endpoint selected by a normalized model.
+
+    This is adapter-level resolution, rather than a claim that the raw HTTP
+    wire request was captured. OpenHands delegates final serialization to
+    LiteLLM, so telemetry records that distinction explicitly.
+    """
+    if model.startswith("anthropic/"):
+        transport = {
+            "resolved_model_prefix": "anthropic",
+            "resolved_route": "/v1/messages",
+            "route_source": "litellm_adapter_resolution",
+            "wire_route_observed": False,
+        }
+    elif model.startswith("openai/"):
+        transport = {
+            "resolved_model_prefix": "openai",
+            "resolved_route": "/v1/chat/completions",
+            "route_source": "litellm_adapter_resolution",
+            "wire_route_observed": False,
+        }
+    else:
+        transport = {
+            "resolved_model_prefix": None,
+            "resolved_route": None,
+            "route_source": "unknown",
+            "wire_route_observed": False,
+        }
+    if base_url and transport["resolved_route"]:
+        transport["resolved_endpoint"] = f"{base_url.rstrip('/')}{transport['resolved_route']}"
+    return transport
+
+
+def gateway_transport_base_url(gateway_base_url: str, normalized_model: str) -> str:
+    """Return the base URL LiteLLM needs for the selected API adapter.
+
+    Gateway environment files conventionally hold an OpenAI-compatible base URL
+    ending in ``/v1``. LiteLLM's Anthropic adapter adds ``/v1/messages`` itself,
+    so retaining that suffix would create the invalid ``/v1/v1/messages`` path.
+    Only the Anthropic Messages adapter removes the terminal version segment;
+    the OpenAI-compatible adapter continues to receive the configured URL.
+    """
+    base = gateway_base_url.rstrip("/")
+    if normalized_model.startswith("anthropic/") and base.endswith("/v1"):
+        return base[:-3]
+    return base
 
 
 def now() -> str:
@@ -253,6 +369,84 @@ def _response_payload(response: Any) -> Any:
     if isinstance(response, dict):
         return response
     return str(response)
+
+
+def _is_empty_length_response(response: Any) -> bool:
+    """Return whether a response exhausted its budget before producing an action."""
+    payload = _response_payload(response)
+    if not isinstance(payload, dict):
+        return False
+    choices = payload.get("choices")
+    if not isinstance(choices, list) or not choices or not isinstance(choices[0], dict):
+        return False
+    choice = choices[0]
+    message = choice.get("message")
+    if not isinstance(message, dict):
+        return False
+    content = message.get("content")
+    has_content = content not in (None, "", [])
+    has_tool_calls = bool(message.get("tool_calls"))
+    return choice.get("finish_reason") == "length" and not has_content and not has_tool_calls
+
+
+def _apply_output_limit_recovery(llm: Any, messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Give the model an actionable retry after a reasoning-only truncation."""
+    if not getattr(llm, "_astra_output_limit_recovery_pending", False):
+        return messages
+    setattr(llm, "_astra_output_limit_recovery_pending", False)
+    return [
+        *messages,
+        {
+            "role": "user",
+            "content": (
+                "Your previous response hit the output-token limit before producing text or a tool call. "
+                "Do not re-plan the whole task. Take exactly one small concrete action now using a tool."
+            ),
+        },
+    ]
+
+
+def _remember_output_limit(response: Any, llm: Any) -> None:
+    """Schedule a focused recovery instruction for the next model request."""
+    if _is_empty_length_response(response):
+        setattr(llm, "_astra_output_limit_recovery_pending", True)
+
+
+def _empty_length_tail(path: Path) -> int:
+    """Count consecutive empty output-limit responses at the end of a capture."""
+    if not path.is_file():
+        return 0
+    flags: list[bool] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        try:
+            record = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        flags.append(_is_empty_length_response(record.get("response")))
+    count = 0
+    for flag in reversed(flags):
+        if not flag:
+            break
+        count += 1
+    return count
+
+
+def _incomplete_run_reason(gateway_responses_path: Path, workspace: dict[str, Any]) -> str | None:
+    """Explain why a nominally successful agent run produced no candidate."""
+    empty_length_responses = _empty_length_tail(gateway_responses_path)
+    if empty_length_responses >= 2:
+        return (
+            f"model produced {empty_length_responses} consecutive empty responses "
+            "after exhausting the output-token limit"
+        )
+    if (
+        gateway_responses_path.is_file()
+        and gateway_responses_path.stat().st_size > 0
+        and workspace.get("status") == "available"
+        and workspace.get("files", {}).get("total_changed") == 0
+    ):
+        return "OpenHands stopped without changing the candidate workspace"
+    return None
 
 
 def _request_fingerprint(value: Any) -> Any:
@@ -554,6 +748,10 @@ class StuckRequestError(RuntimeError):
     """
 
 
+class IncompleteRunError(RuntimeError):
+    """Raised when OpenHands exits cleanly without producing a candidate."""
+
+
 # Retrying an unrecoverable request (this is not the internal loop above -- it is
 # every top-level call the *agent* makes for what is, byte-for-byte, the same
 # conversation state) was observed taking ~15 minutes per attempt and repeating with
@@ -655,6 +853,10 @@ def _capture_gateway_response(
             "timestamp": now(),
             "model": str(getattr(llm, "model", "")),
             "status": "error" if error else "ok",
+            "transport": resolved_transport(
+                str(getattr(llm, "model", "")),
+                str(getattr(llm, "base_url", "")) or None,
+            ),
         }
         if latency_ms is not None:
             record["latency_ms"] = round(max(0.0, latency_ms), 3)
@@ -716,6 +918,57 @@ def _capture_gateway_response(
 def _is_gemini_model(llm: Any) -> bool:
     """Return whether an LLM instance targets a Gemini model."""
     return "gemini" in str(getattr(llm, "model", "")).lower()
+
+
+def _is_anthropic_format_model(llm: Any) -> bool:
+    """Return whether this LLM instance is using the Anthropic Messages API format."""
+    return str(getattr(llm, "model", "")).startswith("anthropic/")
+
+
+def _enable_anthropic_messages_streaming(kwargs: dict[str, Any]) -> None:
+    """Force LiteLLM's Anthropic Messages adapter to send ``stream: true``.
+
+    Prompt-caching Claude runs use ``anthropic/`` so LiteLLM calls
+    ``/v1/messages``. That adapter only puts ``stream: true`` on the wire body
+    when OpenHands leaves streaming enabled. OpenHands's completion path turns
+    streaming off whenever no ``on_token`` callback is wired (the agent never
+    supplies one), so the Gateway receives a non-streaming Messages request.
+
+    Re-enable streaming here and install a no-op callback when needed so the
+    SDK still drains SSE chunks into a ``ModelResponse``.
+    """
+    kwargs["stream"] = True
+    kwargs["enable_streaming"] = True
+    # OpenHands passes ``on_token=None`` explicitly, so setdefault would keep None
+    # and the SDK would not drain the SSE stream into a ModelResponse.
+    if kwargs.get("on_token") is None:
+        kwargs["on_token"] = lambda _chunk: None
+
+
+def _inject_cache_control(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Add cache_control to the system message to enable Anthropic prompt caching.
+
+    Wraps the system message content in a content block with
+    ``cache_control: {type: ephemeral}`` so Anthropic caches the compiled
+    system prompt across turns, reducing cost and latency on long conversations.
+    """
+    result: list[dict[str, Any]] = []
+    for message in messages:
+        if message.get("role") == "system":
+            content = message.get("content")
+            new_message = dict(message)
+            if isinstance(content, str) and content:
+                new_message["content"] = [{"type": "text", "text": content, "cache_control": {"type": "ephemeral"}}]
+            elif isinstance(content, list) and content:
+                last = content[-1]
+                if isinstance(last, dict) and "cache_control" not in last:
+                    new_content = list(content)
+                    new_content[-1] = {**last, "cache_control": {"type": "ephemeral"}}
+                    new_message["content"] = new_content
+            result.append(new_message)
+        else:
+            result.append(message)
+    return result
 
 
 def _field_value(value: Any, field: str) -> Any:
@@ -916,12 +1169,16 @@ def install_gateway_fix(base_url: str) -> None:
         return
 
     def sync_call(self: Any, *, messages: list[dict[str, Any]], **kwargs: Any):
+        messages = _apply_output_limit_recovery(self, messages)
         if _is_gemini_model(self):
             messages = _restore_gemini_signatures(self, messages)
             kwargs.pop("prompt_cache_key", None)
             extra = kwargs.get("extra_body")
             if isinstance(extra, dict):
                 kwargs["extra_body"] = {key: value for key, value in extra.items() if key != "prompt_cache_key"}
+        if _is_anthropic_format_model(self):
+            messages = _inject_cache_control(messages)
+            _enable_anthropic_messages_streaming(kwargs)
         messages = [{key: value for key, value in message.items() if key not in {"name", "refusal"}} for message in messages]
         messages, request_validation = _normalize_and_validate_messages(messages)
         fingerprint = _messages_fingerprint(messages)
@@ -947,17 +1204,22 @@ def install_gateway_fix(base_url: str) -> None:
                 _record_repeat_outcome(self, fingerprint, failed=True)
                 raise
             _remember_gemini_signatures(self, response)
+            _remember_output_limit(response, self)
             _record_repeat_outcome(self, fingerprint, failed=False)
             _capture_gateway_response(self, response=response, latency_ms=(time.perf_counter() - started) * 1000, messages=messages, request_kwargs=kwargs, request_validation=request_validation)
             return response
 
     async def async_call(self: Any, *, messages: list[dict[str, Any]], **kwargs: Any):
+        messages = _apply_output_limit_recovery(self, messages)
         if _is_gemini_model(self):
             messages = _restore_gemini_signatures(self, messages)
             kwargs.pop("prompt_cache_key", None)
             extra = kwargs.get("extra_body")
             if isinstance(extra, dict):
                 kwargs["extra_body"] = {key: value for key, value in extra.items() if key != "prompt_cache_key"}
+        if _is_anthropic_format_model(self):
+            messages = _inject_cache_control(messages)
+            _enable_anthropic_messages_streaming(kwargs)
         messages = [{key: value for key, value in message.items() if key not in {"name", "refusal"}} for message in messages]
         messages, request_validation = _normalize_and_validate_messages(messages)
         fingerprint = _messages_fingerprint(messages)
@@ -983,6 +1245,7 @@ def install_gateway_fix(base_url: str) -> None:
                 _record_repeat_outcome(self, fingerprint, failed=True)
                 raise
             _remember_gemini_signatures(self, response)
+            _remember_output_limit(response, self)
             _record_repeat_outcome(self, fingerprint, failed=False)
             _capture_gateway_response(self, response=response, latency_ms=(time.perf_counter() - started) * 1000, messages=messages, request_kwargs=kwargs, request_validation=request_validation)
             return response
@@ -1051,10 +1314,14 @@ def run(
     env_file: Path | None = None,
     redact_output: bool = False,
     max_iterations: int = 3200,
+    prompt_caching: bool = True,
+    max_output_tokens: int | None = None,
 ) -> RunResult:
     """Run one OpenHands coding session and write JSONL event records."""
     if max_iterations < 1:
         raise ValueError("max_iterations must be at least 1")
+    if max_output_tokens is not None and max_output_tokens < 1:
+        raise ValueError("max_output_tokens must be at least 1")
     output_dir.mkdir(parents=True, exist_ok=True)
     events_path = output_dir / "events.jsonl"
     gateway_responses_path = output_dir / "gateway_responses.jsonl"
@@ -1094,7 +1361,6 @@ def run(
         instruction = instruction_file.read_text(encoding="utf-8")
         key = api_key()
         base_url = (gateway_base_url or gateway_url()).rstrip("/")
-        install_gateway_fix(base_url)
         try:
             workspace_before = snapshot_workspace(workspace, excluded_paths=(output_dir,))
         except Exception as exc:  # noqa: BLE001 - metrics must not prevent the run
@@ -1107,13 +1373,37 @@ def run(
         from openhands.tools.file_editor import FileEditorTool
         from openhands.tools.terminal import TerminalTool
 
-        normalized_model = normalize_gateway_model(model)
+        normalized_model = normalize_gateway_model(model, use_anthropic_format=prompt_caching)
+        register_gateway_model_capabilities(normalized_model)
+        transport_base_url = gateway_transport_base_url(base_url, normalized_model)
+        install_gateway_fix(transport_base_url)
+        extra_headers = {"Authorization": f"Bearer {key}"} if normalized_model.startswith("anthropic/") else None
+        effective_max_output_tokens = (
+            max_output_tokens
+            if max_output_tokens is not None
+            else ANTHROPIC_MAX_OUTPUT_TOKENS
+            if normalized_model.startswith("anthropic/")
+            else DEFAULT_MAX_OUTPUT_TOKENS
+        )
         llm = LLM(
             usage_id="agent",
             model=normalized_model,
             api_key=SecretStr(key),
-            base_url=base_url,
-            force_string_serializer=True,
+            base_url=transport_base_url,
+            # The Gateway's Messages endpoint authenticates with the same Bearer
+            # credential contract as its OpenAI-compatible endpoint. LiteLLM's
+            # Anthropic adapter otherwise emits only its native x-api-key header.
+            extra_headers=extra_headers,
+            # The string serializer flattens each message to plain text, which
+            # drops thinking blocks and per-message cache markers. Claude's
+            # Messages route accepts content blocks, so keep them. Other
+            # gateway models stay on the string form their route requires.
+            force_string_serializer=not normalized_model.startswith("anthropic/"),
+            # Claude prompt-caching uses the Anthropic Messages adapter. Leave
+            # streaming on so LiteLLM sends ``stream: true``; OpenHands still
+            # disables it without an on_token callback, and the Gateway patch
+            # re-enables it on the transport path.
+            stream=bool(prompt_caching and normalized_model.startswith("anthropic/")),
             # Pass the requested value through unchanged. OpenHands and the
             # Gateway/model capability layer determine whether the selected
             # effort is supported for this model.
@@ -1121,7 +1411,7 @@ def run(
             # OpenHands defaults custom gateway routes to a 16,384-token
             # output cap.  Allow longer coding-agent turns; the gateway and
             # model context window remain the final authorities.
-            max_output_tokens=32768,
+            max_output_tokens=effective_max_output_tokens,
             # LiteLLM has no built-in context window for most of these custom aliases.
             # ``max_input_tokens`` always wins over any runtime/static resolution and
             # is what the condenser below uses to decide when to summarize history;
@@ -1137,10 +1427,10 @@ def run(
             # SDK default is 5 internal retries per call. Combined with the longer
             # timeout above, 5 retries could mean up to ~100 minutes before a single
             # call gives up (5 x 1200s) -- and that is *before* any retry the agent
-            # itself performs on top. 2 keeps a real safety net for a one-off blip
-            # without multiplying the longer per-attempt patience into an
-            # unbounded-feeling wait when a request is genuinely stuck, not slow.
-            num_retries=2,
+            # itself performs on top. 3 retries gives a little more room for a
+            # transient provider disconnect without multiplying the longer
+            # per-attempt patience into an unbounded-feeling wait.
+            num_retries=3,
         )
 
         with events_path.open("w", encoding="utf-8") as stream:
@@ -1201,8 +1491,18 @@ def run(
                 "reasoning_tokens": getattr(usage, "reasoning_tokens", None) if usage else None,
                 "cost_usd": getattr(metrics, "accumulated_cost", None) if metrics else None,
             })
-            write(workspace_event())
+            final_workspace = workspace_event()
+            incomplete_reason = _incomplete_run_reason(gateway_responses_path, final_workspace)
+            if incomplete_reason:
+                raise IncompleteRunError(incomplete_reason)
+            write(final_workspace)
             write({"type": "run_event", "event_type": "run_completed", "timestamp": now()})
+    except IncompleteRunError as exc:
+        status, exit_code = "incomplete", 2
+        error = {"type": exc.__class__.__name__, "message": str(exc)}
+        with events_path.open("a", encoding="utf-8") as stream:
+            stream.write(json.dumps(redact(workspace_event()), separators=(",", ":")) + "\n")
+            stream.write(json.dumps(redact({"type": "run_event", "event_type": "run_incomplete", "timestamp": now(), "error": error}), separators=(",", ":")) + "\n")
     except Exception as exc:  # noqa: BLE001 - expose a useful failure to the caller
         status, exit_code = "failed", 1
         error = {"type": exc.__class__.__name__, "message": str(exc)}

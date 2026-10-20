@@ -1,0 +1,475 @@
+{
+  "task_id": "migrate-jscodeshift-runner-to-rust",
+  "verifier_revision": "8fa709b640fbe44dc9130ed10180d3cc2bd38d6fcafefc4562dc4cf2201cc35a",
+  "score": 0.128516,
+  "score_components": {
+    "behavior": {
+      "score": 0.0296551724,
+      "maximum": 0.09,
+      "observed": 0.086
+    },
+    "migration_foundation": {
+      "score": 0.0,
+      "maximum": 0.15,
+      "observed": 0.0
+    },
+    "operational": {
+      "score": 0.0103448276,
+      "maximum": 0.04,
+      "observed": 0.03
+    },
+    "rust_ownership": {
+      "score": 0.05665,
+      "maximum": 0.72,
+      "observed": 0.05665
+    }
+  },
+  "ownership_domains": {
+    "ast": {
+      "score": 0.0,
+      "maximum": 0.15,
+      "fraction": 0.0
+    },
+    "cli": {
+      "score": 0.0,
+      "maximum": 0.08,
+      "fraction": 0.0
+    },
+    "core": {
+      "score": 0.0,
+      "maximum": 0.16,
+      "fraction": 0.0
+    },
+    "files": {
+      "score": 0.0,
+      "maximum": 0.06,
+      "fraction": 0.0
+    },
+    "package": {
+      "score": 0.05665,
+      "maximum": 0.19,
+      "fraction": 0.2981578947
+    },
+    "workers": {
+      "score": 0.0,
+      "maximum": 0.08,
+      "fraction": 0.0
+    }
+  },
+  "observed_wrapper_score": 0.116,
+  "thin_wrapper_cap": 0.04,
+  "migration_status": "thin_js_wrapper",
+  "score_reason": "Compatibility was observed through a launcher/bridge, but no substantive Rust migration foundation was validated",
+  "hard_pass": false,
+  "criteria": {
+    "cli-surface-and-identity": {
+      "status": "fail",
+      "score": 0.0,
+      "weight": 0.01,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.0,
+      "awarded": 0.0
+    },
+    "lifecycle-manifest": {
+      "status": "pass",
+      "score": 1.0,
+      "weight": 0.01,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.01,
+      "awarded": 0.0034482759
+    },
+    "package-root-export": {
+      "status": "pass",
+      "score": 1.0,
+      "weight": 0.01,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.01,
+      "awarded": 0.0034482759
+    },
+    "silent-output-contract": {
+      "status": "pass",
+      "score": 1.0,
+      "weight": 0.01,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.01,
+      "awarded": 0.0034482759
+    },
+    "cli-transform-api": {
+      "status": "pass",
+      "score": 1.0,
+      "weight": 0.03,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.03,
+      "awarded": 0.0103448276
+    },
+    "parser-and-transform-variants": {
+      "status": "pass",
+      "score": 1.0,
+      "weight": 0.004,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.004,
+      "awarded": 0.0013793103
+    },
+    "ast-collections-and-builders": {
+      "status": "pass",
+      "score": 1.0,
+      "weight": 0.004,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.004,
+      "awarded": 0.0013793103
+    },
+    "ast-formatting-and-comments": {
+      "status": "pass",
+      "score": 1.0,
+      "weight": 0.004,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.004,
+      "awarded": 0.0013793103
+    },
+    "ast-modern-syntax": {
+      "status": "pass",
+      "score": 1.0,
+      "weight": 0.004,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.004,
+      "awarded": 0.0013793103
+    },
+    "ast-composition-corpus": {
+      "status": "pass",
+      "score": 1.0,
+      "weight": 0.004,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.004,
+      "awarded": 0.0013793103
+    },
+    "core-api-surface": {
+      "status": "pass",
+      "score": 1.0,
+      "weight": 0.004,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.004,
+      "awarded": 0.0013793103
+    },
+    "collection-extensions": {
+      "status": "pass",
+      "score": 1.0,
+      "weight": 0.004,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.004,
+      "awarded": 0.0013793103
+    },
+    "template-code-generation": {
+      "status": "pass",
+      "score": 1.0,
+      "weight": 0.004,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.004,
+      "awarded": 0.0013793103
+    },
+    "file-selection-and-stdin": {
+      "status": "pass",
+      "score": 1.0,
+      "weight": 0.003,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.003,
+      "awarded": 0.0010344828
+    },
+    "dry-run-print-and-reporting": {
+      "status": "pass",
+      "score": 1.0,
+      "weight": 0.002,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.002,
+      "awarded": 0.0006896552
+    },
+    "symlink-boundary": {
+      "status": "pass",
+      "score": 1.0,
+      "weight": 0.001,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.001,
+      "awarded": 0.0003448276
+    },
+    "custom-option-forwarding": {
+      "status": "pass",
+      "score": 1.0,
+      "weight": 0.002,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.002,
+      "awarded": 0.0006896552
+    },
+    "atomic-write-on-error": {
+      "status": "pass",
+      "score": 1.0,
+      "weight": 0.002,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.002,
+      "awarded": 0.0006896552
+    },
+    "utf8-source-preservation": {
+      "status": "pass",
+      "score": 1.0,
+      "weight": 0.002,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.002,
+      "awarded": 0.0006896552
+    },
+    "parallel-workers-and-results": {
+      "status": "pass",
+      "score": 1.0,
+      "weight": 0.002,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.002,
+      "awarded": 0.0006896552
+    },
+    "failure-and-exit-contract": {
+      "status": "pass",
+      "score": 1.0,
+      "weight": 0.002,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.002,
+      "awarded": 0.0006896552
+    },
+    "parallel-failure-recovery": {
+      "status": "pass",
+      "score": 1.0,
+      "weight": 0.002,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.002,
+      "awarded": 0.0006896552
+    },
+    "parallel-result-determinism": {
+      "status": "pass",
+      "score": 1.0,
+      "weight": 0.002,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.002,
+      "awarded": 0.0006896552
+    },
+    "worker-replay-consistency": {
+      "status": "pass",
+      "score": 1.0,
+      "weight": 0.002,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.002,
+      "awarded": 0.0006896552
+    },
+    "cross-feature-compatibility": {
+      "status": "pass",
+      "score": 1.0,
+      "weight": 0.002,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.002,
+      "awarded": 0.0006896552
+    },
+    "package-boundary-compatibility": {
+      "status": "fail",
+      "score": 0.0,
+      "weight": 0.004,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.0,
+      "awarded": 0.0
+    },
+    "rust-runner-entrypoint": {
+      "status": "fail",
+      "score": 0.0,
+      "weight": 0.15,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.0,
+      "awarded": 0.0
+    },
+    "rust-parser-babel-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "weight": 0.03,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.0,
+      "awarded": 0.0
+    },
+    "rust-parser-typescript-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "weight": 0.03,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.0,
+      "awarded": 0.0
+    },
+    "rust-parser-tsx-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "weight": 0.03,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.0,
+      "awarded": 0.0
+    },
+    "rust-printer-comments-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "weight": 0.03,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.0,
+      "awarded": 0.0
+    },
+    "rust-edge-ast-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "weight": 0.03,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.0,
+      "awarded": 0.0
+    },
+    "rust-core-collections-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "weight": 0.04,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.0,
+      "awarded": 0.0
+    },
+    "rust-core-builders-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "weight": 0.04,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.0,
+      "awarded": 0.0
+    },
+    "rust-core-templates-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "weight": 0.04,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.0,
+      "awarded": 0.0
+    },
+    "rust-core-nodepath-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "weight": 0.04,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.0,
+      "awarded": 0.0
+    },
+    "rust-legacy-engine-boundary": {
+      "status": "fail",
+      "score": 0.0,
+      "weight": 0.08,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.0,
+      "awarded": 0.0
+    },
+    "rust-edge-cli-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "weight": 0.06,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.0,
+      "awarded": 0.0
+    },
+    "rust-worker-multifile-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "weight": 0.02,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.0,
+      "awarded": 0.0
+    },
+    "rust-worker-parallel-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "weight": 0.02,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.0,
+      "awarded": 0.0
+    },
+    "rust-worker-failure-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "weight": 0.02,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.0,
+      "awarded": 0.0
+    },
+    "rust-worker-determinism-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "weight": 0.02,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.0,
+      "awarded": 0.0
+    },
+    "rust-implementation-depth": {
+      "status": "pass",
+      "score": 1.0,
+      "weight": 0.02,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.02,
+      "awarded": 0.02
+    },
+    "rust-feature-completeness": {
+      "status": "pass",
+      "score": 1.0,
+      "weight": 0.02,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.02,
+      "awarded": 0.02
+    },
+    "rust-wiring-attempt": {
+      "status": "fail",
+      "score": 0.0,
+      "weight": 0.01,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.0,
+      "awarded": 0.0
+    },
+    "rust-jscodeshift-facade": {
+      "status": "fail",
+      "score": 0.0,
+      "weight": 0.015,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.0,
+      "awarded": 0.0
+    },
+    "rust-ast-traversal": {
+      "status": "pass",
+      "score": 1.0,
+      "weight": 0.015,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.015,
+      "awarded": 0.015
+    },
+    "rust-collections-module": {
+      "status": "fail",
+      "score": 0.0,
+      "weight": 0.01,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.0,
+      "awarded": 0.0
+    },
+    "rust-test-density": {
+      "status": "fail",
+      "score": 0.33,
+      "weight": 0.005,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.00165,
+      "awarded": 0.00165
+    },
+    "rust-package-clean-pack-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "weight": 0.085,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.0,
+      "awarded": 0.0
+    },
+    "rust-package-guard-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "weight": 0.01,
+      "blocked_policy": "zero",
+      "raw_awarded": 0.0,
+      "awarded": 0.0
+    }
+  },
+  "benchmarking_registry_score": 0.1285
+}

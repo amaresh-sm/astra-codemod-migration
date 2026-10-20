@@ -3,22 +3,25 @@
   "currency": "USD",
   "models": {
     "gpt-5.6-sol": {
-      "input_usd_per_million": 1.25,
-      "output_usd_per_million": 10.0,
-      "cache_read_usd_per_million": 0.125,
-      "note": "~GPT-5 public tier"
+      "input_usd_per_million": 4.0,
+      "output_usd_per_million": 20.0,
+      "cache_read_usd_per_million": 0.4,
+      "cache_write_usd_per_million": 5.0,
+      "note": "OpenAI catalog pricing; Bedrock variants may be higher"
     },
     "gpt-5.6-terra": {
-      "input_usd_per_million": 1.25,
-      "output_usd_per_million": 10.0,
-      "cache_read_usd_per_million": 0.125,
-      "note": "~GPT-5 public tier"
+      "input_usd_per_million": 2.0,
+      "output_usd_per_million": 12.0,
+      "cache_read_usd_per_million": 0.2,
+      "cache_write_usd_per_million": 2.5,
+      "note": "OpenAI catalog pricing; Bedrock variants may be higher"
     },
     "gpt-5.6-luna": {
-      "input_usd_per_million": 1.25,
-      "output_usd_per_million": 10.0,
-      "cache_read_usd_per_million": 0.125,
-      "note": "~GPT-5 public tier"
+      "input_usd_per_million": 0.2,
+      "output_usd_per_million": 1.2,
+      "cache_read_usd_per_million": 0.02,
+      "cache_write_usd_per_million": 0.25,
+      "note": "OpenAI catalog pricing"
     },
     "grok-4.5": {
       "input_usd_per_million": 2.0,
@@ -36,6 +39,7 @@
       "input_usd_per_million": 2.0,
       "output_usd_per_million": 6.0,
       "cache_read_usd_per_million": 0.5,
+      "cache_write_usd_per_million": 0.0,
       "note": "xAI API pricing; long context >= 200K tokens",
       "long_context": {
         "threshold_tokens": 200000,
@@ -48,7 +52,7 @@
       "input_usd_per_million": 3.0,
       "output_usd_per_million": 15.0,
       "cache_read_usd_per_million": 0.3,
-      "note": "~Moonshot Kimi K3 public API pricing"
+      "note": "Moonshot Kimi K3 pricing"
     },
     "minimax-m3": {
       "input_usd_per_million": 0.6,
@@ -66,43 +70,61 @@
       "input_usd_per_million": 2.0,
       "output_usd_per_million": 6.0,
       "cache_read_usd_per_million": null,
-      "note": "~Alibaba Qwen3.8 Max international tier; cache rate not public"
+      "note": "Alibaba Qwen 3.8 pricing; cache read not publicly confirmed"
     },
     "deepseek-v4-pro": {
       "input_usd_per_million": 0.66,
       "output_usd_per_million": 1.98,
       "cache_read_usd_per_million": 0.022,
-      "note": "DeepSeek V4 Pro off-peak pricing; peak rates are 2x"
+      "note": "DeepSeek V4 Pro off-peak pricing; peak may be higher"
     },
     "gemini-3.7-flash": {
-      "input_usd_per_million": 0.3,
-      "output_usd_per_million": 2.5,
+      "input_usd_per_million": 0.75,
+      "output_usd_per_million": 3.75,
       "cache_read_usd_per_million": 0.075,
-      "note": "~Gemini Flash public tier"
+      "cache_write_usd_per_million": 0.5,
+      "note": "Gemini Flash pricing (Google/OpenRouter)"
     },
     "glm-5.2": {
       "input_usd_per_million": 1.4,
       "output_usd_per_million": 4.4,
       "cache_read_usd_per_million": 0.26,
-      "note": "Z.AI GLM-5.2 public API pricing"
+      "note": "Z.AI GLM-5.2 pricing"
     },
     "claude-fable-5": {
       "input_usd_per_million": 10.0,
       "output_usd_per_million": 50.0,
       "cache_read_usd_per_million": 1.0,
-      "note": "Anthropic Claude Fable 5 public pricing; cache read inferred from Fable 5.1 disclosure"
+      "cache_write_usd_per_million": 12.5,
+      "note": "Anthropic Claude Fable 5 pricing"
     },
     "claude-opus-5": {
-      "input_usd_per_million": 15.0,
-      "output_usd_per_million": 75.0,
-      "cache_read_usd_per_million": 1.5,
-      "note": "~Claude Opus public tier"
+      "input_usd_per_million": 5.0,
+      "output_usd_per_million": 25.0,
+      "cache_read_usd_per_million": 0.5,
+      "cache_write_usd_per_million": 6.25,
+      "note": "Anthropic Claude Opus 5 pricing"
     },
     "claude-sonnet-5": {
-      "input_usd_per_million": 3.0,
-      "output_usd_per_million": 15.0,
-      "cache_read_usd_per_million": 0.3,
-      "note": "~Claude Sonnet public tier"
+      "input_usd_per_million": 2.0,
+      "output_usd_per_million": 10.0,
+      "cache_read_usd_per_million": 0.2,
+      "cache_write_usd_per_million": 2.5,
+      "note": "Anthropic Claude Sonnet 5 pricing"
+    },
+    "claude-opus-5-5": {
+      "input_usd_per_million": 5.0,
+      "output_usd_per_million": 25.0,
+      "cache_read_usd_per_million": 0.5,
+      "cache_write_usd_per_million": 6.25,
+      "note": "Anthropic Claude Opus 5.5 pricing (same as Opus 5 until official rates)"
+    },
+    "gpt-6-astra": {
+      "input_usd_per_million": 4.0,
+      "output_usd_per_million": 20.0,
+      "cache_read_usd_per_million": 0.4,
+      "cache_write_usd_per_million": 5.0,
+      "note": "OpenAI GPT-6 Astra pricing (placeholder; mirroring GPT-5.6 Sol)"
     }
   }
 }

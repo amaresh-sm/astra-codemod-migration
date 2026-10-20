@@ -244,6 +244,17 @@ def candidate_json(run_name: str, *relative_paths: str) -> dict[str, Any]:
     return {}
 
 
+def had_no_model_execution(run_name: str) -> bool:
+    """Prove that a failed run stopped before a container or gateway call."""
+    metadata = candidate_json(run_name, "metadata.json")
+    state = candidate_json(run_name, "logs/container-state.json")
+    return (
+        metadata.get("status") == "failed"
+        and state.get("started") is False
+        and metadata.get("exit_code") == 127
+    )
+
+
 def normalized_candidate_usage(run_name: str) -> dict[str, Any] | None:
     """Recover usage from retained nested telemetry or gateway responses."""
     for telemetry in (
@@ -342,6 +353,28 @@ def candidate_duration(run_name: str) -> str | None:
     return pi_duration(run_name)
 
 
+def candidate_workspace_metrics(run_name: str) -> tuple[int | None, int | None, int | None]:
+    """Recover source-file, LOC, and direct dependency counts from a snapshot."""
+    telemetry = candidate_json(run_name, "telemetry.json", ".openhands-output/telemetry.json")
+    size = telemetry.get("solution_size", {})
+    files = size.get("workspace_source_files")
+    loc = size.get("workspace_source_lines")
+    files = int(files) if isinstance(files, (int, float)) else None
+    loc = int(loc) if isinstance(loc, (int, float)) else None
+
+    root = candidate_source_root(run_name)
+    deps = None
+    if root is not None:
+        package = root / "package.json"
+        try:
+            package_data = json.loads(package.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            package_data = {}
+        sections = ("dependencies", "devDependencies", "peerDependencies", "optionalDependencies")
+        deps = sum(len(package_data.get(section, {})) for section in sections if isinstance(package_data.get(section), dict))
+    return files, loc, deps
+
+
 def is_core_source_file(path: Path, root: Path) -> bool:
     relative = path.relative_to(root)
     parts = {part.lower() for part in relative.parts[:-1]}
@@ -406,26 +439,49 @@ def main() -> None:
         usage = telemetry.get("usage", {})
         if normalize_usage(usage) is None:
             usage = normalized_candidate_usage(run_name) or {}
+        no_model_execution = had_no_model_execution(run_name)
         row[0] = display_name
         row[1] = item["model"]
         row[2] = item["reasoning"]
         row[3] = f"{float(item['score']):.4f}"
         row[4] = format_tokens(usage)
+        if row[4] == "—" and no_model_execution:
+            row[4] = "0/0/0/0"
         estimate = estimated_cost(item["model"], usage)
         reported = reported_cost(telemetry)
         if reported is None:
             reported = candidate_reported_cost(run_name)
         row[7] = f"${estimate:.4f}" if estimate is not None else "—"
+        if row[7] == "—" and no_model_execution:
+            row[7] = "$0.0000"
         row[8] = f"${reported:.4f}" if reported is not None else "—"
         event_tools, event_iterations = candidate_event_counts(run_name)
+        if no_model_execution:
+            event_tools = event_tools if event_tools is not None else 0
+            event_iterations = event_iterations if event_iterations is not None else 0
         if row[5] in {"—", "0"} and event_tools is not None:
             row[5] = str(event_tools)
         if row[6] in {"—", "0"} and event_iterations is not None:
             row[6] = str(event_iterations)
         if row[9] == "—":
             duration = candidate_duration(run_name)
+            if duration is None:
+                metadata = candidate_json(run_name, "metadata.json")
+                seconds = metadata.get("duration_seconds")
+                if isinstance(seconds, (int, float)):
+                    total_seconds = max(0, int(round(seconds)))
+                    hours, remainder = divmod(total_seconds, 3600)
+                    minutes, seconds = divmod(remainder, 60)
+                    duration = f"{hours}h {minutes:02d}m {seconds:02d}s" if hours else f"{minutes}m {seconds:02d}s"
             if duration is not None:
                 row[9] = duration
+        files, loc, deps = candidate_workspace_metrics(run_name)
+        if row[10] == "—" and files is not None:
+            row[10] = format_int(files)
+        if row[11] == "—" and loc is not None:
+            row[11] = format_int(loc)
+        if row[12] == "—" and deps is not None:
+            row[12] = format_int(deps)
         row[13] = largest_core_file(run_name)
         if not old_rows.get(display_name):
             missing_metadata.append(display_name)
@@ -439,7 +495,7 @@ def main() -> None:
         "The token column is formatted as `input/output/reasoning/cache-read` with compact K/M units. "
         "Largest file is the highest-LOC first-party source file; dependencies, generated output, caches, logs, lock/package metadata, and dumps are excluded. "
         "Reported cost is the Gateway amount when available, otherwise the OpenHands amount. "
-        "Runs that failed before model execution retain — for tokens, calls, steps, and estimated cost because no gateway request occurred; — otherwise means the source did not provide that field.",
+        "Runs proven to fail before model execution are rendered with zero tokens, calls, steps, and estimated cost; reported cost remains — because no provider reported one. — otherwise means the source did not provide that field.",
         "",
         HEADER,
         ALIGNMENT,

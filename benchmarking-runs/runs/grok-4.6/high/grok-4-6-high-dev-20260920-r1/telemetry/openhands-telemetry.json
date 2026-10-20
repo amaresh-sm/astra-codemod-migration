@@ -1,22 +1,112 @@
 {
   "schema_version": 1,
-  "tokens": {
-    "input": 120,
-    "output": 46,
-    "cached_input": null,
-    "total": 107,
-    "source": "agent-log"
+  "harness": {
+    "name": "hackerrank-openhands-gateway",
+    "version": "0.1.4"
   },
-  "tool_calls": {
-    "total": null,
-    "by_type": {
-      "read": null,
-      "shell": null,
-      "edit": null,
-      "write": null,
-      "other": null
+  "run": {
+    "status": "timed_out",
+    "exit_code": 124,
+    "error": null
+  },
+  "model": {
+    "name": "grok-4.6",
+    "reasoning": "high",
+    "provider": "hackerrank-gateway"
+  },
+  "timing": {
+    "started_at": "2026-09-19T19:56:10.657875+00:00",
+    "completed_at": "2026-09-20T01:56:15.117759+00:00",
+    "duration_ms": 21604459,
+    "llm_requests": {
+      "count": 1567,
+      "with_latency": 1567,
+      "successful": 1567,
+      "failed": 0,
+      "total_latency_ms": 20978489.126,
+      "average_latency_ms": 13387.677,
+      "min_latency_ms": 2048.877,
+      "max_latency_ms": 562551.088
+    }
+  },
+  "usage": {
+    "source": "gateway",
+    "requests": 1567,
+    "input_tokens": 52512939,
+    "cached_input_tokens": 49491383,
+    "cache_read_tokens": 49491383,
+    "cache_write_tokens": 0,
+    "output_tokens": 2544589,
+    "reasoning_tokens": 0,
+    "total_tokens": 55057528
+  },
+  "cost": {
+    "gateway": {
+      "amount_usd": null,
+      "currency": "USD",
+      "status": "unavailable",
+      "source": "gateway",
+      "responses_with_cost": 0
     },
-    "source": "unavailable"
+    "openhands": {
+      "amount_usd": null,
+      "currency": "USD",
+      "status": "unavailable",
+      "source": "openhands"
+    },
+    "custom_estimation": {
+      "amount_usd": 92.112675,
+      "currency": "USD",
+      "status": "estimated",
+      "source": "custom_pricing_table",
+      "pricing_version": 1,
+      "model": "grok-4.6",
+      "normalized_model": "grok-4.6",
+      "requests": 1,
+      "requests_with_usage": 1,
+      "requests_missing_usage": 0,
+      "usage_source": "openhands_usage",
+      "pricing": {
+        "input_usd_per_million": 4.0,
+        "output_usd_per_million": 12.0,
+        "cache_read_usd_per_million": 1.0,
+        "cache_write_usd_per_million": 0.0,
+        "note": "xAI API pricing; long context >= 200K tokens",
+        "long_context_threshold_tokens": 200000,
+        "long_context": {
+          "input_usd_per_million": 4.0,
+          "output_usd_per_million": 12.0,
+          "cache_read_usd_per_million": 1.0
+        }
+      }
+    },
+    "recalculated_from_tokens": {
+      "source": "scripts/recalculate_benchmark_costs.py",
+      "cache_tokens_included": true
+    }
+  },
+  "workspace": {
+    "status": "unavailable",
+    "reason": "workspace metrics event not found"
+  },
+  "tools": {
+    "total": 7197,
+    "successful": 7068,
+    "failed": 129,
+    "cancelled": 0,
+    "rejected": 0,
+    "unknown": 0,
+    "by_tool": {
+      "terminal": 502,
+      "file_editor": 6687,
+      "think": 8
+    }
+  },
+  "trace": {
+    "events_path": "events.jsonl",
+    "event_count": 14679,
+    "invalid_event_count": 0,
+    "integrity_sha256": "4e9c96140e966d7d34a2d9d35362c5e70daa5a632cb8463b38c48308f715baf0"
   },
   "solution_size": {
     "workspace_source_files": 546,
@@ -27,12 +117,13 @@
     "agent_changed_source_files": 545,
     "agent_changed_source_lines": 322905
   },
-  "duration_seconds": 21604.339,
-  "started_at": "2026-09-19T19:56:10.657875+00:00",
-  "finished_at": "2026-09-20T01:56:15.117759+00:00",
   "benchmarking": {
     "score": 0.1112,
     "source": "scores.json",
     "run_name": "grok-4-6-high-dev-20260920-r1"
+  },
+  "benchmarking_cache_backfill": {
+    "ratio": 0.9424607422169496,
+    "source": "cache-backfill-dry-run.json"
   }
 }

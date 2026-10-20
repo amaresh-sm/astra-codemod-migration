@@ -1,0 +1,33 @@
++----------------------------------------------------------------------+
+|  OpenHands SDK v1.44.1                                               |
+|                                                                      |
+|  Report a bug: github.com/OpenHands/software-agent-sdk/issues        |
+|  Get help: openhands.dev/joinslack                                   |
+|  Scale up: openhands.dev/product/sdk                                 |
+|                                                                      |
+|  Set OPENHANDS_SUPPRESS_BANNER=1 to hide this message                |
++----------------------------------------------------------------------+
+
+[09/15/26 21:43:14] WARNING  No persistence_dir provided; falling   state.py:506
+                             back to InMemoryFileStore. EventLog                
+                             data will not persist across requests.             
+[09/15/26 21:43:14] INFO     Created new conversation               state.py:583
+                             84b9c84d-7794-4278-814d-14e76118799b               
+[09/15/26 21:43:14] INFO     FileEditor initialized with cwd:      editor.py:105
+                             /workspace                                         
+[09/15/26 21:43:14] WARNING  tmux is not installed. Falling back  factory.py:181
+                             to subprocess-based terminal, which                
+                             may be less stable. For best agent                 
+                             performance, install tmux (e.g.                    
+                             `apt-get install tmux` or `brew                    
+                             install tmux`).                                    
+/usr/local/lib/python3.12/site-packages/openhands/tools/terminal/impl.py:115: UserWarning: tmux is not installed. Falling back to subprocess-based terminal, which may be less stable. For best agent performance, install tmux (e.g. `apt-get install tmux` or `brew install tmux`).
+  self._session = create_terminal_session(
+[09/15/26 21:43:14] INFO     Using shell:             subprocess_terminal.py:142
+                             /usr/bin/bash                                      
+[09/15/26 21:43:15] INFO     TerminalExecutor initialized with       impl.py:124
+                             working_dir: /workspace, username:                 
+                             None, terminal_type: TerminalSession               
+[09/15/26 21:43:15] INFO     Loaded 2 tools from spec                base.py:563
+/usr/local/lib/python3.12/site-packages/openhands/sdk/llm/utils/telemetry.py:291: UserWarning: Cost calculation failed: This model isn't mapped yet. model=claude-sonnet-5, custom_llm_provider=openai. Add it here - https://github.com/BerriAI/litellm/blob/main/model_prices_and_context_window.json.
+  warnings.warn(f"Cost calculation failed: {e}")

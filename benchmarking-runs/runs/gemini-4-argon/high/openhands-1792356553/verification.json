@@ -1,0 +1,14 @@
+{
+  "task_id": "migrate-jscodeshift-runner-to-rust",
+  "candidate_id": "openhands-1792356553",
+  "workspace": "<candidate-workspace>",
+  "image": "astra-migrate-jscodeshift-runner-to-rust-verifier:latest",
+  "runtime_image": "astra-migrate-jscodeshift-runner-to-rust-runtime:latest",
+  "manifest": "app-setup/manifest.json",
+  "verifier_revision": "8fa709b640fbe44dc9130ed10180d3cc2bd38d6fcafefc4562dc4cf2201cc35a",
+  "started_at": "2026-10-18T22:39:53.810221+00:00",
+  "status": "passed",
+  "exit_code": 0,
+  "finished_at": "2026-10-18T22:41:38.821644+00:00",
+  "duration_seconds": 105.011
+}

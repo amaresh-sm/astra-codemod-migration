@@ -55,24 +55,28 @@
       "source": "openhands"
     },
     "custom_estimation": {
-      "amount_usd": 16.89390305,
+      "amount_usd": 29.15240055,
       "currency": "USD",
       "status": "estimated",
       "source": "custom_pricing_table",
       "pricing_version": 1,
       "model": "openai/gemini-3.7-flash",
       "normalized_model": "gemini-3.7-flash",
-      "requests": 3200,
-      "requests_with_usage": 3200,
+      "requests": 1,
+      "requests_with_usage": 1,
       "requests_missing_usage": 0,
-      "usage_source": "gateway_usage",
+      "usage_source": "openhands_usage",
       "pricing": {
-        "input_usd_per_million": 0.3,
-        "output_usd_per_million": 2.5,
+        "input_usd_per_million": 0.75,
+        "output_usd_per_million": 3.75,
         "cache_read_usd_per_million": 0.075,
-        "cache_write_usd_per_million": null,
-        "note": "~Gemini Flash public tier"
+        "cache_write_usd_per_million": 0.5,
+        "note": "Gemini Flash pricing (Google/OpenRouter)"
       }
+    },
+    "recalculated_from_tokens": {
+      "source": "scripts/recalculate_benchmark_costs.py",
+      "cache_tokens_included": true
     }
   },
   "workspace": {

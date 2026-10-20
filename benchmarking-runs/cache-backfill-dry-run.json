@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "mode": "apply",
-  "generated_at": "2026-09-21T20:55:08.409573+00:00",
+  "generated_at": "2026-09-28T12:00:34.619427+00:00",
   "task": "migrate-jscodeshift-runner-to-rust",
   "ratio_rule": "floor(input_tokens * clamped model-level median cache_read_tokens/input_tokens)",
   "fallback_rule": "provider-level median of observed cache ratios when a model-level median is unavailable",
@@ -13,133 +13,213 @@
   "candidates": [
     {
       "task": "migrate-jscodeshift-runner-to-rust",
+      "run": "opus-5-high-dev-20260919-r2",
+      "model": "claude-opus-5",
+      "input": 29281315,
+      "ratio": 0.95,
+      "observed_median_ratio": 0.971362506038022,
+      "ratio_source": "model-level median",
+      "cached": 27817249
+    },
+    {
+      "task": "migrate-jscodeshift-runner-to-rust",
       "run": "opus-5-medium-dev-20260917",
       "model": "claude-opus-5",
       "input": 25321211,
-      "ratio": 0.9418458647367578,
-      "observed_median_ratio": null,
-      "ratio_source": "provider-level median fallback (hackerrank-gateway)",
-      "cached": 23848677
+      "ratio": 0.95,
+      "observed_median_ratio": 0.971362506038022,
+      "ratio_source": "model-level median",
+      "cached": 24055150
     },
     {
       "task": "migrate-jscodeshift-runner-to-rust",
       "run": "sonnet-5-high-dev-20260918-r2",
       "model": "claude-sonnet-5",
       "input": 25368882,
-      "ratio": 0.9418458647367578,
+      "ratio": 0.9411654126358842,
       "observed_median_ratio": null,
       "ratio_source": "provider-level median fallback (hackerrank-gateway)",
-      "cached": 23893576
+      "cached": 23876314
     },
     {
       "task": "migrate-jscodeshift-runner-to-rust",
       "run": "sonnet-5-medium-dev-20260919-r5",
       "model": "claude-sonnet-5",
       "input": 6808492,
-      "ratio": 0.9418458647367578,
+      "ratio": 0.9411654126358842,
       "observed_median_ratio": null,
       "ratio_source": "provider-level median fallback (hackerrank-gateway)",
-      "cached": 6412550
+      "cached": 6407917
     },
     {
       "task": "migrate-jscodeshift-runner-to-rust",
       "run": "sonnet-5-medium-dev-20260918-r3",
       "model": "claude-sonnet-5",
       "input": 13078038,
-      "ratio": 0.9418458647367578,
+      "ratio": 0.9411654126358842,
       "observed_median_ratio": null,
       "ratio_source": "provider-level median fallback (hackerrank-gateway)",
-      "cached": 12317496
+      "cached": 12308597
+    },
+    {
+      "task": "migrate-jscodeshift-runner-to-rust",
+      "run": "sonnet-5-medium-dev-20260922-r1",
+      "model": "claude-sonnet-5",
+      "input": 6808492,
+      "ratio": 0.9411654126358842,
+      "observed_median_ratio": null,
+      "ratio_source": "provider-level median fallback (hackerrank-gateway)",
+      "cached": 6407917
     },
     {
       "task": "migrate-jscodeshift-runner-to-rust",
       "run": "luna-high-20260916-r2",
       "model": "gpt-5.6-luna",
       "input": 842017,
-      "ratio": 0.9418458647367578,
+      "ratio": 0.9411654126358842,
       "observed_median_ratio": null,
       "ratio_source": "provider-level median fallback (hackerrank-gateway)",
-      "cached": 793050
+      "cached": 792477
     },
     {
       "task": "migrate-jscodeshift-runner-to-rust",
       "run": "luna-high-dev-20260918",
       "model": "gpt-5.6-luna",
       "input": 696709,
-      "ratio": 0.9418458647367578,
+      "ratio": 0.9411654126358842,
       "observed_median_ratio": null,
       "ratio_source": "provider-level median fallback (hackerrank-gateway)",
-      "cached": 656192
+      "cached": 655718
     },
     {
       "task": "migrate-jscodeshift-runner-to-rust",
       "run": "luna-high-20260916-r4",
       "model": "gpt-5.6-luna",
       "input": 3987923,
-      "ratio": 0.9418458647367578,
+      "ratio": 0.9411654126358842,
       "observed_median_ratio": null,
       "ratio_source": "provider-level median fallback (hackerrank-gateway)",
-      "cached": 3756008
+      "cached": 3753295
     },
     {
       "task": "migrate-jscodeshift-runner-to-rust",
       "run": "luna-medium-20260915-r2",
       "model": "gpt-5.6-luna",
       "input": 564446,
-      "ratio": 0.9418458647367578,
+      "ratio": 0.9411654126358842,
       "observed_median_ratio": null,
       "ratio_source": "provider-level median fallback (hackerrank-gateway)",
-      "cached": 531621
+      "cached": 531237
     },
     {
       "task": "migrate-jscodeshift-runner-to-rust",
       "run": "luna-medium-20260916",
       "model": "gpt-5.6-luna",
       "input": 484608,
-      "ratio": 0.9418458647367578,
+      "ratio": 0.9411654126358842,
       "observed_median_ratio": null,
       "ratio_source": "provider-level median fallback (hackerrank-gateway)",
-      "cached": 456426
+      "cached": 456096
     },
     {
       "task": "migrate-jscodeshift-runner-to-rust",
       "run": "luna-medium-prod-dev-20260918",
       "model": "gpt-5.6-luna",
       "input": 371678,
-      "ratio": 0.9418458647367578,
+      "ratio": 0.9411654126358842,
       "observed_median_ratio": null,
       "ratio_source": "provider-level median fallback (hackerrank-gateway)",
-      "cached": 350063
+      "cached": 349810
+    },
+    {
+      "task": "migrate-jscodeshift-runner-to-rust",
+      "run": "sol-high-20260916",
+      "model": "gpt-5.6-sol",
+      "input": 9198813,
+      "ratio": 0.95,
+      "observed_median_ratio": 0.9576617042300646,
+      "ratio_source": "model-level median",
+      "cached": 8738872
+    },
+    {
+      "task": "migrate-jscodeshift-runner-to-rust",
+      "run": "terra-high-prod-dev-20260918",
+      "model": "gpt-5.6-terra",
+      "input": 1436553,
+      "ratio": 0.9389122028259178,
+      "observed_median_ratio": 0.9389122028259178,
+      "ratio_source": "model-level median",
+      "cached": 1348797
+    },
+    {
+      "task": "migrate-jscodeshift-runner-to-rust",
+      "run": "terra-high-20260916-r4",
+      "model": "gpt-5.6-terra",
+      "input": 554903,
+      "ratio": 0.9389122028259178,
+      "observed_median_ratio": 0.9389122028259178,
+      "ratio_source": "model-level median",
+      "cached": 521005
+    },
+    {
+      "task": "migrate-jscodeshift-runner-to-rust",
+      "run": "terra-high-20260915-r2",
+      "model": "gpt-5.6-terra",
+      "input": 669203,
+      "ratio": 0.9389122028259178,
+      "observed_median_ratio": 0.9389122028259178,
+      "ratio_source": "model-level median",
+      "cached": 628322
+    },
+    {
+      "task": "migrate-jscodeshift-runner-to-rust",
+      "run": "terra-medium-20260916-r3",
+      "model": "gpt-5.6-terra",
+      "input": 447631,
+      "ratio": 0.9389122028259178,
+      "observed_median_ratio": 0.9389122028259178,
+      "ratio_source": "model-level median",
+      "cached": 420286
     },
     {
       "task": "migrate-jscodeshift-runner-to-rust",
       "run": "grok-4-6-high-dev-20260918",
       "model": "grok-4.6",
       "input": 16763503,
-      "ratio": 0.9418458647367578,
-      "observed_median_ratio": null,
-      "ratio_source": "provider-level median fallback (hackerrank-gateway)",
-      "cached": 15788635
+      "ratio": 0.9424607422169496,
+      "observed_median_ratio": 0.9424607422169496,
+      "ratio_source": "model-level median",
+      "cached": 15798943
+    },
+    {
+      "task": "migrate-jscodeshift-runner-to-rust",
+      "run": "grok-4-6-high-dev-20260920-r1",
+      "model": "grok-4.6",
+      "input": 52512939,
+      "ratio": 0.9424607422169496,
+      "observed_median_ratio": 0.9424607422169496,
+      "ratio_source": "model-level median",
+      "cached": 49491383
     },
     {
       "task": "migrate-jscodeshift-runner-to-rust",
       "run": "grok-4-6-medium-20260915",
       "model": "grok-4.6",
       "input": 10277274,
-      "ratio": 0.9418458647367578,
-      "observed_median_ratio": null,
-      "ratio_source": "provider-level median fallback (hackerrank-gateway)",
-      "cached": 9679608
+      "ratio": 0.9424607422169496,
+      "observed_median_ratio": 0.9424607422169496,
+      "ratio_source": "model-level median",
+      "cached": 9685927
     },
     {
       "task": "migrate-jscodeshift-runner-to-rust",
       "run": "grok-4-6-medium-20260916-r2",
       "model": "grok-4.6",
       "input": 5448661,
-      "ratio": 0.9418458647367578,
-      "observed_median_ratio": null,
-      "ratio_source": "provider-level median fallback (hackerrank-gateway)",
-      "cached": 5131798
+      "ratio": 0.9424607422169496,
+      "observed_median_ratio": 0.9424607422169496,
+      "ratio_source": "model-level median",
+      "cached": 5135149
     }
   ],
   "skipped": [
@@ -149,14 +229,19 @@
       "reason": "no_input_tokens"
     },
     {
-      "run": "opus-5-high-dev-20260919-r2",
+      "run": "opus-5-high-dev-20260918",
       "model": "claude-opus-5",
       "reason": "no_input_tokens"
     },
     {
-      "run": "opus-5-high-dev-20260918",
+      "run": "openhands-opus-5-medium-dev-20260920-r2",
       "model": "claude-opus-5",
-      "reason": "no_input_tokens"
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "openhands-opus-5-medium-dev-20260921-r1",
+      "model": "claude-opus-5",
+      "reason": "cache_already_present"
     },
     {
       "run": "claude-sonnet-5-high-20260916",
@@ -224,9 +309,9 @@
       "reason": "cache_already_present"
     },
     {
-      "run": "gemini-3-7-flash-medium-prod-20260918",
+      "run": "gemini-3-7-flash-medium-prod-20260920-r1",
       "model": "gemini-3.7-flash",
-      "reason": "no_input_tokens"
+      "reason": "cache_already_present"
     },
     {
       "run": "1789573954",
@@ -259,11 +344,6 @@
       "reason": "cache_already_present"
     },
     {
-      "run": "sol-high-20260916",
-      "model": "gpt-5.6-sol",
-      "reason": "cache_already_present"
-    },
-    {
       "run": "sol-high-20260916-r2",
       "model": "gpt-5.6-sol",
       "reason": "cache_already_present"
@@ -286,26 +366,6 @@
     {
       "run": "sol-medium-prod-20260918-r3",
       "model": "gpt-5.6-sol",
-      "reason": "cache_already_present"
-    },
-    {
-      "run": "terra-high-prod-dev-20260918",
-      "model": "gpt-5.6-terra",
-      "reason": "cache_already_present"
-    },
-    {
-      "run": "terra-high-20260916-r4",
-      "model": "gpt-5.6-terra",
-      "reason": "cache_already_present"
-    },
-    {
-      "run": "terra-high-20260915-r2",
-      "model": "gpt-5.6-terra",
-      "reason": "cache_already_present"
-    },
-    {
-      "run": "terra-medium-20260916-r3",
-      "model": "gpt-5.6-terra",
       "reason": "cache_already_present"
     },
     {
@@ -349,9 +409,9 @@
       "reason": "cache_already_present"
     },
     {
-      "run": "grok-4-6-high-dev-20260920-r1",
+      "run": "grok-4-6-high-dev-20260921-r1",
       "model": "grok-4.6",
-      "reason": "no_input_tokens"
+      "reason": "cache_already_present"
     },
     {
       "run": "grok-4-6-medium-dev-20260921",
@@ -421,29 +481,49 @@
     {
       "run": "qwen-3-8-high-prod-20260919-q08",
       "model": "qwen-3.8",
-      "reason": "no_input_tokens"
+      "reason": "cache_already_present"
     },
     {
       "run": "qwen-3-8-high-prod-20260920-r1",
       "model": "qwen-3.8",
-      "reason": "no_input_tokens"
+      "reason": "cache_already_present"
     },
     {
       "run": "qwen-3-8-high-prod-20260918-q04",
       "model": "qwen-3.8",
-      "reason": "no_input_tokens"
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "openhands-qwen-3-8-medium-dev-20260919-r1",
+      "model": "qwen-3.8",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "openhands-qwen-3-8-medium-dev-20260920-r1",
+      "model": "qwen-3.8",
+      "reason": "cache_already_present"
+    },
+    {
+      "run": "openhands-qwen-3-8-medium-dev-20260920-r2",
+      "model": "qwen-3.8",
+      "reason": "cache_already_present"
     }
   ],
   "model_ratios": {
+    "claude-opus-5": {
+      "sample_count": 2,
+      "observed_median": 0.971362506038022,
+      "applied_ratio": 0.95
+    },
     "deepseek-v4-pro": {
       "sample_count": 6,
       "observed_median": 0.956591180476875,
       "applied_ratio": 0.95
     },
     "gemini-3.7-flash": {
-      "sample_count": 5,
-      "observed_median": 0.798897733193241,
-      "applied_ratio": 0.798897733193241
+      "sample_count": 6,
+      "observed_median": 0.8013991929608235,
+      "applied_ratio": 0.8013991929608235
     },
     "glm-5.2": {
       "sample_count": 6,
@@ -451,19 +531,24 @@
       "applied_ratio": 0.95
     },
     "gpt-5.6-sol": {
-      "sample_count": 6,
-      "observed_median": 0.9538308330908386,
+      "sample_count": 5,
+      "observed_median": 0.9576617042300646,
       "applied_ratio": 0.95
     },
     "gpt-5.6-terra": {
-      "sample_count": 6,
-      "observed_median": 0.9389117917118504,
-      "applied_ratio": 0.9389117917118504
+      "sample_count": 2,
+      "observed_median": 0.9389122028259178,
+      "applied_ratio": 0.9389122028259178
     },
     "grok-4.5": {
       "sample_count": 5,
       "observed_median": 0.8971780230502931,
       "applied_ratio": 0.8971780230502931
+    },
+    "grok-4.6": {
+      "sample_count": 1,
+      "observed_median": 0.9424607422169496,
+      "applied_ratio": 0.9424607422169496
     },
     "kimi-k3": {
       "sample_count": 6,
@@ -474,13 +559,18 @@
       "sample_count": 6,
       "observed_median": 0.9463426570375203,
       "applied_ratio": 0.9463426570375203
+    },
+    "qwen-3.8": {
+      "sample_count": 6,
+      "observed_median": 0.8880858294985539,
+      "applied_ratio": 0.8880858294985539
     }
   },
   "provider_ratios": {
     "hackerrank-gateway": {
-      "sample_count": 46,
-      "observed_median": 0.9418458647367578,
-      "applied_ratio": 0.9418458647367578
+      "sample_count": 51,
+      "observed_median": 0.9411654126358842,
+      "applied_ratio": 0.9411654126358842
     }
   }
 }

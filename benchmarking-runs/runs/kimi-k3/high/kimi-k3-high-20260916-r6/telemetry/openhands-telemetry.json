@@ -70,8 +70,12 @@
         "output_usd_per_million": 15.0,
         "cache_read_usd_per_million": 0.3,
         "cache_write_usd_per_million": null,
-        "note": "~Moonshot Kimi K3 public API pricing"
+        "note": "Moonshot Kimi K3 pricing"
       }
+    },
+    "recalculated_from_tokens": {
+      "source": "scripts/recalculate_benchmark_costs.py",
+      "cache_tokens_included": true
     }
   },
   "workspace": {

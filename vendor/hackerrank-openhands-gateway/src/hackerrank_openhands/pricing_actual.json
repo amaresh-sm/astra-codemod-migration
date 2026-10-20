@@ -1,0 +1,996 @@
+{
+  "generated_at": "2026-09-17",
+  "unit": "USD per 1k tokens (cost fields are per-1k as stored in gateway model_catalog)",
+  "models": {
+    "claude-fable-5": {
+      "central": [
+        {
+          "provider": "anthropic",
+          "provider_model_name": "claude-fable-5",
+          "pricing": {
+            "input_cost_per_1k": 0.01,
+            "output_cost_per_1k": 0.05,
+            "cache_write_cost_per_1k": 0.0125,
+            "cached_input_cost_per_1k": 0.001,
+            "cache_write_1h_cost_per_1k": 0.02,
+            "cache_write_5m_cost_per_1k": 0.0125
+          },
+          "limits": {
+            "rpm": 20000,
+            "tpm": 100000
+          },
+          "api_map": {
+            "messages": "messages",
+            "responses": "messages",
+            "chat_completions": "messages"
+          }
+        }
+      ],
+      "preview": [
+        {
+          "provider": "anthropic",
+          "provider_model_name": "claude-fable-5",
+          "pricing": {
+            "input_cost_per_1k": 0.01,
+            "output_cost_per_1k": 0.05,
+            "cache_write_cost_per_1k": 0.0125,
+            "cached_input_cost_per_1k": 0.001
+          },
+          "limits": {
+            "tpm": 8000000
+          },
+          "api_map": {
+            "messages": "messages",
+            "responses": "messages",
+            "chat_completions": "messages"
+          }
+        },
+        {
+          "provider": "bedrock",
+          "provider_model_name": "us.anthropic.claude-fable-5",
+          "pricing": {
+            "input_cost_per_1k": 0.01,
+            "output_cost_per_1k": 0.05,
+            "cache_write_cost_per_1k": 0.0125,
+            "cached_input_cost_per_1k": 0.001
+          },
+          "limits": {
+            "tpm": 1
+          },
+          "api_map": {
+            "messages": "messages",
+            "responses": "messages",
+            "chat_completions": "messages"
+          }
+        }
+      ]
+    },
+    "claude-opus-5": {
+      "central": [
+        {
+          "provider": "bedrock",
+          "provider_model_name": "us.anthropic.claude-opus-5",
+          "pricing": {
+            "input_cost_per_1k": 0.005,
+            "output_cost_per_1k": 0.025,
+            "cache_write_cost_per_1k": 0.00625,
+            "cached_input_cost_per_1k": 0.0005,
+            "cache_write_1h_cost_per_1k": 0.01,
+            "cache_write_5m_cost_per_1k": 0.00625
+          },
+          "limits": {
+            "tpm": 10000000
+          },
+          "api_map": {
+            "messages": "messages",
+            "responses": "messages",
+            "chat_completions": "messages"
+          }
+        },
+        {
+          "provider": "bedrock",
+          "provider_model_name": "global.anthropic.claude-opus-5",
+          "pricing": {
+            "input_cost_per_1k": 0.005,
+            "output_cost_per_1k": 0.025,
+            "cache_write_cost_per_1k": 0.00625,
+            "cached_input_cost_per_1k": 0.0005,
+            "cache_write_1h_cost_per_1k": 0.01,
+            "cache_write_5m_cost_per_1k": 0.00625
+          },
+          "limits": {
+            "tpm": 30000000
+          },
+          "api_map": {
+            "messages": "messages",
+            "responses": "messages",
+            "chat_completions": "messages"
+          }
+        },
+        {
+          "provider": "anthropic",
+          "provider_model_name": "claude-opus-5",
+          "pricing": {
+            "input_cost_per_1k": 0.005,
+            "output_cost_per_1k": 0.025,
+            "cache_write_cost_per_1k": 0.00625,
+            "cached_input_cost_per_1k": 0.0005,
+            "cache_write_1h_cost_per_1k": 0.01,
+            "cache_write_5m_cost_per_1k": 0.00625
+          },
+          "limits": {
+            "tpm": 2000000
+          },
+          "api_map": {
+            "messages": "messages",
+            "responses": "messages",
+            "chat_completions": "messages"
+          }
+        }
+      ],
+      "preview": [
+        {
+          "provider": "bedrock",
+          "provider_model_name": "global.anthropic.claude-opus-5",
+          "pricing": {
+            "input_cost_per_1k": 0.005,
+            "output_cost_per_1k": 0.025,
+            "cache_write_cost_per_1k": 0.00625,
+            "cached_input_cost_per_1k": 0.0005,
+            "cache_write_1h_cost_per_1k": 0.01,
+            "cache_write_5m_cost_per_1k": 0.00625
+          },
+          "limits": {
+            "tpm": 30000000
+          },
+          "api_map": {
+            "messages": "messages",
+            "responses": "messages",
+            "chat_completions": "messages"
+          }
+        },
+        {
+          "provider": "anthropic",
+          "provider_model_name": "claude-opus-5",
+          "pricing": {
+            "input_cost_per_1k": 0.005,
+            "output_cost_per_1k": 0.025,
+            "cache_write_cost_per_1k": 0.00625,
+            "cached_input_cost_per_1k": 0.0005,
+            "cache_write_1h_cost_per_1k": 0.01,
+            "cache_write_5m_cost_per_1k": 0.00625
+          },
+          "limits": {
+            "tpm": 8000000
+          },
+          "api_map": {
+            "messages": "messages",
+            "responses": "messages",
+            "chat_completions": "messages"
+          }
+        },
+        {
+          "provider": "bedrock",
+          "provider_model_name": "us.anthropic.claude-opus-5",
+          "pricing": {
+            "input_cost_per_1k": 0.005,
+            "output_cost_per_1k": 0.025,
+            "cache_write_cost_per_1k": 0.00625,
+            "cached_input_cost_per_1k": 0.0005,
+            "cache_write_1h_cost_per_1k": 0.01,
+            "cache_write_5m_cost_per_1k": 0.00625
+          },
+          "limits": {
+            "tpm": 30000000
+          },
+          "api_map": {
+            "messages": "messages",
+            "responses": "messages",
+            "chat_completions": "messages"
+          }
+        }
+      ]
+    },
+    "claude-sonnet-5": {
+      "central": [
+        {
+          "provider": "bedrock",
+          "provider_model_name": "global.anthropic.claude-sonnet-5",
+          "pricing": {
+            "input_cost_per_1k": 0.002,
+            "output_cost_per_1k": 0.01,
+            "cache_write_cost_per_1k": 0.0025,
+            "cached_input_cost_per_1k": 0.0002,
+            "cache_write_1h_cost_per_1k": 0.004,
+            "cache_write_5m_cost_per_1k": 0.0025
+          },
+          "limits": {
+            "tpm": 10000000
+          },
+          "api_map": {
+            "messages": "messages",
+            "responses": "messages",
+            "chat_completions": "messages"
+          }
+        },
+        {
+          "provider": "bedrock",
+          "provider_model_name": "us.anthropic.claude-sonnet-5",
+          "pricing": {
+            "input_cost_per_1k": 0.002,
+            "output_cost_per_1k": 0.01,
+            "cache_write_cost_per_1k": 0.0025,
+            "cached_input_cost_per_1k": 0.0002,
+            "cache_write_1h_cost_per_1k": 0.004,
+            "cache_write_5m_cost_per_1k": 0.0025
+          },
+          "limits": {
+            "tpm": 10000000
+          },
+          "api_map": {
+            "messages": "messages",
+            "responses": "messages",
+            "chat_completions": "messages"
+          }
+        },
+        {
+          "provider": "anthropic",
+          "provider_model_name": "claude-sonnet-5",
+          "pricing": {
+            "input_cost_per_1k": 0.002,
+            "output_cost_per_1k": 0.01,
+            "cache_write_cost_per_1k": 0.0025,
+            "cached_input_cost_per_1k": 0.0002,
+            "cache_write_1h_cost_per_1k": 0.004,
+            "cache_write_5m_cost_per_1k": 0.0025
+          },
+          "limits": {
+            "rpm": 20000,
+            "tpm": 2000000
+          },
+          "api_map": {
+            "messages": "messages",
+            "responses": "messages",
+            "chat_completions": "messages"
+          }
+        }
+      ],
+      "preview": [
+        {
+          "provider": "anthropic",
+          "provider_model_name": "claude-sonnet-5",
+          "pricing": {
+            "input_cost_per_1k": 0.002,
+            "output_cost_per_1k": 0.01,
+            "cached_input_cost_per_1k": 0.0002,
+            "cache_write_1h_cost_per_1k": 0.004,
+            "cache_write_5m_cost_per_1k": 0.0025
+          },
+          "limits": {
+            "rpm": 20000,
+            "tpm": 8000000
+          },
+          "api_map": {
+            "messages": "messages",
+            "responses": "messages",
+            "chat_completions": "messages"
+          }
+        },
+        {
+          "provider": "bedrock",
+          "provider_model_name": "us.anthropic.claude-sonnet-5",
+          "pricing": {
+            "input_cost_per_1k": 0.002,
+            "output_cost_per_1k": 0.01,
+            "cached_input_cost_per_1k": 0.0002,
+            "cache_write_1h_cost_per_1k": 0.004,
+            "cache_write_5m_cost_per_1k": 0.0025
+          },
+          "limits": {
+            "tpm": 6000000
+          },
+          "api_map": {
+            "messages": "messages",
+            "responses": "messages",
+            "chat_completions": "messages"
+          }
+        },
+        {
+          "provider": "openrouter",
+          "provider_model_name": "anthropic/claude-sonnet-5",
+          "pricing": {
+            "input_cost_per_1k": 0.002,
+            "output_cost_per_1k": 0.01,
+            "cached_input_cost_per_1k": 0.0002,
+            "cache_write_1h_cost_per_1k": 0.004,
+            "cache_write_5m_cost_per_1k": 0.0025
+          },
+          "limits": {
+            "rpm": 600,
+            "tpm": 2000000
+          },
+          "api_map": {
+            "messages": "messages",
+            "responses": "responses",
+            "chat_completions": "chat_completions"
+          }
+        },
+        {
+          "provider": "bedrock",
+          "provider_model_name": "global.anthropic.claude-sonnet-5",
+          "pricing": {
+            "input_cost_per_1k": 0.002,
+            "output_cost_per_1k": 0.01,
+            "cache_write_cost_per_1k": 0.0025,
+            "cached_input_cost_per_1k": 0.0002,
+            "cache_write_1h_cost_per_1k": 0.004,
+            "cache_write_5m_cost_per_1k": 0.0025
+          },
+          "limits": {
+            "tpm": 6000000
+          },
+          "api_map": {
+            "messages": "messages",
+            "responses": "messages",
+            "chat_completions": "messages"
+          }
+        }
+      ]
+    },
+    "deepseek-v4-pro": {
+      "central": [
+        {
+          "provider": "openrouter",
+          "provider_model_name": "deepseek/deepseek-v4-pro",
+          "pricing": {
+            "input_cost_per_1k": 0.00174,
+            "output_cost_per_1k": 0.00348,
+            "cached_input_cost_per_1k": 0.00016
+          },
+          "limits": {},
+          "api_map": null
+        }
+      ],
+      "preview": [
+        {
+          "provider": "openrouter",
+          "provider_model_name": "deepseek/deepseek-v4-pro",
+          "pricing": {
+            "input_cost_per_1k": 0.00174,
+            "output_cost_per_1k": 0.00348,
+            "cached_input_cost_per_1k": 0.00016
+          },
+          "limits": {},
+          "api_map": {
+            "messages": "messages",
+            "responses": "responses",
+            "chat_completions": "chat_completions"
+          }
+        }
+      ]
+    },
+    "gemini-3.7-flash": {
+      "central": [
+        {
+          "provider": "google",
+          "provider_model_name": "gemini-3.7-flash",
+          "pricing": {
+            "input_cost_per_1k": 0.00075,
+            "output_cost_per_1k": 0.00375
+          },
+          "limits": {},
+          "api_map": {
+            "messages": "chat_completions",
+            "responses": "chat_completions",
+            "chat_completions": "chat_completions"
+          }
+        },
+        {
+          "provider": "openrouter",
+          "provider_model_name": "google/gemini-3.7-flash",
+          "pricing": {
+            "input_cost_per_1k": 0.00075,
+            "output_cost_per_1k": 0.00375,
+            "cached_input_cost_per_1k": 7.5e-5
+          },
+          "limits": {
+            "rpm": 600,
+            "tpm": 2000000
+          },
+          "api_map": {
+            "messages": "messages",
+            "responses": "responses",
+            "chat_completions": "chat_completions"
+          }
+        }
+      ],
+      "preview": [
+        {
+          "provider": "google",
+          "provider_model_name": "gemini-3.7-flash",
+          "pricing": {
+            "input_cost_per_1k": 0.00075,
+            "output_cost_per_1k": 0.00375,
+            "cached_input_cost_per_1k": 7.5e-5
+          },
+          "limits": {
+            "rpm": 20000,
+            "tpm": 20000000
+          },
+          "api_map": {
+            "messages": "chat_completions",
+            "responses": "chat_completions",
+            "chat_completions": "chat_completions"
+          }
+        },
+        {
+          "provider": "openrouter",
+          "provider_model_name": "google/gemini-3.7-flash",
+          "pricing": {
+            "input_cost_per_1k": 0.00075,
+            "output_cost_per_1k": 0.00375,
+            "cache_write_cost_per_1k": 0.0005,
+            "cached_input_cost_per_1k": 7.5e-5
+          },
+          "limits": {
+            "rpm": 600,
+            "tpm": 2000000
+          },
+          "api_map": {
+            "messages": "messages",
+            "responses": "responses",
+            "chat_completions": "chat_completions"
+          }
+        }
+      ]
+    },
+    "glm-5.2": {
+      "central": [
+        {
+          "provider": "openrouter",
+          "provider_model_name": "z-ai/glm-5.2",
+          "pricing": {
+            "input_cost_per_1k": 0.0014,
+            "output_cost_per_1k": 0.0044,
+            "cached_input_cost_per_1k": 0.00026000000000000003
+          },
+          "limits": {
+            "rpm": 20000,
+            "tpm": 10000000
+          },
+          "api_map": {
+            "messages": "messages",
+            "responses": "responses",
+            "chat_completions": "chat_completions"
+          }
+        }
+      ],
+      "preview": [
+        {
+          "provider": "openrouter",
+          "provider_model_name": "z-ai/glm-5.2",
+          "pricing": {
+            "input_cost_per_1k": 0.0014,
+            "output_cost_per_1k": 0.0044,
+            "cached_input_cost_per_1k": 0.00026000000000000003
+          },
+          "limits": {
+            "tpm": 5000000
+          },
+          "api_map": {
+            "messages": "messages",
+            "responses": "responses",
+            "chat_completions": "chat_completions"
+          }
+        }
+      ]
+    },
+    "gpt-5.6-luna": {
+      "central": [
+        {
+          "provider": "openai",
+          "provider_model_name": "gpt-5.6-luna",
+          "pricing": {
+            "input_cost_per_1k": 0.0002,
+            "output_cost_per_1k": 0.0012,
+            "cache_write_cost_per_1k": 0.00025,
+            "cached_input_cost_per_1k": 2e-5
+          },
+          "limits": {
+            "rpm": 1000,
+            "tpm": 1000000
+          },
+          "api_map": {
+            "messages": "responses",
+            "responses": "responses",
+            "chat_completions": "chat_completions"
+          }
+        },
+        {
+          "provider": "bedrock",
+          "provider_model_name": "openai.gpt-5.6-luna",
+          "pricing": {
+            "input_cost_per_1k": 0.0002,
+            "output_cost_per_1k": 0.0012,
+            "cache_write_cost_per_1k": 0.00025,
+            "cached_input_cost_per_1k": 2e-5
+          },
+          "limits": {
+            "tpm": 20000000
+          },
+          "api_map": {
+            "messages": "responses",
+            "responses": "responses",
+            "chat_completions": "chat_completions"
+          }
+        },
+        {
+          "provider": "openrouter",
+          "provider_model_name": "openai/gpt-5.6-luna",
+          "pricing": {
+            "input_cost_per_1k": 0.0002,
+            "output_cost_per_1k": 0.0012,
+            "cached_input_cost_per_1k": 2e-5
+          },
+          "limits": {},
+          "api_map": {
+            "messages": "chat_completions",
+            "responses": "chat_completions",
+            "chat_completions": "chat_completions"
+          }
+        }
+      ],
+      "preview": [
+        {
+          "provider": "bedrock",
+          "provider_model_name": "openai.gpt-5.6-luna",
+          "pricing": {
+            "input_cost_per_1k": 0.0002,
+            "output_cost_per_1k": 0.0012,
+            "cache_write_cost_per_1k": 0.00025,
+            "cached_input_cost_per_1k": 2e-5
+          },
+          "limits": {
+            "rpm": 6000,
+            "tpm": 20000000
+          },
+          "api_map": {
+            "messages": "responses",
+            "responses": "responses",
+            "chat_completions": "chat_completions"
+          }
+        },
+        {
+          "provider": "openai",
+          "provider_model_name": "gpt-5.6-luna",
+          "pricing": {
+            "input_cost_per_1k": 0.0002,
+            "output_cost_per_1k": 0.0012,
+            "cache_write_cost_per_1k": 0.00025,
+            "cached_input_cost_per_1k": 2e-5
+          },
+          "limits": {
+            "rpm": 30000,
+            "tpm": 180000000
+          },
+          "api_map": {
+            "messages": "responses",
+            "responses": "responses",
+            "chat_completions": "chat_completions"
+          }
+        },
+        {
+          "provider": "openrouter",
+          "provider_model_name": "openai/gpt-5.6-luna",
+          "pricing": {
+            "input_cost_per_1k": 0.0002,
+            "output_cost_per_1k": 0.0012,
+            "cache_write_cost_per_1k": 0.00025,
+            "cached_input_cost_per_1k": 2e-5
+          },
+          "limits": {
+            "rpm": 600,
+            "tpm": 100000000
+          },
+          "api_map": {
+            "messages": "messages",
+            "responses": "responses",
+            "chat_completions": "chat_completions"
+          }
+        }
+      ]
+    },
+    "gpt-5.6-sol": {
+      "central": [
+        {
+          "provider": "openai",
+          "provider_model_name": "gpt-5.6-sol",
+          "pricing": {
+            "input_cost_per_1k": 0.004,
+            "output_cost_per_1k": 0.02,
+            "cache_write_cost_per_1k": 0.005,
+            "cached_input_cost_per_1k": 0.0004
+          },
+          "limits": {},
+          "api_map": {
+            "messages": "responses",
+            "responses": "responses",
+            "chat_completions": "chat_completions"
+          }
+        },
+        {
+          "provider": "bedrock",
+          "provider_model_name": "openai.gpt-5.6-sol",
+          "pricing": {
+            "input_cost_per_1k": 0.0044,
+            "output_cost_per_1k": 0.022,
+            "cache_write_cost_per_1k": 0.0055,
+            "cached_input_cost_per_1k": 0.00044
+          },
+          "limits": {},
+          "api_map": {
+            "messages": "responses",
+            "responses": "responses",
+            "chat_completions": "chat_completions"
+          }
+        }
+      ],
+      "preview": [
+        {
+          "provider": "bedrock",
+          "provider_model_name": "openai.gpt-5.6-sol",
+          "pricing": {
+            "input_cost_per_1k": 0.004,
+            "output_cost_per_1k": 0.02,
+            "cache_write_cost_per_1k": 0.005,
+            "cached_input_cost_per_1k": 0.0004
+          },
+          "limits": {
+            "tpm": 10000000
+          },
+          "api_map": {
+            "messages": "responses",
+            "responses": "responses",
+            "chat_completions": "chat_completions"
+          }
+        },
+        {
+          "provider": "openai",
+          "provider_model_name": "gpt-5.6-sol",
+          "pricing": {
+            "input_cost_per_1k": 0.004,
+            "output_cost_per_1k": 0.02,
+            "cache_write_cost_per_1k": 0.005,
+            "cached_input_cost_per_1k": 0.0004
+          },
+          "limits": {
+            "rpm": 15000,
+            "tpm": 40000000
+          },
+          "api_map": {
+            "messages": "responses",
+            "responses": "responses",
+            "chat_completions": "chat_completions"
+          }
+        }
+      ]
+    },
+    "gpt-5.6-terra": {
+      "central": [
+        {
+          "provider": "openai",
+          "provider_model_name": "gpt-5.6-terra",
+          "pricing": {
+            "input_cost_per_1k": 0.002,
+            "output_cost_per_1k": 0.012,
+            "cache_write_cost_per_1k": 0.0025,
+            "cached_input_cost_per_1k": 0.0002
+          },
+          "limits": {},
+          "api_map": {
+            "messages": "responses",
+            "responses": "responses",
+            "chat_completions": "chat_completions"
+          }
+        },
+        {
+          "provider": "bedrock",
+          "provider_model_name": "openai.gpt-5.6-terra",
+          "pricing": {
+            "input_cost_per_1k": 0.0022,
+            "output_cost_per_1k": 0.0132,
+            "cache_write_cost_per_1k": 0.00275,
+            "cached_input_cost_per_1k": 0.00022
+          },
+          "limits": {},
+          "api_map": {
+            "messages": "responses",
+            "responses": "responses",
+            "chat_completions": "chat_completions"
+          }
+        }
+      ],
+      "preview": [
+        {
+          "provider": "bedrock",
+          "provider_model_name": "openai.gpt-5.6-terra",
+          "pricing": {
+            "input_cost_per_1k": 0.002,
+            "output_cost_per_1k": 0.012,
+            "cache_write_cost_per_1k": 0.0025,
+            "cached_input_cost_per_1k": 0.0002
+          },
+          "limits": {
+            "tpm": 20000000
+          },
+          "api_map": {
+            "messages": "responses",
+            "responses": "responses",
+            "chat_completions": "chat_completions"
+          }
+        },
+        {
+          "provider": "openai",
+          "provider_model_name": "gpt-5.6-terra",
+          "pricing": {
+            "input_cost_per_1k": 0.002,
+            "output_cost_per_1k": 0.012,
+            "cache_write_cost_per_1k": 0.0025,
+            "cached_input_cost_per_1k": 0.0002
+          },
+          "limits": {
+            "rpm": 15000,
+            "tpm": 40000000
+          },
+          "api_map": {
+            "messages": "responses",
+            "responses": "responses",
+            "chat_completions": "chat_completions"
+          }
+        },
+        {
+          "provider": "openrouter",
+          "provider_model_name": "openai/gpt-5.6-terra",
+          "pricing": {
+            "input_cost_per_1k": 0.002,
+            "output_cost_per_1k": 0.012,
+            "cache_write_cost_per_1k": 0.0025,
+            "cached_input_cost_per_1k": 0.0002
+          },
+          "limits": {
+            "rpm": 600,
+            "tpm": 2000000
+          },
+          "api_map": {
+            "messages": "messages",
+            "responses": "responses",
+            "chat_completions": "chat_completions"
+          }
+        }
+      ]
+    },
+    "grok-4.6": {
+      "central": [
+        {
+          "provider": "openrouter",
+          "provider_model_name": "x-ai/grok-4.6",
+          "pricing": {
+            "input_cost_per_1k": 0.002,
+            "output_cost_per_1k": 0.006,
+            "cache_write_cost_per_1k": 0,
+            "cached_input_cost_per_1k": 0.0005
+          },
+          "limits": {
+            "tpm": 1000000
+          },
+          "api_map": {
+            "messages": "messages",
+            "responses": "responses",
+            "chat_completions": "chat_completions"
+          }
+        },
+        {
+          "provider": "bedrock",
+          "provider_model_name": "global.xai.grok-4.6",
+          "pricing": {
+            "input_cost_per_1k": 0.002,
+            "output_cost_per_1k": 0.006,
+            "cache_write_cost_per_1k": 0,
+            "cached_input_cost_per_1k": 0.0005
+          },
+          "limits": {
+            "rpm": 10000,
+            "tpm": 10000000
+          },
+          "api_map": {
+            "messages": "converse",
+            "responses": "converse",
+            "chat_completions": "converse"
+          }
+        },
+        {
+          "provider": "bedrock-us-east-2",
+          "provider_model_name": "us.xai.grok-4.6",
+          "pricing": {
+            "input_cost_per_1k": 0.002,
+            "output_cost_per_1k": 0.006,
+            "cache_write_cost_per_1k": 0,
+            "cached_input_cost_per_1k": 0.0005
+          },
+          "limits": {
+            "rpm": 10000,
+            "tpm": 10000000
+          },
+          "api_map": {
+            "messages": "converse",
+            "responses": "converse",
+            "chat_completions": "converse"
+          }
+        }
+      ],
+      "preview": [
+        {
+          "provider": "bedrock",
+          "provider_model_name": "global.xai.grok-4.6",
+          "pricing": {
+            "input_cost_per_1k": 0.002,
+            "output_cost_per_1k": 0.006,
+            "cache_write_cost_per_1k": 0,
+            "cached_input_cost_per_1k": 0.0005
+          },
+          "limits": {
+            "tpm": 10000000
+          },
+          "api_map": {
+            "messages": "converse",
+            "responses": "converse",
+            "chat_completions": "converse"
+          }
+        },
+        {
+          "provider": "bedrock-us-east-2",
+          "provider_model_name": "us.xai.grok-4.6",
+          "pricing": {
+            "input_cost_per_1k": 0.002,
+            "output_cost_per_1k": 0.006,
+            "cache_write_cost_per_1k": 0,
+            "cached_input_cost_per_1k": 0.0005
+          },
+          "limits": {
+            "tpm": 10000000
+          },
+          "api_map": {
+            "messages": "converse",
+            "responses": "converse",
+            "chat_completions": "converse"
+          }
+        },
+        {
+          "provider": "openrouter",
+          "provider_model_name": "x-ai/grok-4.6",
+          "pricing": {
+            "input_cost_per_1k": 0.002,
+            "output_cost_per_1k": 0.006,
+            "cache_write_cost_per_1k": 0,
+            "cached_input_cost_per_1k": 0.0005
+          },
+          "limits": {
+            "tpm": 10000000
+          },
+          "api_map": {
+            "messages": "messages",
+            "responses": "responses",
+            "chat_completions": "chat_completions"
+          }
+        }
+      ]
+    },
+    "kimi-k3": {
+      "central": [
+        {
+          "provider": "openrouter",
+          "provider_model_name": "moonshotai/kimi-k3",
+          "pricing": {
+            "input_cost_per_1k": 0.003,
+            "output_cost_per_1k": 0.015,
+            "cached_input_cost_per_1k": 0.0003
+          },
+          "limits": {},
+          "api_map": {
+            "messages": "messages",
+            "responses": "responses",
+            "chat_completions": "chat_completions"
+          }
+        }
+      ],
+      "preview": [
+        {
+          "provider": "openrouter",
+          "provider_model_name": "moonshotai/kimi-k3",
+          "pricing": {
+            "input_cost_per_1k": 0.003,
+            "output_cost_per_1k": 0.015,
+            "cached_input_cost_per_1k": 0.0003
+          },
+          "limits": {
+            "tpm": 2000000
+          },
+          "api_map": {
+            "messages": "messages",
+            "responses": "responses",
+            "chat_completions": "chat_completions"
+          }
+        }
+      ]
+    },
+    "minimax-m3": {
+      "central": [
+        {
+          "provider": "openrouter",
+          "provider_model_name": "minimax/minimax-m3",
+          "pricing": {
+            "input_cost_per_1k": 0.0003,
+            "output_cost_per_1k": 0.0012
+          },
+          "limits": {},
+          "api_map": null
+        }
+      ],
+      "preview": [
+        {
+          "provider": "openrouter",
+          "provider_model_name": "minimax/minimax-m3",
+          "pricing": {
+            "input_cost_per_1k": 0.0003,
+            "output_cost_per_1k": 0.0012,
+            "cached_input_cost_per_1k": 5.9999999999999995e-5
+          },
+          "limits": {},
+          "api_map": {
+            "messages": "messages",
+            "responses": "responses",
+            "chat_completions": "chat_completions"
+          }
+        }
+      ]
+    },
+    "qwen-3.8": {
+      "central": [
+        {
+          "provider": "openrouter",
+          "provider_model_name": "qwen/qwen3.8-2.4t-a95b",
+          "pricing": {
+            "input_cost_per_1k": 0.002,
+            "output_cost_per_1k": 0.006
+          },
+          "limits": {},
+          "api_map": {
+            "messages": "chat_completions",
+            "responses": "chat_completions",
+            "chat_completions": "chat_completions"
+          }
+        }
+      ],
+      "preview": [
+        {
+          "provider": "openrouter",
+          "provider_model_name": "qwen/qwen3.8-2.4t-a95b",
+          "pricing": {
+            "input_cost_per_1k": 0.002,
+            "output_cost_per_1k": 0.006,
+            "cached_input_cost_per_1k": 0.00025
+          },
+          "limits": {
+            "rpm": 600,
+            "tpm": 2000000
+          },
+          "api_map": {
+            "messages": "messages",
+            "responses": "responses",
+            "chat_completions": "chat_completions"
+          }
+        }
+      ]
+    }
+  }
+}

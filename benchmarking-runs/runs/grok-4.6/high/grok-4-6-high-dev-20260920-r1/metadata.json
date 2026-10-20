@@ -29,6 +29,13 @@
     "score": 0.1112,
     "score_source": "scores.json and newest reports/score.json",
     "source_candidate": "openhands-grok-4-6-high-dev-20260920-r1",
-    "exported_at": "2026-09-21T20:26:01.067498+00:00"
+    "exported_at": "2026-09-28T11:40:57.425125+00:00"
+  },
+  "benchmarking_cache_backfill": {
+    "input_tokens": 52512939,
+    "cached_tokens": 49491383,
+    "ratio": 0.9424607422169496,
+    "ratio_source": "model-level median",
+    "source": "cache-backfill-dry-run.json"
   }
 }

@@ -1,0 +1,2 @@
+Gateway has no /models catalog; model support will be checked by the generation request
+preflight ok: model=claude-opus-5 reasoning=high gateway=https://gateway-central.ai.private.hackerrank.link/v1

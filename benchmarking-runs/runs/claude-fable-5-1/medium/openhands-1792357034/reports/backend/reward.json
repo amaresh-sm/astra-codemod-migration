@@ -1,0 +1,317 @@
+{
+  "criterionStatus": {
+    "cli-transform-api": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.cli-transform-api",
+      "detail": "JavaScript, TypeScript, async transforms, and transform options received the expected API"
+    },
+    "parser-and-transform-variants": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.parser-and-transform-variants",
+      "detail": "TSX, Flow, transform-declared parser, and local URL transforms behaved correctly"
+    },
+    "file-selection-and-stdin": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.file-selection-and-stdin",
+      "detail": "recursive, extension, ignore, and stdin selection behaved correctly"
+    },
+    "dry-run-print-and-reporting": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.dry-run-print-and-reporting",
+      "detail": "dry run, print output, statistics, reports, and result statuses were preserved"
+    },
+    "parallel-workers-and-results": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.parallel-workers-and-results",
+      "detail": "parallel and serial workers processed every file with correct aggregate statuses"
+    },
+    "failure-and-exit-contract": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.failure-and-exit-contract",
+      "detail": "transform errors and --fail-on-error behaved correctly"
+    },
+    "cli-surface-and-identity": {
+      "status": "fail",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.cli-surface-and-identity",
+      "detail": "help output does not expose the required CLI surface"
+    },
+    "silent-output-contract": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.silent-output-contract",
+      "detail": "--silent suppresses output without suppressing the transform"
+    },
+    "symlink-boundary": {
+      "status": "fail",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.symlink-boundary",
+      "detail": "out-of-root symlink was not processed as it is by the legacy runner"
+    },
+    "parallel-failure-recovery": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.parallel-failure-recovery",
+      "detail": "parallel workers isolate failures and complete independent files"
+    },
+    "lifecycle-manifest": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.lifecycle-manifest",
+      "detail": "build, reset, and start lifecycle commands are declared"
+    },
+    "custom-option-forwarding": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.custom-option-forwarding",
+      "detail": "repeatable and equals-form custom options reach transforms"
+    },
+    "atomic-write-on-error": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.atomic-write-on-error",
+      "detail": "failed transforms leave source files unchanged"
+    },
+    "parallel-result-determinism": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.parallel-result-determinism",
+      "detail": "parallel scheduling produces stable aggregate results"
+    },
+    "utf8-source-preservation": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.utf8-source-preservation",
+      "detail": "UTF-8 source content is preserved for no-op transforms"
+    },
+    "ast-collections-and-builders": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.ast-collections-and-builders",
+      "detail": "collections and standard AST builders remain available"
+    },
+    "ast-formatting-and-comments": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.ast-formatting-and-comments",
+      "detail": "AST edits preserve comments and formatting options"
+    },
+    "ast-modern-syntax": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.ast-modern-syntax",
+      "detail": "TypeScript, TSX, and modern JavaScript syntax remain traversable"
+    },
+    "core-api-surface": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.core-api-surface",
+      "detail": "package core exports, parser binding, matching, plugins, and templates remain compatible"
+    },
+    "collection-extensions": {
+      "status": "fail",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.collection-extensions",
+      "detail": "typed collection compatibility failed (rc=1; /loader:254:19)     at Module.require (node:internal/modules/cjs/loader:1527:12)     at require (node:internal/modules/helpers:147:16)     at [eval]:1:18     at runScriptInThisContext (node:internal/vm:209:10)     at node:internal/process/execution:446:12 {   code: 'MODULE_NOT_FOUND',   requireStack: [ '/input/candidate/codebase/[eval]' ] }  Node.js v22.23.3)"
+    },
+    "template-code-generation": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.template-code-generation",
+      "detail": "statement, expression, and async-expression templates retain their public behavior"
+    },
+    "package-root-export": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.package-root-export",
+      "detail": "package root exports the callable jscodeshift API and parses source"
+    },
+    "rust-runner-entrypoint": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.rust-runner-entrypoint",
+      "detail": "public CLI is backed by the compiled Rust runner; substantive Rust migration foundation: modular layout with 3036 executable lines across 11 modules; signals=argument handling, file handling, execution or writing; migration progress: arguments, file discovery, ignore handling, atomic writing, runner protocol, worker orchestration, package integration"
+    },
+    "rust-parser-babel-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.rust-parser-babel-ownership",
+      "detail": "Babel parser/printer is still implemented by the JavaScript bridge: bridge/template.js implements multiple AST-engine capabilities (AST builders, collection runtime, template generation)"
+    },
+    "rust-parser-typescript-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.rust-parser-typescript-ownership",
+      "detail": "TypeScript parser is still implemented by the JavaScript bridge: bridge/template.js implements multiple AST-engine capabilities (AST builders, collection runtime, template generation)"
+    },
+    "rust-parser-tsx-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.rust-parser-tsx-ownership",
+      "detail": "TSX parser is still implemented by the JavaScript bridge: bridge/template.js implements multiple AST-engine capabilities (AST builders, collection runtime, template generation)"
+    },
+    "rust-printer-comments-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.rust-printer-comments-ownership",
+      "detail": "comment-preserving printer is still implemented by the JavaScript bridge: bridge/template.js implements multiple AST-engine capabilities (AST builders, collection runtime, template generation)"
+    },
+    "rust-core-collections-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.rust-core-collections-ownership",
+      "detail": "core collections is still implemented by the JavaScript bridge: bridge/template.js implements multiple AST-engine capabilities (AST builders, collection runtime, template generation)"
+    },
+    "rust-core-builders-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.rust-core-builders-ownership",
+      "detail": "core builders is still implemented by the JavaScript bridge: bridge/template.js implements multiple AST-engine capabilities (AST builders, collection runtime, template generation)"
+    },
+    "rust-core-templates-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.rust-core-templates-ownership",
+      "detail": "template generation is still implemented by the JavaScript bridge: bridge/template.js implements multiple AST-engine capabilities (AST builders, collection runtime, template generation)"
+    },
+    "rust-core-nodepath-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.rust-core-nodepath-ownership",
+      "detail": "NodePath accessors is still implemented by the JavaScript bridge: bridge/template.js implements multiple AST-engine capabilities (AST builders, collection runtime, template generation)"
+    },
+    "rust-edge-ast-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.rust-edge-ast-ownership",
+      "detail": "edge-case AST syntax is still implemented by the JavaScript bridge: bridge/template.js implements multiple AST-engine capabilities (AST builders, collection runtime, template generation)"
+    },
+    "rust-edge-cli-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.rust-edge-cli-ownership",
+      "detail": "edge-case CLI ownership probe failed (rc=1): Node.js v22.23.3"
+    },
+    "rust-worker-multifile-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.rust-worker-multifile-ownership",
+      "detail": "multi-file worker execution ownership probe did not produce the expected native result: project/file-0.js, project/file-1.js, project/file-2.js, project/file-3.js, project/file-4.js, project/file-5.js"
+    },
+    "rust-worker-parallel-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.rust-worker-parallel-ownership",
+      "detail": "parallel worker execution ownership probe did not produce the expected native result: project/file-0.js, project/file-1.js, project/file-2.js, project/file-3.js, project/file-4.js, project/file-5.js"
+    },
+    "rust-worker-failure-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.rust-worker-failure-ownership",
+      "detail": "worker failure recovery ownership failed (rc=0)"
+    },
+    "rust-worker-determinism-ownership": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.rust-worker-determinism-ownership",
+      "detail": "parallel worker replay was deterministic with only the explicit JS bridge"
+    },
+    "rust-implementation-depth": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.rust-implementation-depth",
+      "detail": "substantive Rust migration foundation: modular layout with 3036 executable lines across 11 modules; signals=argument handling, file handling, execution or writing"
+    },
+    "rust-feature-completeness": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.rust-feature-completeness",
+      "detail": "3/3 feature layers: argument handling, file handling, execution or writing"
+    },
+    "rust-wiring-attempt": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.rust-wiring-attempt",
+      "detail": "wiring: cargo in package.json scripts"
+    },
+    "rust-jscodeshift-facade": {
+      "status": "fail",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.rust-jscodeshift-facade",
+      "detail": "only 1 facade method found (transform); need \u22652"
+    },
+    "rust-ast-traversal": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.rust-ast-traversal",
+      "detail": "recursive AST traversal found in args.rs"
+    },
+    "rust-collections-module": {
+      "status": "fail",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.rust-collections-module",
+      "detail": "no collections module in Rust source"
+    },
+    "rust-test-density": {
+      "status": "partial",
+      "score": 0.67,
+      "scenarioId": "jscodeshift.rust-test-density",
+      "detail": "15 tests found"
+    },
+    "rust-module-breadth": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.rust-module-breadth",
+      "detail": "11 .rs files: ['args', 'build', 'colors', 'nodeerr', 'paths', 'pkg', 'runner', 'worker']"
+    },
+    "rust-package-clean-pack-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.rust-package-clean-pack-ownership",
+      "detail": "clean package retains a JavaScript engine bridge: bridge/template.js implements multiple AST-engine capabilities (AST builders, collection runtime, template generation)"
+    },
+    "rust-package-guard-ownership": {
+      "status": "fail",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.rust-package-guard-ownership",
+      "detail": "compatibility bridge contains first-party engine logic: bridge/template.js implements multiple AST-engine capabilities (AST builders, collection runtime, template generation)"
+    },
+    "rust-legacy-engine-boundary": {
+      "status": "fail",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.rust-legacy-engine-boundary",
+      "detail": "Rust CLI ownership probe failed (rc=1)"
+    },
+    "cross-feature-compatibility": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.cross-feature-compatibility",
+      "detail": "CLI options, worker scheduling, TSX parsing, templates, and ignore rules composed correctly"
+    },
+    "package-boundary-compatibility": {
+      "status": "fail",
+      "score": 0.0,
+      "scenarioId": "jscodeshift.package-boundary-compatibility",
+      "detail": "npm pack failed (rc=127)"
+    },
+    "ast-composition-corpus": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.ast-composition-corpus",
+      "detail": "multi-file AST corpus preserves syntax, plugins, collections, templates, and formatting"
+    },
+    "worker-replay-consistency": {
+      "status": "pass",
+      "score": 1.0,
+      "scenarioId": "jscodeshift.worker-replay-consistency",
+      "detail": "parallel and serial worker replays preserve successful, failed, and delayed outcomes"
+    }
+  },
+  "status": "fail"
+}

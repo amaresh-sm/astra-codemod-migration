@@ -75,7 +75,7 @@ class OpenHandsEnvironmentTests(unittest.TestCase):
         self.assertTrue(all(value in OPENHANDS_REASONING_OPTIONS for value in ("medium", "high")))
 
     def test_reads_vendored_gateway_version(self) -> None:
-        self.assertEqual(gateway_package_version(), "0.1.2")
+        self.assertEqual(gateway_package_version(), "0.1.4")
 
     def test_failure_diagnostics_retain_workspace_snapshot_and_raw_output(self) -> None:
         with tempfile.TemporaryDirectory() as raw:

@@ -33,8 +33,8 @@
     "source": "gateway",
     "requests": 500,
     "input_tokens": 25368882,
-    "cached_input_tokens": 23893576,
-    "cache_read_tokens": 23893576,
+    "cached_input_tokens": 23876314,
+    "cache_read_tokens": 23876314,
     "cache_write_tokens": 0,
     "output_tokens": 867756,
     "reasoning_tokens": 683367,
@@ -55,24 +55,28 @@
       "source": "openhands"
     },
     "custom_estimation": {
-      "amount_usd": 89.122986,
+      "amount_usd": 16.4379588,
       "currency": "USD",
       "status": "estimated",
       "source": "custom_pricing_table",
       "pricing_version": 1,
       "model": "openai/claude-sonnet-5",
       "normalized_model": "claude-sonnet-5",
-      "requests": 500,
-      "requests_with_usage": 500,
+      "requests": 1,
+      "requests_with_usage": 1,
       "requests_missing_usage": 0,
-      "usage_source": "gateway_usage",
+      "usage_source": "openhands_usage",
       "pricing": {
-        "input_usd_per_million": 3.0,
-        "output_usd_per_million": 15.0,
-        "cache_read_usd_per_million": 0.3,
-        "cache_write_usd_per_million": null,
-        "note": "~Claude Sonnet public tier"
+        "input_usd_per_million": 2.0,
+        "output_usd_per_million": 10.0,
+        "cache_read_usd_per_million": 0.2,
+        "cache_write_usd_per_million": 2.5,
+        "note": "Anthropic Claude Sonnet 5 pricing"
       }
+    },
+    "recalculated_from_tokens": {
+      "source": "scripts/recalculate_benchmark_costs.py",
+      "cache_tokens_included": true
     }
   },
   "workspace": {
@@ -112,12 +116,12 @@
     "integrity_sha256": "b5ea864eba80eda2dcab48cde5ac1439ae3769ddc81e650f563e176fb4a98159"
   },
   "benchmarking": {
-    "score": 0.0696,
+    "score": 0.3122,
     "source": "scores.json",
     "run_name": "sonnet-5-high-dev-20260918-r2"
   },
   "benchmarking_cache_backfill": {
-    "ratio": 0.9418458647367578,
+    "ratio": 0.9411654126358842,
     "source": "cache-backfill-dry-run.json"
   }
 }

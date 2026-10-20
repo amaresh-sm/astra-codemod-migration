@@ -55,21 +55,21 @@
       "source": "openhands"
     },
     "custom_estimation": {
-      "amount_usd": 1.45843572,
+      "amount_usd": 2.91687144,
       "currency": "USD",
       "status": "estimated",
       "source": "custom_pricing_table",
       "pricing_version": 1,
       "model": "openai/minimax-m3",
       "normalized_model": "minimax-m3",
-      "requests": 368,
-      "requests_with_usage": 368,
+      "requests": 1,
+      "requests_with_usage": 1,
       "requests_missing_usage": 0,
-      "usage_source": "gateway_usage",
+      "usage_source": "openhands_usage",
       "pricing": {
-        "input_usd_per_million": 0.6,
-        "output_usd_per_million": 2.4,
-        "cache_read_usd_per_million": 0.12,
+        "input_usd_per_million": 1.2,
+        "output_usd_per_million": 4.8,
+        "cache_read_usd_per_million": 0.24,
         "cache_write_usd_per_million": null,
         "note": "MiniMax public API pricing; long context > 512K tokens",
         "long_context_threshold_tokens": 512001,
@@ -79,6 +79,10 @@
           "cache_read_usd_per_million": 0.24
         }
       }
+    },
+    "recalculated_from_tokens": {
+      "source": "scripts/recalculate_benchmark_costs.py",
+      "cache_tokens_included": true
     }
   },
   "workspace": {

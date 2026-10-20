@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hackerrank-openhands-gateway"
-version = "0.1.2"
+version = "0.1.4"
 description = "Reusable OpenHands runner for the HackerRank API Gateway with standardized telemetry"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -26,7 +26,7 @@ hackerrank-openhands = "hackerrank_openhands.cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-hackerrank_openhands = ["pricing.json"]
+hackerrank_openhands = ["pricing.json", "pricing_actual.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

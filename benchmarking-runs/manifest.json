@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "source": "scores.json",
-  "generated_at": "2026-09-21T20:26:01.067498+00:00",
+  "generated_at": "2026-09-28T11:40:57.425125+00:00",
   "runs": [
     {
       "model": "claude-opus-5",
@@ -15,14 +15,28 @@
       "reasoning": "high",
       "run_name": "opus-5-high-dev-20260919-r2",
       "source": "openhands-opus-5-high-dev-20260919-r2",
-      "score": 0.1303
+      "score": 0.3503
     },
     {
       "model": "claude-opus-5",
       "reasoning": "high",
       "run_name": "opus-5-high-dev-20260918",
       "source": "openhands-opus-5-high-dev-20260918",
-      "score": 0.1251
+      "score": 0.3444
+    },
+    {
+      "model": "claude-opus-5",
+      "reasoning": "medium",
+      "run_name": "openhands-opus-5-medium-dev-20260920-r2",
+      "source": "openhands-opus-5-medium-dev-20260920-r2",
+      "score": 0.33
+    },
+    {
+      "model": "claude-opus-5",
+      "reasoning": "medium",
+      "run_name": "openhands-opus-5-medium-dev-20260921-r1",
+      "source": "openhands-opus-5-medium-dev-20260921-r1",
+      "score": 0.29
     },
     {
       "model": "claude-opus-5",
@@ -43,14 +57,14 @@
       "reasoning": "high",
       "run_name": "sonnet-5-high-dev-20260918-r2",
       "source": "openhands-sonnet-5-high-dev-20260918-r2",
-      "score": 0.0696
+      "score": 0.3122
     },
     {
       "model": "claude-sonnet-5",
       "reasoning": "high",
       "run_name": "pi-sonnet-5-high-20260919-r1",
       "source": "pi-sonnet-5-high-20260919-r1",
-      "score": 0.0696
+      "score": 0.2999
     },
     {
       "model": "claude-sonnet-5",
@@ -64,7 +78,14 @@
       "reasoning": "medium",
       "run_name": "sonnet-5-medium-dev-20260918-r3",
       "source": "openhands-sonnet-5-medium-dev-20260918-r3",
-      "score": 0.0904
+      "score": 0.224
+    },
+    {
+      "model": "claude-sonnet-5",
+      "reasoning": "medium",
+      "run_name": "sonnet-5-medium-dev-20260922-r1",
+      "source": "openhands-sonnet-5-medium-dev-20260922-r1",
+      "score": 0.1285
     },
     {
       "model": "deepseek-v4-pro",
@@ -146,9 +167,9 @@
     {
       "model": "gemini-3.7-flash",
       "reasoning": "medium",
-      "run_name": "gemini-3-7-flash-medium-prod-20260918",
-      "source": "openhands-gemini-3-7-flash-medium-prod-20260918",
-      "score": 0.028
+      "run_name": "gemini-3-7-flash-medium-prod-20260920-r1",
+      "source": "openhands-gemini-3-7-flash-medium-prod-20260920-r1",
+      "score": 0.12
     },
     {
       "model": "glm-5.2",
@@ -363,6 +384,13 @@
     {
       "model": "grok-4.6",
       "reasoning": "high",
+      "run_name": "grok-4-6-high-dev-20260921-r1",
+      "source": "openhands-grok-4-6-high-dev-20260921-r1",
+      "score": 0.139
+    },
+    {
+      "model": "grok-4.6",
+      "reasoning": "high",
       "run_name": "grok-4-6-high-dev-20260918",
       "source": "openhands-grok-4-6-high-dev-20260918",
       "score": 0.1147
@@ -499,6 +527,27 @@
       "run_name": "qwen-3-8-high-prod-20260918-q04",
       "source": "openhands-qwen-3-8-high-prod-20260918-q04",
       "score": 0.028
+    },
+    {
+      "model": "qwen-3.8",
+      "reasoning": "medium",
+      "run_name": "openhands-qwen-3-8-medium-dev-20260919-r1",
+      "source": "openhands-qwen-3-8-medium-dev-20260919-r1",
+      "score": 0.0835
+    },
+    {
+      "model": "qwen-3.8",
+      "reasoning": "medium",
+      "run_name": "openhands-qwen-3-8-medium-dev-20260920-r1",
+      "source": "openhands-qwen-3-8-medium-dev-20260920-r1",
+      "score": 0.0668
+    },
+    {
+      "model": "qwen-3.8",
+      "reasoning": "medium",
+      "run_name": "openhands-qwen-3-8-medium-dev-20260920-r2",
+      "source": "openhands-qwen-3-8-medium-dev-20260920-r2",
+      "score": 0.0668
     }
   ]
 }
